@@ -1,0 +1,20 @@
+# macOS
+.DS_Store
+.AppleDouble
+.LSOverride
+._*
+
+# Editor / IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Claude Code local session/agent state (keep settings if you want them shared)
+.claude/
+
+# Logs / temp
+*.log
+.cache/
+tmp/
