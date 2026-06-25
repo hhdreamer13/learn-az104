@@ -28,8 +28,6 @@ Color meanings are consistent everywhere: **green** = correct/safe · **red** = 
 
 - **[`CONTEXT.md`](CONTEXT.md)** — the why, the approach, current status, and what's next.
 - **[`STRUCTURE.md`](STRUCTURE.md)** — AZ-104 exam domains ↔ learning paths ↔ where the raw files live.
-- **[`AUDIT-placement.md`](AUDIT-placement.md)** — library vs. exam-objective placement audit.
-- **[`AUDIT-content.md`](AUDIT-content.md)** — factual-accuracy audit of all 21 decks (every finding proven against source + live MS docs; all confirmed errors fixed).
 
 ## Status
 

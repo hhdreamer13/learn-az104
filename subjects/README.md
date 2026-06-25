@@ -35,4 +35,4 @@ These are the deliberate moves where the raw MS placement was wrong for the exam
 - **Network Watcher** → in `10-monitor`, but it's a networking diagnostic. Lives in both worlds.
 
 ## Gaps = our-notes backlog (no raw coverage, but scored)
-Monitor-first priority. Full list in `../AUDIT-placement.md`. Headline gaps: action groups, KQL/Log Analytics, alert rules, Site Recovery (Monitor); Bicep, Container Apps, ACR, Bastion, private/service endpoints (Compute/Net); tags, cost mgmt, external users (Identity/Gov).
+Monitor-first priority. Headline gaps: action groups, KQL/Log Analytics, alert rules, Site Recovery (Monitor); Bicep, Container Apps, ACR, Bastion, private/service endpoints (Compute/Net); tags, cost mgmt, external users (Identity/Gov).

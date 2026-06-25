@@ -50,12 +50,12 @@ Key fixes baked into placement: backup pulled out of compute → backup-recovery
 - [x] Context file created
 - [x] Researched + verified AZ-104 structure (STRUCTURE.md)
 - [x] Pulled raw MS Learn markdown library (library/, MS-mirror provenance)
-- [x] Audited library vs exam objectives (AUDIT-placement.md)
+- [x] Audited library vs exam objectives (drove the subjects/ placement; one-time, log removed)
 - [x] Re-placed into flat 11-subject mental model (subjects/)
 - [x] Designed + froze the artifact design system (see subjects/DESIGN-SYSTEM.md)
 - [x] **Built ALL subject decks — 21 HTML files, every AZ-104 domain covered.** Map below.
 - [x] **Built `index.html` hub** (project root) — visual subject map grouped by exam domain (weights + color dots), one card per deck, "where did I see this?" placement strip. Launcher style (opens decks in same tab). Domain dot color == card color (verified).
-- [x] **Fact-accuracy audit of all 21 decks** → `AUDIT-content.md`. Method: per-deck fact-check vs the deck's own MS Learn `.md` sources + live `learn.microsoft.com` when the source looked stale, then adversarial verification of each finding. **All confirmed errors FIXED in the HTML** (17 total: 16 from the audit + the ACI GPU correction). Headline pattern: ~90% of errors were the deck faithfully copying an OUTDATED `.md` line — the raw `library/` is a frozen ~2024 mirror, so prefer live docs when refreshing. Decks found fully clean: 03, 04b, 07*, 08, 09d, 10-network-watcher, 10-vm-monitor, 11.
+- [x] **Fact-accuracy audit of all 21 decks** (one-time; log removed after fixing). Per-deck fact-check vs the deck's own MS Learn `.md` sources + live `learn.microsoft.com`, with adversarial verification. **All confirmed errors FIXED in the HTML** (17 total). Key lesson to remember: ~90% of errors were the deck copying an OUTDATED `.md` line — the raw `library/` is a frozen ~2024 mirror, so **prefer live docs when refreshing any fact.**
 - [ ] **NEXT (in progress): Idea 2 → Idea 1.** (Idea 2 first, it feeds Idea 1.)
   - **Idea 2 — hard Q&A from real sims.** User is taking Tutorials Dojo sim exams (already done 2 MS sims earlier). Will bring back the questions that *caught* them (wrong/guessed/trap) with the right answer, the tempting wrong answer, and the catch. We turn each into a per-subject "hard Q&A with the catch" card. **Blocked on user supplying the questions** (paste or screenshot — they live in the sim tool, not the repo).
   - **Idea 1 — per-DOMAIN flashcard/review HTML** (5 pages: Identity+Gov, Storage, Compute, Networking, Monitor). Per-domain ON PURPOSE — sits ABOVE the subject decks to fix cross-subject *placement* confusion (user's core problem). Contents: rapid flip-card defs, comparison tables (the forks the exam loves), tricky/confusable pairs, "catch" cards. Build AFTER Idea 2 so the real sim catches populate the "tricky" sections. Reuses subjects/DESIGN-SYSTEM.md.
