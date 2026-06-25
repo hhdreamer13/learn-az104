@@ -31,7 +31,7 @@ Color meanings are consistent everywhere: **green** = correct/safe · **red** = 
 
 ## Status
 
-All 21 decks are built and fact-checked. Next up: hard Q&A cards mined from real practice-exam questions, then per-domain flashcard/review pages. See [`CONTEXT.md`](CONTEXT.md) for the live plan.
+All 21 decks are built and fact-checked. **In progress:** capturing *catches* from real practice-exam questions into `subjects/<subject>/CATCHES.md` files (one-line trap + answer, tagged ✓ easy / ⚠ reasoned / ✗ missed). These feed the planned per-domain flashcard/review pages. See [`CONTEXT.md`](CONTEXT.md) for the live plan and the catch-capture workflow.
 
 ---
 

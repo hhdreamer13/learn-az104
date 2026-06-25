@@ -56,9 +56,19 @@ Key fixes baked into placement: backup pulled out of compute → backup-recovery
 - [x] **Built ALL subject decks — 21 HTML files, every AZ-104 domain covered.** Map below.
 - [x] **Built `index.html` hub** (project root) — visual subject map grouped by exam domain (weights + color dots), one card per deck, "where did I see this?" placement strip. Launcher style (opens decks in same tab). Domain dot color == card color (verified).
 - [x] **Fact-accuracy audit of all 21 decks** (one-time; log removed after fixing). Per-deck fact-check vs the deck's own MS Learn `.md` sources + live `learn.microsoft.com`, with adversarial verification. **All confirmed errors FIXED in the HTML** (17 total). Key lesson to remember: ~90% of errors were the deck copying an OUTDATED `.md` line — the raw `library/` is a frozen ~2024 mirror, so **prefer live docs when refreshing any fact.**
-- [ ] **NEXT (in progress): Idea 2 → Idea 1.** (Idea 2 first, it feeds Idea 1.)
-  - **Idea 2 — hard Q&A from real sims.** User is taking Tutorials Dojo sim exams (already done 2 MS sims earlier). Will bring back the questions that *caught* them (wrong/guessed/trap) with the right answer, the tempting wrong answer, and the catch. We turn each into a per-subject "hard Q&A with the catch" card. **Blocked on user supplying the questions** (paste or screenshot — they live in the sim tool, not the repo).
-  - **Idea 1 — per-DOMAIN flashcard/review HTML** (5 pages: Identity+Gov, Storage, Compute, Networking, Monitor). Per-domain ON PURPOSE — sits ABOVE the subject decks to fix cross-subject *placement* confusion (user's core problem). Contents: rapid flip-card defs, comparison tables (the forks the exam loves), tricky/confusable pairs, "catch" cards. Build AFTER Idea 2 so the real sim catches populate the "tricky" sections. Reuses subjects/DESIGN-SYSTEM.md.
+- [~] **IN PROGRESS: Idea 2 — practice-question catches → `CATCHES.md` files.** (This is the ACTIVE workflow. It feeds Idea 1 later.)
+
+  ### How the Q&A / catch workflow works (READ THIS when the user pastes a question — applies in ANY session)
+  The user does Tutorials Dojo / MS practice exams and pastes questions here (often with the official answer + explanation). For EACH question:
+  1. **Confirm the answer + explain the *catch*** — the one subtle thing that makes it tricky (e.g. "Logic App Operator can't create"). Keep it SHORT — the user explicitly dislikes long text dumps. One tight paragraph, lead with whether they were right.
+  2. **Find the right home** by SUBJECT, not domain: the catch goes in `subjects/<subject>/CATCHES.md` (create the file if missing, using the same header + legend as existing ones). RBAC→`02-rbac`, Entra/licenses/groups/devices/admin-roles→`01-entra-id` (folder level, covers a/b/c), locks/move/policy→`03-governance`, ARM/deployments→`08-iac`, etc.
+  3. **Write ONE line:** a status tag + the **catch**, then the **answer/rule**. Format: `- <tag> **<catch>** — <why/answer>.` Keep optional context in *(italics)*.
+  4. **Status tags** (this is also a weak-point heat map): **✓ easy** (solid, not a weak point) · **⚠ reasoned** (got it but had to think) · **✗ missed** (real weak point — focus here). Use `✗→✓` if a later question re-tested a prior miss and they got it. **Ask/infer how it went** ("easy / had to think / missed") so the tag is honest.
+  5. If a question reuses a prior catch, append to the existing line (don't duplicate). If the user's miss was caused by an earlier note of OURS being wrong/vague, fix the note at its source.
+
+  Observed so far (user's pattern): strong on Identity & Governance facts; the real misses are **second-guessing a correct first instinct** and **"which do you do FIRST?" ordering traps**, not knowledge gaps. Watch for those.
+
+  - **Idea 1 (NEXT, after enough catches) — per-DOMAIN flashcard/review HTML** (5 pages: Identity+Gov, Storage, Compute, Networking, Monitor). Per-domain ON PURPOSE — sits ABOVE the subject decks to fix cross-subject *placement* confusion (user's core problem). Contents: rapid flip-card defs, comparison tables (the forks the exam loves), tricky/confusable pairs, "catch" cards. The `CATCHES.md` files ARE the raw material for the "tricky" sections. Reuses subjects/DESIGN-SYSTEM.md.
 - [ ] Parked (decide later): cross-cutting compute-comparison page (VM vs Container vs App Service) + CLI-vs-PowerShell command reference — both detailed in build-notes below.
 
 ## Built library — 21 decks (all complete)
