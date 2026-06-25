@@ -1,0 +1,291 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure Cloud Shell — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;
+  --ink:#16181d;
+  --soft:#5a6472;
+  --faint:#98a1ad;
+  --hair:#e7e9ee;
+  --green:#1f8a5b;
+  --red:#c8453d;
+  --amber:#b07d1a;
+  --blue:#2f6fb0;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);
+  font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;
+  display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+/* ---- title ---- */
+.head{padding:26px 40px 16px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:30px;font-weight:650;letter-spacing:-.01em;margin-top:6px}
+.head .lede{font-size:15px;color:var(--soft);margin-top:7px;max-width:760px}
+
+/* ---- facet tabs ---- */
+.tabs{display:flex;gap:30px;padding:0 40px;border-bottom:1px solid var(--hair)}
+.tab{padding:12px 0;font-size:15px;color:var(--faint);cursor:pointer;
+  border-bottom:2px solid transparent;margin-bottom:-1px;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+/* ---- body: diagram + side ---- */
+.main{flex:1;display:grid;grid-template-columns:1fr 400px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+/* zone 1 — the gist */
+.zone{padding:24px 30px}
+.zone + .zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:20px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14.5px;color:var(--soft);margin-top:10px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:13px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+/* zone 2 — facts */
+.facts{font-size:14px}
+.facts .r{display:flex;gap:16px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 116px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+/* zone 3 — recall (self-test), set apart on a tinted panel) */
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:14px}
+.qa + .qa{margin-top:14px;padding-top:14px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;
+  padding:2px 7px;border-radius:4px;margin-bottom:7px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:9px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:13px;color:var(--blue);cursor:pointer;margin-top:9px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:12px}
+
+/* ---- footer nav ---- */
+.foot{display:flex;align-items:center;justify-content:space-between;padding:12px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Tooling</div>
+  <h1>Azure Cloud Shell</h1>
+  <div class="lede">A signed-in command line in any browser. The whole subject turns on one split — a host you lose, a drive you keep — and the few fences around it.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+    </div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav">
+    <button id="prev">← Prev</button>
+    <button id="next">Next →</button>
+  </div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;            /* inner breathing room, px */
+let W=900,H=520;          /* live drawable size (set by fit) */
+
+function fit(){
+  const r=$('diagram').getBoundingClientRect();
+  W=Math.max(560,Math.round(r.width));
+  H=Math.max(360,Math.round(r.height));
+  stage.setAttribute('viewBox',`0 0 ${W} ${H}`);
+}
+/* usable content rect after padding — everything draws inside this */
+function area(){return {x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){
+  const id='ah'+Math.round(x1+y1+x2+y2);
+  const defs=el('defs');const m=document.createElementNS(NS,'marker');
+  m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');
+  m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');
+  const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');
+  m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);
+  el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});
+}
+
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 */
+{
+  tab:'What it is',
+  title:'A signed-in CLI in any browser',
+  gist:`No install, always-current <b>Bash or PowerShell</b>, wired to your account's permissions. The thing you open is just a web terminal in front of Azure.`,
+  facts:[['Access','Browser → shell.azure.com'],['Identity','Your account + RBAC'],['Shells','Bash or PowerShell'],['Tooling','Latest, Microsoft-managed','green'],['Install','None','green']],
+  trap:['It looks like "just a terminal." What is it really?','Two halves — an <b>ephemeral host</b> you lose and a <b>persistent drive</b> you keep. Most questions hinge on which half a thing lives in.'],
+  exam:['"No admin laptop, only a browser, must run an Azure command now."','<b>Azure Cloud Shell</b> — browser, signed-in, zero install is its exact pitch.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'You, any browser  →  a signed-in Azure command line',{anchor:'middle',size:15,weight:600});
+    const midY=a.y+a.h*0.5, bw=Math.min(170,a.w*0.20), bh=96;
+    /* you */
+    const yx=a.x;
+    box(yx,midY-bh/2,bw,bh); T(yx+bw/2,midY-6,'You',{anchor:'middle',size:15,weight:600}); T(yx+bw/2,midY+16,'any browser',{anchor:'middle',size:12,fill:C.soft});
+    /* cloud shell (center, taller) */
+    const csw=Math.min(220,a.w*0.27), csh=Math.min(200,a.h*0.72), csx=a.cx-csw/2, csy=midY-csh/2;
+    box(csx,csy,csw,csh,{stroke:C.green,sw:2});
+    T(csx+csw/2,csy+30,'Cloud Shell',{anchor:'middle',size:15,weight:600,fill:C.green});
+    box(csx+18,csy+48,csw-36,36); T(csx+csw/2,csy+71,'Bash / PowerShell',{anchor:'middle',size:12.5});
+    T(csx+csw/2,csy+csh-44,'host VM — temporary',{anchor:'middle',size:12,fill:C.red});
+    T(csx+csw/2,csy+csh-20,'CloudDrive — persists',{anchor:'middle',size:12,fill:C.amber});
+    /* azure */
+    const ax=a.r-bw;
+    box(ax,midY-bh/2,bw,bh); T(ax+bw/2,midY-10,'Azure',{anchor:'middle',size:15,weight:600}); T(ax+bw/2,midY+12,'VMs · storage',{anchor:'middle',size:12,fill:C.soft}); T(ax+bw/2,midY+30,'· network',{anchor:'middle',size:12,fill:C.soft});
+    arrow(yx+bw+8,midY,csx-8,midY,{stroke:C.blue}); T((yx+bw+csx)/2,midY-10,'sign in',{anchor:'middle',size:12,fill:C.blue});
+    arrow(csx+csw+8,midY,ax-8,midY,{stroke:C.green}); T((csx+csw+ax)/2,midY-10,'run',{anchor:'middle',size:12,fill:C.green});
+  }
+},
+/* 1 */
+{
+  tab:'Host vs drive',
+  title:'Throwaway host, kept drive',
+  gist:`Each session gets a <b>temporary host VM</b> — its state dies on close. To keep files across sessions you mount a <b>CloudDrive</b>, an Azure Files share in a storage account. Storage is <b>optional</b>: at first launch you choose with or without it — without storage you get an ephemeral session that keeps nothing.`,
+  facts:[['Host','Temporary, per-session'],['Host state','Lost on close','red'],['CloudDrive','Persists, any device','green'],['Backed by','Azure Files share'],['First launch','Storage optional'],['Storage','One region only','red']],
+  trap:['New session, blank host — what carried over?','<b>Nothing from the host.</b> Files re-mount from the CloudDrive / Azure File share; the host is fresh each time.'],
+  exam:['"First-time launch — is storage required?" / "Files available from another machine — where?"','Storage is <b>optional</b> (ephemeral sessions need none). To persist files you mount a <b>storage account</b> (the Azure Files share behind CloudDrive). Region-locked — no two-region drive.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Hosts come and go — the drive is the constant',{anchor:'middle',size:15,weight:600});
+    const topY=a.y+34, hh=Math.min(150,a.h*0.42), hw=Math.min(280,a.w*0.40);
+    const driveY=a.b-Math.min(96,a.h*0.26);
+    /* two sessions */
+    const s1=a.x, s2=a.r-hw;
+    [[s1,'Session — Mon','temporary host','closed → destroyed'],[s2,'Session — Fri','new blank host','different device']].forEach(s=>{
+      box(s[0],topY,hw,hh,{stroke:C.red,dash:'6 5'});
+      T(s[0]+20,topY+30,s[1],{size:14,weight:600,fill:C.red});
+      T(s[0]+20,topY+52,s[2],{size:12,fill:C.soft});
+      T(s[0]+20,topY+80,s[3],{size:12.5,fill:C.red});
+      arrow(s[0]+hw/2,topY+hh+6,s[0]+hw/2,driveY-6,{stroke:C.amber,dash:'4 4'});
+      T(s[0]+hw/2+12,(topY+hh+driveY)/2,'mounts',{size:12,fill:C.amber});
+    });
+    /* drive band full width */
+    box(a.x,driveY,a.w,a.b-driveY,{stroke:C.amber,sw:2});
+    T(a.x+22,driveY+30,'CloudDrive',{size:15,weight:600,fill:C.amber});
+    T(a.x+22,driveY+52,'Azure Files share · in a storage account (one region)',{size:13,fill:C.soft});
+    T(a.x+22,driveY+72,'scripts · SSH keys · files — persist across every session & device',{size:12.5,fill:C.faint});
+  }
+},
+/* 2 */
+{
+  tab:'Shells & tools',
+  title:'Two shells, stocked toolbox, no sudo',
+  gist:`Pick <b>Bash</b> or <b>PowerShell</b> — both drive <code>az</code>. Pre-loaded with az, AzCopy, git, kubectl, Helm, Terraform, Ansible, the <code>code</code> editor. You can't <code>sudo</code> or install <b>system packages</b> (those need root); with a storage account you can still install user-level tools (<code>pip</code>, <code>npm</code>, PowerShell modules).`,
+  facts:[['Shells','Bash · PowerShell'],['Both run','The Azure CLI'],['Preloaded','az, git, AzCopy','green'],['Containers','kubectl, Helm','green'],['3rd-party','Terraform, Ansible','green'],['Cannot','sudo / root installs','red']],
+  trap:['"Pre-loaded with tools" — can you add your own?','<b>No root-level installs.</b> No sudo, no system-package installs. User-level tools (pip / npm / PowerShell modules) do work when storage is mounted.'],
+  exam:['"Need Terraform now, nothing local" vs "need to sudo apt-get install X."','First → yes, already there. Second → <b>not Cloud Shell</b>; use a VM.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Choose a shell — common tools already there, box is sealed',{anchor:'middle',size:15,weight:600});
+    /* two shell pills */
+    const pw=Math.min(200,a.w*0.28), gap2=a.w*0.05, py=a.y+30;
+    const p1=a.cx-pw-gap2/2, p2=a.cx+gap2/2;
+    box(p1,py,pw,46,{stroke:C.blue}); T(p1+pw/2,py+29,'Bash',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    box(p2,py,pw,46,{stroke:C.blue}); T(p2+pw/2,py+29,'PowerShell',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    /* tool grid, centered, fits width */
+    const tools=['az CLI','AzCopy','git','kubectl','Helm','Terraform','Ansible','code','vim / nano','npm / pip'];
+    const cols=5, gap=14, gridY=py+86;
+    const tw=(a.w-(cols-1)*gap)/cols, rh=Math.min(52,(a.b-gridY-40)/2-gap);
+    tools.forEach((t,i)=>{const r=Math.floor(i/cols),c=i%cols;const x=a.x+c*(tw+gap),y=gridY+r*(rh+gap);
+      box(x,y,tw,rh,{stroke:C.green}); T(x+tw/2,y+rh/2+5,t,{anchor:'middle',size:12.5,fill:C.green,weight:600});});
+    T(a.cx,gridY+2*(rh+gap)+18,'No sudo · no system-package (root) installs · user-level pip/npm OK',{anchor:'middle',size:13,fill:C.red,weight:600});
+  }
+},
+/* 3 */
+{
+  tab:'The fences',
+  title:'The five fences',
+  gist:`Convenient but boxed in. Hit a fence → use something else. Each is a distractor-killer: idle timeout, one session, no sudo, single-region storage, no root-level installs.`,
+  facts:[['Idle','20 min → ends','red'],['On timeout','State lost, silent','red'],['Sessions','One at a time','red'],['Privilege','No sudo','red'],['Storage','Single region','red'],['Env','No root installs','red']],
+  trap:['You start a long script and walk away. Then?','At <b>20 min idle</b> the session ends — no warning, host state lost. CloudDrive files survive; the job does not.'],
+  exam:['How to spot a "NOT Cloud Shell" question fast?','Scan for a fence word: <b>overnight, sudo, system-package install, two subscriptions, another region.</b> Any one → VM / automation, not Cloud Shell.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Five fences — each is a wrong-answer trap',{anchor:'middle',size:15,weight:600});
+    const f=[['20-minute idle timeout','session ends silently, state lost'],
+      ['One session at a time','no parallel shells / multi-subscription'],
+      ['No sudo or admin','cannot elevate inside the shell'],
+      ['Storage in one region','no multi-region drive; sync yourself'],
+      ['No root-level installs','need sudo/system pkgs → a VM or container']];
+    const top=a.y+30, gap=10, rh=(a.b-top-(f.length-1)*gap)/f.length;
+    f.forEach((r,i)=>{const y=top+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:'#eccccb',fill:'#fdf6f6'});
+      T(a.x+22,y+rh/2-6,r[0],{size:15,weight:600,fill:C.red});
+      T(a.x+22,y+rh/2+16,r[1],{size:13,fill:C.soft});});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap" style="margin-bottom:18px"><div class="q"><span class="mark">Trap</span>${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="q"><span class="mark">Exam</span>${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

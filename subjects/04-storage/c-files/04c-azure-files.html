@@ -1,0 +1,312 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure Files — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Storage (3 of 4)</div>
+  <h1>Azure Files</h1>
+  <div class="lede">A fully managed cloud file share you mount over SMB or NFS — a real drive with folders, unlike object-based blobs. This file covers how shares are tiered and authenticated, how snapshots and soft delete protect them, and how File Sync caches them onto on-premises servers.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — Files vs Blobs */
+{
+  tab:'Files vs Blobs',
+  title:'A mountable file share, not object storage',
+  gist:`<b>Azure Files</b> gives you a real <b>file share</b> — a hierarchical drive of folders and files — mounted over <b>SMB</b> or <b>NFS</b> from Windows, Linux, or macOS. That's the contrast with <b>blobs</b>, which are <b>objects</b> reached by URL/REST/SAS with no true filesystem. Use Files to replace an on-prem file server or lift-and-shift an app that expects a mounted drive; use blobs for unstructured objects served to apps. A share holds up to 100 TiB; a single file up to 4 TiB.`,
+  facts:[['Azure Files','mountable SMB / NFS share','green'],['Mount from','Windows · Linux · macOS'],['Blobs','objects via URL / REST'],['Use Files for','file server / lift-and-shift'],['Share max','100 TiB'],['File max','4 TiB']],
+  trap:['App expects a mapped network drive with folders — blobs or Files?','<b>Azure Files.</b> Blobs are object storage (REST/SAS, no real filesystem). A mountable SMB/NFS drive with directories is <b>Azure Files</b>.'],
+  exam:['"Migrate an app that reads/writes a Windows file share to Azure with minimal change."','<b>Azure Files</b> over SMB — mount it at the same drive letter and the app keeps working. Blobs would require rewriting the app to use the storage API.'],
+  scn:[
+    ['Multiple VMs need read/write access to the same shared folder.','Azure Files','one SMB share mounted by all the VMs'],
+    ['An app serves images to browsers and stores backups.','Blobs','object storage, reached by URL — not Files'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two data services, two access models',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(380,a.w*0.44), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.green,sw:2});
+    T(x0+w/2,y+30,'Azure Files',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x0+w/2,y+54,'a mountable FILE SHARE',{anchor:'middle',size:12,fill:C.soft});
+    ['SMB / NFS, real folders','mount from Win/Linux/mac','replace file server / lift-shift','share 100 TiB · file 4 TiB'].forEach((t,i)=>Twrap(x0+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+30,'Blob Storage',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x1+w/2,y+54,'OBJECT storage',{anchor:'middle',size:12,fill:C.soft});
+    ['reached by URL / REST / SAS','no real filesystem','unstructured data, served to apps','images · backups · logs · video'].forEach((t,i)=>Twrap(x1+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 1 — tiers + protocols + port 445 */
+{
+  tab:'Tiers & protocols',
+  title:'Premium vs Standard tiers, SMB vs NFS, port 445',
+  gist:`Two performance tiers. <b>Premium</b> shares are SSD-backed, live in a <b>FileStorage</b> account, and bill on <b>provisioned</b> capacity (you reserve and pay for it). <b>Standard</b> shares live in GPv2 and bill pay-as-you-go, with sub-tiers <b>Transaction-Optimized / Hot / Cool</b> for different access patterns. A share uses <b>either SMB or NFS, not both</b> (though one account can host shares of each). The classic gotcha: <b>SMB uses TCP port 445</b>, which many ISPs block outbound — the #1 reason on-prem mounts fail.`,
+  facts:[['Premium','SSD · FileStorage · provisioned'],['Standard','GPv2 · pay-as-you-go'],['Standard sub-tiers','Transaction-Opt / Hot / Cool'],['Per share','SMB OR NFS, not both','red'],['SMB port','TCP 445','red'],['Premium redundancy','LRS / ZRS only']],
+  trap:['You can\'t mount an SMB Azure file share from the office. First thing to check?','Outbound <b>TCP port 445</b> — many ISPs block it, and that\'s the most common SMB connectivity failure. (Workarounds: VPN/ExpressRoute, or use a different network.)'],
+  exam:['"High-performance file share with consistent low latency." Tier and account?','<b>Premium</b> tier in a <b>FileStorage</b> account (SSD, provisioned billing). Standard tiers (GPv2) are HDD-backed.'],
+  scn:[
+    ['A latency-sensitive app needs fast file access.','Premium (FileStorage)','SSD, provisioned capacity'],
+    ['A general team share, cost-conscious, occasional access.','Standard Cool','HDD, pay-as-you-go, cool sub-tier'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Premium (SSD, provisioned) vs Standard (HDD, pay-as-you-go)',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(280,a.w*0.34), gap=a.w*0.05, x0=a.cx-w-gap/2, x1=a.cx+gap/2;
+    const y=a.y+a.h*0.16, h=a.h*0.5;
+    box(x0,y,w,h,{stroke:C.green,sw:2});
+    T(x0+w/2,y+30,'Premium',{anchor:'middle',size:16,weight:600,fill:C.green});
+    ['SSD-backed, low latency','FileStorage account','provisioned billing','LRS / ZRS'].forEach((t,i)=>T(x0+w/2,y+58+i*24,t,{anchor:'middle',size:12,fill:C.soft}));
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+30,'Standard',{anchor:'middle',size:16,weight:600,fill:C.blue});
+    ['HDD-backed','GPv2 account · PAYG','Transaction-Opt / Hot / Cool','all redundancy options'].forEach((t,i)=>T(x1+w/2,y+58+i*24,t,{anchor:'middle',size:12,fill:C.soft}));
+    /* port 445 banner */
+    const by=y+h+a.h*0.06, bh=a.b-by;
+    box(a.x,by,a.w,bh,{stroke:C.red,fill:'#fdf6f6',sw:1.6});
+    T(a.cx,by+bh/2-6,'SMB uses TCP port 445',{anchor:'middle',size:14,weight:700,fill:C.red});
+    T(a.cx,by+bh/2+14,'often blocked outbound by ISPs — the #1 mount failure (a share is SMB OR NFS, never both)',{anchor:'middle',size:11.5,fill:C.soft});
+  }
+},
+/* 2 — authentication */
+{
+  tab:'Authentication',
+  title:'Three ways to authenticate to a file share',
+  gist:`Files supports three auth methods. <b>Identity-based over SMB</b> is the preferred one for mounted shares — back it with <b>on-prem AD DS</b>, <b>Entra Domain Services</b>, or <b>Entra Kerberos</b>, then assign <b>RBAC roles</b> for share-level access and NTFS permissions for files. <b>Access key</b> — the account key; full control, bypasses all access rules, so avoid sharing it. <b>SAS token</b> — only used for <b>REST API access from code</b>, not for mounting a drive.`,
+  facts:[['Identity-based (SMB)','preferred for mounts','green'],['…AD sources','AD DS · Entra DS · Entra Kerberos'],['…then','RBAC + NTFS permissions'],['Access key','full control, bypasses ACLs','red'],['SAS','REST API from code only'],['SAS','not for mounting']],
+  trap:['Can you use a SAS token to mount an Azure file share as a drive?','<b>No.</b> For Azure Files a <b>SAS is only for REST API access from code</b>. To mount a share you use <b>identity-based auth (SMB)</b> or the storage account key — not a SAS.'],
+  exam:['"Users mount a share and get permissions based on their AD identity."','<b>Identity-based authentication over SMB</b> (AD DS / Entra DS / Entra Kerberos) with RBAC + NTFS ACLs — not the account key, not SAS.'],
+  scn:[
+    ['Domain users should mount the share with their own credentials.','Identity-based over SMB','RBAC for share access, NTFS for files'],
+    ['App code calls the Files REST API for limited, temporary access.','SAS token','the only Files use of SAS'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Pick by how the share is accessed',{anchor:'middle',size:15,weight:600});
+    const items=[
+      [C.green,'Identity-based (SMB)','AD DS / Entra DS / Entra Kerberos + RBAC + NTFS — preferred for mounted shares'],
+      [C.amber,'Access key','account key — full control, bypasses all access rules; avoid sharing'],
+      [C.blue,'SAS token','REST API access from code only — NOT for mounting a drive'],
+    ];
+    const y0=a.y+a.h*0.16, gap=14, rh=(a.h*0.72-2*gap)/3;
+    items.forEach((it,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:it[0],sw:i===0?2:1.7,fill:i===0?'#f3faf6':'#fff'});
+      T(a.x+18,y+rh/2-6,it[1],{size:14.5,weight:600,fill:it[0],baseline:'middle'});
+      Twrap(a.x+a.w*0.34,y+rh/2-2,it[2],Math.floor((a.w*0.62)/6.8),{anchor:'start',size:12,fill:C.ink,lh:15,baseline:'middle'});
+    });
+  }
+},
+/* 3 — snapshots + soft delete */
+{
+  tab:'Snapshots & soft delete',
+  title:'Two safety nets: snapshots and soft delete',
+  gist:`Two ways to protect share data. <b>Share snapshots</b> are <b>incremental, read-only, point-in-time</b> copies of the whole share — take one before a risky deploy to roll back; up to <b>200</b> per share; deleting the share deletes its snapshots. <b>Soft delete</b> is the safety net for the share itself: deleted files/shares go to a recoverable state for a <b>retention period of 1–365 days</b> (set at the account level) instead of being erased — protection against accidental deletion and ransomware.`,
+  facts:[['Snapshot','incremental, read-only, PIT'],['Snapshot scope','whole share'],['Max snapshots','200 per share'],['Delete share','deletes its snapshots','red'],['Soft delete','recover deleted shares/files','green'],['Soft-delete retention','1–365 days']],
+  trap:['You deleted a whole file share by mistake. Snapshot or soft delete?','<b>Soft delete</b> — it recovers a deleted <i>share</i> (within the retention window). Snapshots are point-in-time copies <i>inside</i> a share, and they\'re <b>deleted along with the share</b>, so they can\'t recover the share itself.'],
+  exam:['"Roll a share back to a known-good state before a bad deployment."','Take a <b>share snapshot</b> beforehand (read-only, point-in-time); restore from it if the deploy goes wrong. For recovering a deleted share, that\'s soft delete.'],
+  scn:[
+    ['Capture a restore point before releasing new code.','Snapshot','read-only point-in-time copy of the share'],
+    ['Recover a share someone deleted last week.','Soft delete','if within the 1–365 day retention window'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Snapshots roll back content · soft delete recovers a deleted share',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(380,a.w*0.44), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+30,'Share snapshots',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    ['incremental, read-only','point-in-time, whole share','up to 200 per share','gone if the share is deleted'].forEach((t,i)=>Twrap(x0+w/2,y+62+i*28,t,Math.floor(w/6.5),{anchor:'middle',size:12,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:1.8});
+    T(x1+w/2,y+30,'Soft delete',{anchor:'middle',size:15,weight:600,fill:C.green});
+    ['recovers deleted files & shares','retention 1–365 days','enabled at account level','ransomware / accident safety net'].forEach((t,i)=>Twrap(x1+w/2,y+62+i*28,t,Math.floor(w/6.5),{anchor:'middle',size:12,fill:C.ink,lh:13}));
+  }
+},
+/* 4 — File Sync components */
+{
+  tab:'File Sync',
+  title:'Azure File Sync — cache the share onto servers',
+  gist:`<b>Azure File Sync</b> turns Windows Servers into fast local <b>caches</b> of an Azure file share, with <b>cloud tiering</b> keeping only hot files on local disk. Five components: the <b>Storage Sync Service</b> (the top Azure resource, one region, up to 200 sync groups / 100 servers); a <b>sync group</b> (one sync relationship); exactly <b>one cloud endpoint</b> (the Azure file share) per sync group; up to <b>100 server endpoints</b> (NTFS paths on registered servers — <b>not</b> the system volume); and the <b>Sync Agent</b> installed on each server.`,
+  facts:[['Storage Sync Service','top resource · 1 region'],['…limits','200 sync groups · 100 servers'],['Sync group','1 sync relationship'],['Cloud endpoint','the Azure share · 1 per group','red'],['Server endpoint','NTFS path · ≤100 · not system vol'],['Cloud tiering','keep hot files local','green']],
+  trap:['How many cloud endpoints (Azure file shares) can a sync group have?','<b>Exactly one.</b> A sync group has <b>one cloud endpoint</b> and up to <b>100 server endpoints</b>. One Azure share is the master; the servers are caches of it.'],
+  exam:['"Branch offices need fast local file access but a single central copy in Azure."','<b>Azure File Sync</b>: one sync group with the Azure share as the cloud endpoint and each branch server as a server endpoint; <b>cloud tiering</b> keeps hot files local.'],
+  scn:[
+    ['Old files should move to Azure but recent ones stay on the local server.','Cloud tiering','File Sync keeps only recently-used files on local disk'],
+    ['Register a server path to sync — but it\'s the C: system volume.','Not allowed','server endpoints can\'t be on the system volume; use another NTFS volume'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'One cloud endpoint (the share), many server caches',{anchor:'middle',size:15,weight:600});
+    /* cloud endpoint top center */
+    const cw=Math.min(240,a.w*0.30);
+    const cloud=node(a.cx-cw/2,a.y+a.h*0.14,cw,80,C.green,'Cloud endpoint',null,{strong:true,tsize:14});
+    Twrap(cloud.cx,cloud.cy+16,'the Azure file share (1 per sync group)',Math.floor(cw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    /* sync group label */
+    T(a.cx,a.y+a.h*0.14+96,'↑ in a sync group · managed by the Storage Sync Service ↑',{anchor:'middle',size:10.5,fill:C.faint});
+    /* server endpoints */
+    const servers=['Server endpoint A','Server endpoint B','Server endpoint C'];
+    const sw=Math.min(200,a.w*0.26), sy=a.b-88, totalW=3*sw+2*a.w*0.03, sx0=a.cx-totalW/2;
+    servers.forEach((s,i)=>{const x=sx0+i*(sw+a.w*0.03);
+      box(x,sy,sw,72,{stroke:C.blue,sw:1.6});
+      T(x+sw/2,sy+28,s,{anchor:'middle',size:12.5,weight:600,fill:C.blue});
+      T(x+sw/2,sy+50,'NTFS path · cloud tiering',{anchor:'middle',size:10.5,fill:C.soft});
+      arrow(cloud.cx,cloud.b+6,x+sw/2,sy-6,{stroke:C.green,dash:'4 4'});
+    });
+    T(a.cx,(cloud.b+sy)/2+18,'Sync Agent on each server · ≤ 100 server endpoints',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

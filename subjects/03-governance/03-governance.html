@@ -1,0 +1,360 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure Governance — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Identity &amp; governance</div>
+  <h1>Azure governance</h1>
+  <div class="lede">Governance keeps a growing Azure estate organised and compliant. It rests on the management hierarchy (management groups → subscriptions → resource groups), and adds the controls that enforce standards: <b>Azure Policy</b>, <b>resource locks</b>, and <b>tags</b>.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — THE MANAGEMENT HIERARCHY */
+{
+  tab:'The hierarchy',
+  title:'Management groups → subscriptions → resource groups',
+  gist:`Governance hangs off one nesting structure. <b>Resources</b> sit in a <b>resource group</b> (exactly one — RGs can't be nested or renamed, and deleting an RG deletes everything in it). Resource groups sit in a <b>subscription</b> — the unit of <b>billing</b> and an <b>access-control boundary</b>. Subscriptions sit in <b>management groups</b> — containers for applying policy and access across many subscriptions at once, nestable up to six levels, all folding up to one <b>Tenant Root Group</b>. Policy and access assigned at any level <b>inherit downward</b>.`,
+  facts:[['Resource','one RG only'],['Resource group','no nesting, no rename','red'],['Subscription','billing + access boundary'],['Management group','spans many subscriptions'],['MG nesting','up to 6 levels'],['Top','one Tenant Root Group']],
+  trap:['Can you nest resource groups, and can you move a resource to another subscription?','<b>Nesting: no</b> — RGs can\'t be nested and a resource lives in exactly one RG; <b>management groups</b> are the level that nests (up to 6). <b>Moving: yes</b> — you can move a resource to another RG or subscription (<code>az resource move</code> / portal Move), but only <b>some</b> resource types support it, the <b>source and target RGs are locked</b> during the move (no create/delete/update, up to 4h), and crossing <b>regions</b> is a separate operation (<b>Azure Resource Mover</b>), not this move.'],
+  exam:['"Apply one policy + one access grant across all current and future subscriptions."','Assign at a <b>management group</b> — every subscription beneath it (including new ones) inherits both the policy and the RBAC assignment.'],
+  scn:[
+    ['You want production policy to cover every prod subscription automatically.','Management group','put the prod subscriptions under it; they inherit the policy'],
+    ['You need separate billing for dev vs prod.','Two subscriptions','the subscription is the billing boundary'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Four nested levels — assignments inherit downward',{anchor:'middle',size:15,weight:600});
+    const levels=[
+      [C.purple,'Management group','policy + access across subscriptions · nests to 6'],
+      [C.blue,'Subscription','billing + access boundary'],
+      [C.amber,'Resource group','bucket of resources · no nesting, no rename'],
+      [C.green,'Resource','a single VM, disk, etc.'],
+    ];
+    const y0=a.y+a.h*0.16, gap=10, rh=(a.h*0.70-3*gap)/4;
+    levels.forEach((l,i)=>{
+      const inset=i*(a.w*0.07);
+      const x=a.x+inset, w=a.w-2*inset;
+      box(x,y0+i*(rh+gap),w,rh,{stroke:l[0],sw:1.7});
+      T(x+16,y0+i*(rh+gap)+rh/2-6,l[1],{size:13.5,weight:600,fill:l[0]});
+      Twrap(x+16+a.w*0.18,y0+i*(rh+gap)+rh/2-2,l[2],Math.floor((w-a.w*0.18-30)/6.5),{anchor:'start',size:11.5,fill:C.soft,lh:13});
+      if(i<3)arrow(a.cx,y0+i*(rh+gap)+rh,a.cx,y0+(i+1)*(rh+gap)-2,{stroke:C.faint});
+    });
+    T(a.r,a.b-2,'policy + access inherit downward ↓',{anchor:'end',size:10.5,fill:C.green,weight:600});
+  }
+},
+/* 1 — AZURE POLICY + EFFECTS */
+{
+  tab:'Azure Policy',
+  title:'Policy enforces standards — via its effect',
+  gist:`<b>Azure Policy</b> evaluates resources against rules and enforces configuration standards (e.g. "storage must be HTTPS-only", "only these regions"). What a policy <i>does</i> when a resource violates it is the <b>effect</b>. Four matter: <b>Audit</b> (flag as noncompliant, change nothing), <b>Deny</b> (block the create/update at the ARM layer), <b>DeployIfNotExists / DINE</b> (auto-deploy a missing related resource, e.g. diagnostic settings), and <b>Modify</b> (add/change a tag or property). The standard rollout is <b>Audit first</b> to discover, then switch to <b>Deny</b> to enforce.`,
+  facts:[['Audit','flag noncompliant, no block','green'],['Deny','block at ARM create/update','red'],['DeployIfNotExists','auto-deploy what\'s missing'],['Modify','add/change tag or property'],['Evaluation','full scan every 24h'],['Rollout','Audit → then Deny']],
+  trap:['You want to stop noncompliant storage from being created. Which effect — Audit or Deny?','<b>Deny.</b> Audit only flags existing/new resources as noncompliant; it does not block. <b>Deny</b> rejects the create/update request at ARM. Audit = visibility, Deny = enforcement.'],
+  exam:['"Every VM must have diagnostic settings; auto-create them if missing."','<b>DeployIfNotExists (DINE)</b> — it checks for the related resource and deploys it automatically. (Modify is for tags/properties; Deny only blocks.)'],
+  scn:[
+    ['Phase 1: find all storage accounts allowing HTTP, without breaking anything.','Audit','marks them noncompliant in the dashboard, no disruption'],
+    ['Phase 2: stop any new HTTP storage from being deployed.','Deny','blocks the noncompliant create request at ARM'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A policy\'s EFFECT decides what happens on violation',{anchor:'middle',size:15,weight:600});
+    const effects=[
+      [C.green,'Audit','flag noncompliant — no block','discovery phase'],
+      [C.red,'Deny','block at ARM create/update','enforcement phase'],
+      [C.blue,'DeployIfNotExists','auto-deploy what\'s missing','e.g. diagnostic settings'],
+      [C.amber,'Modify','add / change tag or property','tagging standards'],
+    ];
+    const cols=2, gap=14, w=(a.w-gap)/2, rh=(a.h*0.74-gap)/2;
+    const y0=a.y+a.h*0.16;
+    effects.forEach((e,i)=>{const r=Math.floor(i/cols),c=i%cols;const x=a.x+c*(w+gap),y=y0+r*(rh+gap);
+      box(x,y,w,rh,{stroke:e[0],sw:1.8});
+      T(x+18,y+30,e[1],{size:15,weight:600,fill:e[0]});
+      Twrap(x+18,y+rh/2+6,e[2],Math.floor((w-36)/6.8),{anchor:'start',size:12.5,fill:C.ink,lh:15});
+      T(x+18,y+rh-16,e[3],{size:11,fill:C.faint});
+    });
+  }
+},
+/* 2 — definitions, initiatives, custom, remediation */
+{
+  tab:'Definitions & initiatives',
+  title:'Definitions, initiatives, custom rules, remediation',
+  gist:`A single rule is a <b>policy definition</b> (built-in — 100s maintained by Microsoft — or <b>custom</b> JSON for needs the built-ins don't cover). An <b>initiative</b> (a.k.a. policy set) bundles many definitions into one assignable unit — e.g. the Microsoft Cloud Security Benchmark — so related controls deploy together. You assign a definition/initiative at a scope. <b>Remediation tasks</b> bring <i>existing</i> noncompliant resources into line (only for DINE/Modify effects). <b>Exemptions/exclusions</b> carve out justified exceptions to an assignment.`,
+  facts:[['Definition','one rule (built-in or custom)'],['Initiative','a bundle of definitions','green'],['Custom def','JSON, for uncovered needs'],['Remediation task','fix EXISTING resources'],['…works with','DINE / Modify only','red'],['Exemption','justified exception to a rule']],
+  trap:['You assigned a Deny policy — will it fix the resources that are already noncompliant?','<b>No.</b> Deny only blocks <i>new</i> violations. To fix <i>existing</i> resources you need a <b>remediation task</b>, which works only with <b>DINE/Modify</b> effects — not Deny/Audit.'],
+  exam:['"Apply dozens of related security controls in one assignment."','Assign an <b>initiative</b> (policy set), e.g. Microsoft Cloud Security Benchmark — not the definitions one by one.'],
+  scn:[
+    ['You need a control that no built-in definition covers.','Custom policy definition','author the rule in JSON and assign it'],
+    ['Existing VMs lack the required extension; auto-fix them.','Remediation task','on a DINE policy, it deploys the extension to existing resources'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Definition → Initiative → Assignment → Remediation',{anchor:'middle',size:15,weight:600});
+    /* initiative containing definitions */
+    const iw=a.w*0.40, ix=a.x, iy=a.y+a.h*0.16, ih=a.h*0.5;
+    box(ix,iy,iw,ih,{stroke:C.green,sw:2,fill:'#f3faf6'});
+    T(ix+iw/2,iy+26,'Initiative (policy set)',{anchor:'middle',size:13.5,weight:600,fill:C.green});
+    ['Definition: HTTPS storage','Definition: TDE on SQL','Definition: diagnostic logs'].forEach((d,i)=>{
+      box(ix+16,iy+44+i*((ih-60)/3),iw-32,(ih-60)/3-8,{stroke:C.blue,fill:'#fff'});
+      T(ix+iw/2,iy+44+i*((ih-60)/3)+((ih-60)/3-8)/2+4,d,{anchor:'middle',size:11.5,fill:C.blue});
+    });
+    /* assignment + remediation */
+    const sx=ix+iw+a.w*0.10, sw=a.r-sx;
+    const asn=node(sx,iy+10,sw,70,C.purple,'Assigned at a scope',null,{tsize:13.5});
+    Twrap(asn.cx,asn.cy+16,'mgmt group / subscription / RG',Math.floor(sw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const rem=node(sx,iy+ih-70,sw,70,C.amber,'Remediation task',null,{tsize:13.5});
+    Twrap(rem.cx,rem.cy+16,'fixes existing (DINE / Modify only)',Math.floor(sw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(ix+iw+6,iy+ih*0.3,sx-6,asn.cy,{stroke:C.purple,dash:'4 4'});
+    arrow(asn.cx,asn.b+6,rem.cx,rem.y-6,{stroke:C.amber,dash:'4 4'});
+  }
+},
+/* 3 — RESOURCE LOCKS */
+{
+  tab:'Resource locks',
+  title:'Locks stop accidental delete or change — and beat RBAC',
+  gist:`A <b>resource lock</b> protects a resource from being deleted or modified, regardless of permissions. Two types: <b>Delete (CanNotDelete)</b> — blocks deletion, allows read/write (the common one); <b>ReadOnly</b> — blocks deletion <i>and</i> modification, allows read only. Locks <b>inherit downward</b> (lock an RG → all its resources are protected). The big rule: <b>locks override RBAC</b> — even a subscription Owner must remove the lock before deleting. Managing locks needs <b>Owner</b> or <b>User Access Administrator</b> (Contributor can't).`,
+  facts:[['Delete lock','no delete; read/write ok','green'],['ReadOnly lock','no delete or modify','red'],['Inheritance','parent → children'],['Overrides','RBAC, even Owner','red'],['Manage locks','Owner or UAA only'],['Contributor','cannot manage locks']],
+  trap:['A subscription Owner tries to delete a locked VNet. Allowed?','<b>No.</b> A lock <b>overrides RBAC</b> — even Owner can\'t delete or modify a locked resource until the lock is removed. And ReadOnly can break things subtly: it blocks listing storage keys (key listing counts as a write).'],
+  exam:['"Protect a production VNet from accidental deletion without blocking changes."','A <b>Delete (CanNotDelete)</b> lock — stops deletion but still allows read/write. ReadOnly would also block legitimate modifications.'],
+  scn:[
+    ['Stop anyone deleting the core VNet, but allow normal config changes.','Delete lock','blocks deletion, leaves read/write intact'],
+    ['A config-only resource must never be deleted or changed.','ReadOnly lock','blocks both — but check it doesn\'t break runtime writes'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two lock types · inherits down · overrides RBAC',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(360,a.w*0.43), gap=a.w*0.05, x0=a.cx-w-gap/2, x1=a.cx+gap/2;
+    const y=a.y+a.h*0.16, h=a.h*0.40;
+    box(x0,y,w,h,{stroke:C.green,sw:1.8});
+    T(x0+w/2,y+30,'Delete (CanNotDelete)',{anchor:'middle',size:14.5,weight:600,fill:C.green});
+    T(x0+w/2,y+58,'✓ read   ✓ write   ✗ delete',{anchor:'middle',size:13,fill:C.ink});
+    T(x0+w/2,y+h-22,'the common one',{anchor:'middle',size:11.5,fill:C.soft});
+    box(x1,y,w,h,{stroke:C.red,sw:1.8});
+    T(x1+w/2,y+30,'ReadOnly',{anchor:'middle',size:14.5,weight:600,fill:C.red});
+    T(x1+w/2,y+58,'✓ read   ✗ write   ✗ delete',{anchor:'middle',size:13,fill:C.ink});
+    T(x1+w/2,y+h-22,'can break listing storage keys',{anchor:'middle',size:11.5,fill:C.soft});
+    /* override banner */
+    const by=y+h+a.h*0.08, bh=a.b-by;
+    box(a.x,by,a.w,bh,{stroke:C.red,fill:'#fdf6f6',sw:1.6});
+    T(a.cx,by+bh/2-8,'A lock OVERRIDES RBAC',{anchor:'middle',size:14,weight:700,fill:C.red});
+    T(a.cx,by+bh/2+14,'even a subscription Owner must remove the lock before delete/modify',{anchor:'middle',size:12,fill:C.soft});
+  }
+},
+/* 4 — TAGS + cost */
+{
+  tab:'Tags & cost',
+  title:'Tags organise and bill — but they don\'t inherit',
+  gist:`<b>Tags</b> are name/value pairs you attach to resources, resource groups, and subscriptions to organise, search, and — most importantly — <b>group costs</b> (e.g. <code>CostCenter: Finance</code>, <code>Environment: Prod</code>). Cost Management reports can break down spending by tag. The catch: <b>tags do NOT inherit</b> — a tag on a resource group does not automatically apply to the resources inside it. To enforce or auto-apply tags, use an <b>Azure Policy</b> with the <b>Modify</b> effect (or a Deny policy that requires a tag).`,
+  facts:[['Tag','name/value pair'],['Applied to','resource, RG, subscription'],['Main use','cost grouping & search','green'],['Inheritance','tags do NOT inherit','red'],['Enforce tags','Policy (Modify / Deny)'],['Cost by tag','in Cost Management']],
+  trap:['You tag a resource group. Do its resources get the tag automatically?','<b>No — tags do not inherit.</b> A resource group\'s tag does not flow to its resources. To apply tags down the hierarchy, use an Azure <b>Policy with the Modify effect</b>.'],
+  exam:['"Report cloud spend per department." How?','Apply a consistent <b>tag</b> (e.g. CostCenter) to resources and group by it in <b>Cost Management</b>. Enforce the tag with a Modify/Deny policy so it\'s always present.'],
+  scn:[
+    ['Finance wants spend split by project across the whole estate.','Tags + Cost Management','tag resources by project; report grouped by that tag'],
+    ['Ensure every new resource carries an Environment tag.','Policy (Modify/Deny)','auto-add or require the tag at create time'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Tags label resources for organising and billing',{anchor:'middle',size:15,weight:600});
+    /* resource group with tag, resources NOT inheriting */
+    const rgx=a.x, rgw=a.w*0.44, rgy=a.y+a.h*0.16, rgh=a.h*0.62;
+    box(rgx,rgy,rgw,rgh,{stroke:C.amber,sw:1.7});
+    T(rgx+14,rgy+24,'Resource group',{size:13,weight:600,fill:C.amber});
+    box(rgx+14,rgy+36,rgw-28,30,{stroke:C.green,fill:'#f3faf6'});
+    T(rgx+rgw/2,rgy+56,'tag: Environment = Prod',{anchor:'middle',size:11.5,fill:C.green,weight:600});
+    ['VM (no tag)','Disk (no tag)'].forEach((r,i)=>{
+      box(rgx+14,rgy+78+i*54,rgw-28,46,{stroke:'#dfe3e9',fill:'#fafbfc'});
+      T(rgx+rgw/2,rgy+78+i*54+27,r,{anchor:'middle',size:12,fill:C.faint});
+    });
+    T(rgx+rgw/2,rgy+rgh-6,'↑ tag does NOT flow down',{anchor:'middle',size:11,fill:C.red,weight:600});
+    /* cost report */
+    const cx=rgx+rgw+a.w*0.08, cw=a.r-cx;
+    const cost=node(cx,rgy+a.h*0.10,cw,90,C.blue,'Cost Management',null,{tsize:14});
+    Twrap(cost.cx,cost.cy+16,'group spend by tag (CostCenter, Env…)',Math.floor(cw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const pol=node(cx,rgy+a.h*0.40,cw,80,C.purple,'Policy: Modify',null,{tsize:14});
+    Twrap(pol.cx,pol.cy+16,'auto-apply / require tags',Math.floor(cw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(rgx+rgw+6,rgy+a.h*0.16,cx-6,cost.cy,{stroke:C.blue,dash:'4 4'});
+    arrow(cx+cw/2,pol.y-6,cx+cw/2,cost.b+6,{stroke:C.purple,dash:'4 4'});
+  }
+},
+/* 5 — POLICY vs RBAC (placement) */
+{
+  tab:'Policy vs RBAC',
+  title:'Policy governs the resource · RBAC governs the person',
+  gist:`The defining governance distinction. <b>Azure Policy</b> controls <b>what resources can exist and how they're configured</b> — it evaluates the resource itself (region, SKU, encryption, tags) and allows, denies, or fixes it. <b>Azure RBAC</b> controls <b>who can perform actions</b> on resources — it's about the security principal's permissions. Policy is about the <i>resource's properties</i>; RBAC is about the <i>user's rights</i>. They run independently and combine: RBAC may let you create a VM, but Policy can still deny it if it violates a rule.`,
+  place:{here:'<b>Azure Policy</b> and <b>resource locks</b> live in <b>Governance</b>.',
+    other:'RBAC (Owner/Contributor…) is the sibling identity subject — it answers "who can act", not "what may exist". Same hierarchy (mgmt group→sub→RG→resource) carries both. If a question is about a resource\'s <i>configuration/compliance</i> → Policy; about a person\'s <i>access</i> → RBAC.'},
+  facts:[['Azure Policy','what resources / config','green'],['…evaluates','the resource\'s properties'],['Azure RBAC','who can act'],['…evaluates','the principal\'s permissions'],['Run','independently, both apply'],['Lock','overrides both on delete']],
+  trap:['"Restrict which regions VMs can deploy to." RBAC or Policy?','<b>Policy</b> — it governs the resource\'s allowed configuration (location). RBAC only governs who can act, not what properties a resource may have.'],
+  exam:['RBAC lets a user create a VM, but a Policy denies that SKU. Result?','The VM is <b>blocked</b>. Policy (Deny) and RBAC apply independently; both must pass. Having permission (RBAC) doesn\'t override a Policy Deny.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two independent gates — both must pass',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(380,a.w*0.44), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.purple,sw:1.8});
+    T(x0+w/2,y+30,'Azure Policy',{anchor:'middle',size:15,weight:600,fill:C.purple});
+    T(x0+w/2,y+54,'WHAT may exist / how configured',{anchor:'middle',size:12,fill:C.soft});
+    ['region, SKU, encryption, tags','allow · deny · auto-fix','evaluates the resource'].forEach((t,i)=>Twrap(x0+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+30,'Azure RBAC',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x1+w/2,y+54,'WHO may perform actions',{anchor:'middle',size:12,fill:C.soft});
+    ['Owner, Contributor, Reader…','role + scope per principal','evaluates the person'].forEach((t,i)=>Twrap(x1+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    T(a.cx,y+h-14,'both apply',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

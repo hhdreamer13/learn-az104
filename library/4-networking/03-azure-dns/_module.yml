@@ -1,0 +1,41 @@
+### YamlMime:Module
+uid: learn.azure.host-domain-azure-dns
+metadata:
+  title: Host your domain on Azure DNS
+  description: Learn how to host the Domain Name System (DNS) records for your domains on Azure infrastructure by using Azure DNS.
+  ms.date: 10/03/2024
+  author: wwlpublish
+  ms.author: cynthist
+  ms.topic: module
+  ms.service: azure-dns
+title: Host your domain on Azure DNS
+summary: Create a DNS zone for your domain name. Create DNS records to map the domain to an IP address. Test that the domain name resolves to your web server.
+abstract: |
+  In this module, you will:
+  - Configure Azure DNS to host your domain.
+prerequisites: |
+  Knowledge of networking concepts like name resolution and IP addresses
+
+  [!INCLUDE [](../../includes/azure-optional-exercise-subscription-prerequisite.md)]
+
+iconUrl: /training/achievements/host-domain-azure-dns.svg
+levels:
+- beginner
+roles:
+- administrator
+products:
+- azure
+- azure-dns
+subjects:
+- cloud-computing
+- networking
+units:
+- learn.azure.host-domain-azure-dns.introduction
+- learn.azure.host-domain-azure-dns.what-is-azure-dns
+- learn.azure.host-domain-azure-dns.configure-azure-dns-host-domain
+- learn.azure.host-domain-azure-dns.exercise-create-dns-zone-a-record
+- learn.azure.host-domain-azure-dns.resolve-name-alias-record
+- learn.azure.host-domain-azure-dns.exercise-create-alias-records
+- learn.azure.host-domain-azure-dns.summary
+badge:
+  uid: learn.azure.host-domain-azure-dns.badge

@@ -1,0 +1,56 @@
+### YamlMime:Module
+uid: learn.wwl.configure-network-security-groups
+metadata:
+  adobe-target: true
+  prefetch-feature-rollout: true
+  title: Configure Network Security Groups
+  description: "Learn how to implement network security groups, and ensure network security group rules are correctly applied."
+  ms.date: 06/23/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-virtual-network
+  ai-usage: ai-assisted
+title: Configure network security groups
+summary: Learn how to implement network security groups, and ensure network security group rules are correctly applied.
+abstract: |
+  In this module, you learn how to:
+
+  -   Determine when to use network security groups.
+
+  -   Create network security groups.
+
+  -   Implement and evaluate network security group rules.
+
+  -   Describe the function of application security groups.
+prerequisites: |
+  -   Familiarity with Azure virtual networks and resources such as virtual machines.
+
+  -   Working knowledge of the Azure portal so you can configure the network security groups.
+
+  -   Basic understanding of traffic routing and traffic control strategies.
+iconUrl: /training/achievements/network-security-groups.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure
+subjects:
+- identity-access
+- networking
+units:
+- learn.wwl.configure-network-security-groups.introduction
+- learn.wwl.configure-network-security-groups.implement
+- learn.wwl.configure-network-security-groups.determine-nsg-rules
+- learn.wwl.configure-network-security-groups.determine-nsg-effective-rules
+- learn.wwl.configure-network-security-groups.create-nsg-rules
+- learn.wwl.configure-network-security-groups.implement-asgs-new
+- learn.wwl.configure-network-security-groups.interactive-lab-simulation-network-groups
+- learn.wwl.configure-network-security-groups.knowledge-check
+- learn.wwl.configure-network-security-groups.summary-resources
+badge:
+  uid: learn.wwl.configure-network-security-groups.badge

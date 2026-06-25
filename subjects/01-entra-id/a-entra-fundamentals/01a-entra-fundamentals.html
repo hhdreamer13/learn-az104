@@ -1,0 +1,283 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Microsoft Entra ID — Fundamentals — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Identity &amp; governance · Entra ID (1 of 3)</div>
+  <h1>Microsoft Entra ID — the fundamentals</h1>
+  <div class="lede">Microsoft Entra ID is Microsoft's cloud identity and access service — the directory that signs users in to Microsoft 365, Azure, and SaaS apps. This file is about <b>what it is</b>: how it differs from on-premises Active Directory, the related <b>Domain Services</b> offering, and the <b>license tiers</b>. Managing users and groups inside it is a separate file.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — WHAT IT IS: tenant + flat schema */
+{
+  tab:'What it is',
+  title:'A cloud directory: one tenant, a flat structure',
+  gist:`Entra ID is a multi-tenant cloud identity service. Your organisation gets a <b>tenant</b> — a dedicated, isolated directory instance that is your <b>security boundary</b>. Inside it live users, groups, devices, and app registrations in a <b>flat structure</b> — there are no organisational units (OUs) and no Group Policy. It authenticates over the internet (HTTPS) using modern protocols, and it's what backs sign-in to Microsoft 365, the Azure portal, and thousands of SaaS apps.`,
+  facts:[['Tenant','your isolated directory'],['Tenant =','security boundary','green'],['Structure','flat — no OUs','red'],['Holds','users, groups, devices, apps'],['Talks','HTTPS / REST'],['Signs in to','M365 · Azure · SaaS']],
+  trap:['Can you organise Entra users into OUs and apply Group Policy, like on-prem AD?','<b>No.</b> Entra ID has a <b>flat structure</b> — no OUs, no GPOs. You organise with <b>groups</b> and govern with policy/Conditional Access instead. Expecting OUs/GPO is the classic on-prem-thinking trap.'],
+  exam:['"One organisation, one ___ that acts as the identity security boundary."','A <b>tenant</b>. One tenant per organisation directory; it isolates that org\'s identities and is the boundary for admin and access.'],
+  scn:[
+    ['A new company starts using Microsoft 365 and needs a place for its user accounts.','An Entra tenant','M365 automatically backs onto an Entra tenant — the org\'s cloud directory'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One tenant — a flat directory that signs users in to cloud services',{anchor:'middle',size:15,weight:600});
+    const tx=a.x+a.w*0.06, tw=a.w*0.40, ty=a.y+a.h*0.16, th=a.h*0.66;
+    box(tx,ty,tw,th,{stroke:C.purple,sw:2});
+    T(tx+16,ty+26,'Entra tenant',{size:14,weight:600,fill:C.purple});
+    T(tx+16,ty+44,'isolated directory · security boundary',{size:11,fill:C.soft});
+    const objs=['Users','Groups','Devices','App registrations'];
+    objs.forEach((o,i)=>{const oy=ty+62+i*((th-80)/4);box(tx+18,oy,tw-36,(th-80)/4-8,{stroke:'#e7e9ee',fill:'#fafbfc'});T(tx+tw/2,oy+((th-80)/4-8)/2+4,o,{anchor:'middle',size:12,fill:C.ink});});
+    /* services it signs into */
+    const sx=tx+tw+a.w*0.10;
+    const svcs=['Microsoft 365','Azure portal','SaaS apps'];
+    svcs.forEach((s,i)=>{const sy=ty+a.h*0.06+i*((th-20)/3);const n=node(sx,sy,a.r-sx,(th-20)/3-14,C.blue,s,null,{tsize:13});arrow(tx+tw+6,ty+th*0.5,sx-6,sy+((th-20)/3-14)/2,{stroke:C.blue,dash:'4 4'});});
+    T((tx+tw+sx)/2,ty+th*0.5-12,'signs in to',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 1 — ENTRA ID vs AD DS (the big comparison) */
+{
+  tab:'Entra ID vs AD DS',
+  title:'Cloud Entra ID vs on-premises Active Directory',
+  gist:`They are <b>not</b> the same product, and the exam tests the differences. <b>AD DS</b> is Windows Server Active Directory: a hierarchical <b>X.500</b> directory you query with <b>LDAP</b>, authenticate with <b>Kerberos/NTLM</b>, organise with <b>OUs</b>, manage with <b>Group Policy</b>, and which contains <b>computer objects</b> and domain trusts. <b>Entra ID</b> is a cloud identity service: <b>flat</b> structure, <b>REST/HTTPS</b> instead of LDAP, modern protocols (<b>SAML, OpenID Connect, OAuth</b>) instead of Kerberos, and <b>no OUs, GPOs, or computer objects</b>.`,
+  facts:[['AD DS structure','hierarchical (X.500)'],['Entra structure','flat','green'],['AD DS query','LDAP'],['Entra query','REST / HTTPS','green'],['AD DS auth','Kerberos / NTLM'],['Entra auth','SAML · OIDC · OAuth']],
+  trap:['Can you make LDAP queries or join computers to Entra ID like AD DS?','<b>No.</b> Entra ID has <b>no LDAP and no Kerberos</b>, and uses a flat structure. If a scenario needs LDAP, Kerberos, OUs, or GPO, that\'s <b>AD DS</b> (or Entra Domain Services), not plain Entra ID.'],
+  exam:['"App needs LDAP and Kerberos but you don\'t want to run domain controllers." What gives those in the cloud?','<b>Entra Domain Services</b> — it provides LDAP, Kerberos/NTLM, and GPO/domain-join in the cloud. Plain Entra ID does not; AD DS does but needs DCs.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Two different products — old protocols vs modern protocols',{anchor:'middle',size:15,weight:600});
+    const rows=[['Structure','Hierarchical · OUs','Flat · no OUs'],['Directory access','LDAP','REST / HTTPS'],['Authentication','Kerberos / NTLM','SAML · OIDC · OAuth'],['Management','Group Policy (GPO)','Policy / Conditional Access'],['Contains','Computer objects, trusts','Users, groups, apps']];
+    const y0=a.y+a.h*0.16, rh=(a.h*0.74)/(rows.length+1), x=a.x, w=a.w;
+    const c1=x+w*0.26, c2=x+w*0.63;
+    /* header */
+    T(x+8,y0,'',{});
+    box(c1-8,y0-rh+10,w*0.33,rh-6,{stroke:C.amber,fill:'#fffaf0'});T(c1+w*0.10,y0-rh/2+8,'AD DS (on-prem)',{anchor:'middle',size:13,weight:600,fill:C.amber});
+    box(c2-8,y0-rh+10,w*0.33,rh-6,{stroke:C.purple,fill:'#f7f4fb'});T(c2+w*0.10,y0-rh/2+8,'Entra ID (cloud)',{anchor:'middle',size:13,weight:600,fill:C.purple});
+    rows.forEach((r,i)=>{
+      const y=y0+i*rh;
+      T(x+8,y+rh/2+4,r[0],{size:12.5,weight:600,fill:C.soft});
+      Twrap(c1+w*0.10,y+rh/2+4,r[1],Math.floor(w*0.30/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13});
+      Twrap(c2+w*0.10,y+rh/2+4,r[2],Math.floor(w*0.30/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13});
+      el('line',{x1:x,y1:y,x2:x+w,y2:y,stroke:'#eef0f3','stroke-width':1});
+    });
+  }
+},
+/* 2 — THE THREE-WAY: AD DS vs Entra ID vs Entra Domain Services */
+{
+  tab:'+ Domain Services',
+  title:'Three things people confuse: AD DS, Entra ID, Entra DS',
+  gist:`A third option sits between the two. <b>Entra Domain Services (Entra DS)</b> gives you managed <b>domain services in the cloud</b> — LDAP, Kerberos/NTLM, domain-join, and a basic GPO — <b>without you running any domain controllers</b>. Microsoft manages the DCs for you. It's for lift-and-shift apps that need legacy AD protocols but where you don't want to deploy DCs or a VPN to on-prem. Note: it's a <b>separate, per-hour billed Azure service</b> (not a P1/P2 feature) and has limits (flat OU, no schema extension).`,
+  facts:[['AD DS','you run the DCs (on-prem/VM)'],['Entra ID','cloud identity, no legacy AD'],['Entra DS','managed cloud DCs','green'],['Entra DS gives','LDAP, Kerberos, domain-join'],['Entra DS billing','separate, per-hour by SKU'],['Limits','flat OU, no schema extend','red']],
+  trap:['App needs Kerberos. Is plain Entra ID enough?','<b>No — plain Entra ID has no Kerberos/LDAP.</b> You need <b>Entra Domain Services</b> (managed DCs in the cloud) or actual AD DS. Don\'t confuse Entra ID with Entra DS — only the latter speaks legacy protocols.'],
+  exam:['"Migrate an LDAP/Kerberos app to Azure without deploying or managing domain controllers."','<b>Entra Domain Services</b> — managed domain services in the cloud, no DCs to run, no VPN to on-prem required.'],
+  scn:[
+    ['A legacy SharePoint app needs Kerberos but you don\'t want to manage domain controllers.','Entra Domain Services','Microsoft-managed DCs provide Kerberos/LDAP/domain-join in the cloud'],
+    ['You\'re extending an existing on-prem AD forest to Azure VMs for full control.','AD DS on a VM','you run the domain controllers; this does not use Entra ID at all'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Three options, by who runs the domain controllers',{anchor:'middle',size:15,weight:600});
+    const cols=[
+      [C.amber,'AD DS','on-prem or on an Azure VM',['You run the DCs','Full AD: OUs, GPO, schema','Legacy protocols','Most control, most effort']],
+      [C.purple,'Entra ID','the cloud identity service',['Microsoft runs it','Flat, modern protocols','No LDAP / Kerberos','For cloud / SaaS sign-in']],
+      [C.green,'Entra Domain Services','managed domain services',['Microsoft runs the DCs','LDAP · Kerberos · domain-join','Basic GPO, flat OU','For legacy apps, no DCs']],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.14, h=a.h*0.78;
+    cols.forEach((c,i)=>{
+      const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:c[0],sw:i===2?2.2:1.7});
+      T(x+w/2,y+28,c[1],{anchor:'middle',size:14.5,weight:600,fill:c[0]});
+      Twrap(x+w/2,y+50,c[2],Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
+      c[3].forEach((t,j)=>{const yy=y+78+j*26;Twrap(x+16,yy,'· '+t,Math.floor((w-24)/6.5),{anchor:'start',size:11.5,fill:C.ink,lh:13});});
+    });
+  }
+},
+/* 3 — LICENSE TIERS P1/P2 */
+{
+  tab:'License tiers',
+  title:'Free, P1, P2 — what each tier unlocks',
+  gist:`Entra ID comes in tiers, and the exam checks which feature needs which. <b>Free</b> covers the basics: users, groups, SSO, basic security defaults. <b>P1</b> adds the enterprise access features: <b>Conditional Access</b>, <b>dynamic groups</b>, <b>group-based licensing</b>, and <b>self-service password reset with writeback</b>. <b>P2</b> adds the advanced protection: <b>Identity Protection</b> (risk-based policies) and <b>Privileged Identity Management (PIM)</b>. Higher tier includes everything below it.`,
+  facts:[['Free','users, groups, SSO'],['P1 adds','Conditional Access','green'],['P1 adds','dynamic groups','green'],['P1 adds','SSPR writeback','green'],['P2 adds','Identity Protection','green'],['P2 adds','PIM','green']],
+  trap:['You want dynamic groups and Conditional Access — does the Free tier cover that?','<b>No — those need P1.</b> Free gives static groups and basic SSO. Dynamic membership and Conditional Access are <b>P1</b> features; risk policies and PIM are <b>P2</b>.'],
+  exam:['"Risk-based Conditional Access / just-in-time admin elevation — which tier?"','<b>P2</b>. Identity Protection (risk-based) and Privileged Identity Management (PIM, JIT roles) are the headline P2 features. Plain Conditional Access alone is P1.'],
+  scn:[
+    ['HR wants group membership to update automatically by department attribute.','P1 (dynamic groups)','rule-based membership is a P1 feature; Free only has manual/static groups'],
+    ['Security wants admins to elevate to privileged roles only just-in-time.','P2 (PIM)','Privileged Identity Management is a P2 feature'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Each tier includes everything below it',{anchor:'middle',size:15,weight:600});
+    const tiers=[
+      [C.soft,'Free','users · groups · SSO · security defaults'],
+      [C.blue,'P1','+ Conditional Access · dynamic groups · group-based licensing · SSPR writeback'],
+      [C.purple,'P2','+ Identity Protection (risk policies) · Privileged Identity Management (PIM)'],
+    ];
+    const y0=a.y+a.h*0.16, gap=14, rh=(a.h*0.72-2*gap)/3;
+    tiers.forEach((t,i)=>{
+      const x=a.x+i*(a.w*0.04), w=a.w-i*(a.w*0.08), y=y0+i*(rh+gap);
+      box(x,y,w,rh,{stroke:t[0],sw:1.8,fill:i===0?'#fafbfc':'#fff'});
+      T(x+18,y+rh/2-6,t[1],{size:15,weight:700,fill:t[0],baseline:'middle'});
+      Twrap(x+70,y+rh/2-2,t[2],Math.floor((w-90)/6.8),{anchor:'start',size:12,fill:C.ink,lh:15,baseline:'middle'});
+    });
+    T(a.cx,y0+3*(rh+gap)+2,'higher tier = wider box = more features',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

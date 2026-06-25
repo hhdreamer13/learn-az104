@@ -1,0 +1,341 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Infrastructure as Code — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Deploy &amp; manage compute</div>
+  <h1>Infrastructure as Code</h1>
+  <div class="lede">Describe your Azure infrastructure as files you version, review, and deploy repeatably. Azure's native options are <b>ARM templates</b> (JSON) and <b>Bicep</b> (a cleaner language that compiles to ARM). Both are declarative and idempotent — deploy the same file any number of times and land in the same state.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.font||'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+const MONO='ui-monospace, monospace';
+
+const facets=[
+/* 0 — what IaC is: declarative + idempotent */
+{
+  tab:'What IaC is',
+  title:'Describe the desired state — declarative and idempotent',
+  gist:`Infrastructure as code means writing your infrastructure as <b>files you version and deploy</b>, instead of clicking the portal. Azure's native IaC is <b>declarative</b>: you state <i>what</i> resources should exist and their properties, and <b>Azure Resource Manager (ARM)</b> figures out <i>how</i> (order, parallelism) — unlike <b>imperative</b> scripts that spell out each step. It's <b>idempotent</b>: deploy the same file 1 or 100 times and you land in the same state. ARM also <b>validates</b> before deploying and orchestrates interdependent resources in the right order.`,
+  facts:[['IaC','infra as versioned files'],['Declarative','state WHAT, not how','green'],['Imperative','scripts spell out each step'],['Idempotent','same file → same state','green'],['ARM','orders + parallelizes deploy'],['Validation','checked before deploy']],
+  trap:['You run the same ARM/Bicep deployment twice — do you get duplicate resources?','<b>No — it\'s idempotent.</b> Re-deploying the same file converges to the same desired state; existing matching resources are left unchanged. That\'s the point of declarative IaC vs imperative scripts.'],
+  exam:['"Repeatably deploy identical infrastructure across dev/test/prod with consistency."','Use <b>declarative IaC</b> (ARM or Bicep) — version the file, deploy per environment with different parameters; idempotency guarantees consistent state.'],
+  scn:[
+    ['Reproduce the exact same environment in three regions.','ARM / Bicep file','one declarative file, deployed repeatably and consistently'],
+    ['Avoid drift between hand-clicked environments.','IaC in source control','the file is the source of truth, reviewed and versioned'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Declarative file → ARM deploys it consistently',{anchor:'middle',size:15,weight:600});
+    const file=node(a.x,a.y+a.h*0.34,Math.min(220,a.w*0.26),96,C.blue,'IaC file',null,{tsize:14});
+    Twrap(file.cx,file.cy+16,'declares the desired state',Math.floor(file.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const arm=node(file.r+a.w*0.10,a.y+a.h*0.34,Math.min(220,a.w*0.26),96,C.purple,'Azure Resource Manager',null,{tsize:13});
+    Twrap(arm.cx,arm.cy+16,'validates · orders · parallelizes',Math.floor(arm.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(file.r+6,file.cy,arm.x-6,arm.cy,{stroke:C.soft});
+    /* repeated deploy = same state */
+    const res=node(arm.r+a.w*0.10,a.y+a.h*0.34,a.r-(arm.r+a.w*0.10),96,C.green,'Resources',null,{tsize:14});
+    Twrap(res.cx,res.cy+16,'same state every deploy (idempotent)',Math.floor(res.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(arm.r+6,arm.cy,res.x-6,res.cy,{stroke:C.green});
+    T(a.cx,a.b-10,'deploy 1× or 100× → identical result',{anchor:'middle',size:11.5,fill:C.faint});
+  }
+},
+/* 1 — ARM template anatomy */
+{
+  tab:'ARM template anatomy',
+  title:'An ARM template is JSON with a fixed set of sections',
+  gist:`An <b>ARM template</b> is a JSON file with named sections. Three are the backbone: <b>$schema</b> (required), <b>contentVersion</b> (required), and <b>resources</b> (required — the actual things you deploy). The rest are optional: <b>parameters</b> (values supplied at deploy time), <b>variables</b> (reused expressions), <b>functions</b> (user-defined), <b>apiProfile</b>, and <b>outputs</b> (values returned after deploy). A resource is identified by <code>{provider}/{type}</code> — e.g. <code>Microsoft.Storage/storageAccounts</code> — plus an <code>apiVersion</code>.`,
+  facts:[['$schema','required'],['contentVersion','required'],['resources','required — what to deploy','green'],['parameters / variables','optional, for reuse'],['outputs','optional, returned values'],['Resource id','{provider}/{type} + apiVersion']],
+  trap:['Which ARM template sections are actually required?','<b>$schema, contentVersion, and resources.</b> parameters, variables, functions, outputs, apiProfile are all <b>optional</b> — a minimal valid template just needs the schema, version, and at least the resources array.'],
+  exam:['"Where in an ARM template do you define the storage account to deploy?"','In the <b>resources</b> section, with <code>type: "Microsoft.Storage/storageAccounts"</code> and an <code>apiVersion</code>. Resources is the required section that declares what gets deployed.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'The sections of an ARM JSON template',{anchor:'middle',size:15,weight:600});
+    const secs=[['$schema','required',true],['contentVersion','required',true],['apiProfile','optional',false],['parameters','optional — deploy-time inputs',false],['variables','optional — reused expressions',false],['functions','optional — user-defined',false],['resources','required — what to deploy',true],['outputs','optional — returned values',false]];
+    const y0=a.y+a.h*0.15, gap=7, rh=(a.h*0.76-(secs.length-1)*gap)/secs.length;
+    secs.forEach((s,i)=>{const y=y0+i*(rh+gap);const req=s[2];
+      box(a.x,y,a.w,rh,{stroke:req?C.green:'#d7dbe2',sw:req?1.8:1.3,fill:req?'#f3faf6':'#fff'});
+      T(a.x+16,y+rh/2+5,s[0],{size:13,weight:600,fill:req?C.green:C.ink,font:MONO,baseline:'middle'});
+      T(a.x+a.w*0.42,y+rh/2+5,s[1],{size:12,fill:req?C.green:C.soft,baseline:'middle'});
+    });
+    T(a.cx,a.b-2,'required: $schema · contentVersion · resources   (rest optional)',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 2 — parameters / variables / outputs (reusability) */
+{
+  tab:'Parameters & outputs',
+  title:'Parameters make one template reusable across environments',
+  gist:`Hardcoding values (a storage name, a SKU) means one template per environment. <b>Parameters</b> fix that: declare values supplied <b>at deploy time</b> — via a parameter file, the CLI, or the portal — so one template serves dev/test/prod. A parameter has a <b>type</b> (string, secureString, int, bool, object, secureObject, array), and optional <b>defaultValue</b>, <b>allowedValues</b>, and min/max constraints (limit: 256 params). <b>Variables</b> hold reused expressions to keep the template clean; <b>outputs</b> return values (like a created resource's ID) after the deploy.`,
+  facts:[['Parameters','deploy-time inputs','green'],['Supplied via','param file · CLI · portal'],['Types','string, secureString, int, bool…'],['Constraints','default, allowed, min/max'],['secureString','for secrets (not logged)','green'],['Outputs','values returned after deploy']],
+  trap:['You need to deploy the same template to dev and prod with different SKUs — copy the template?','<b>No — parameterize it.</b> Make the SKU a <b>parameter</b> and pass a different value per environment (param file or CLI). One template, many environments — that\'s the point of parameters.'],
+  exam:['"Pass a password into a template without it appearing in logs/history."','Use a <b>secureString</b> (or secureObject) parameter — secure types aren\'t logged or shown in deployment history.'],
+  scn:[
+    ['Deploy the same app infra to dev and prod, differing only in size.','Parameter for the SKU/size','pass dev vs prod values at deploy time'],
+    ['Return the new resource\'s endpoint to a pipeline.','Outputs section','emit the value at the end of the deployment'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'One template + different parameters = many environments',{anchor:'middle',size:15,weight:600});
+    /* template in middle */
+    const tpl=node(a.cx-Math.min(220,a.w*0.26)/2,a.y+a.h*0.18,Math.min(220,a.w*0.26),84,C.purple,'One template',null,{strong:true,tsize:14});
+    Twrap(tpl.cx,tpl.cy+16,'SKU + name as parameters',Math.floor(tpl.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    /* three env deployments */
+    const envs=[['dev','Standard_LRS, small'],['test','Standard_GRS, medium'],['prod','Premium_LRS, large']];
+    const ew=Math.min(220,a.w*0.27), egap=(a.w-3*ew)/2, ey=a.b-92;
+    envs.forEach((e,i)=>{const x=a.x+i*(ew+egap);
+      box(x,ey,ew,76,{stroke:C.green,sw:1.6});
+      T(x+ew/2,ey+28,e[0],{anchor:'middle',size:14,weight:600,fill:C.green});
+      Twrap(x+ew/2,ey+52,e[1],Math.floor(ew/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
+      arrow(tpl.cx,tpl.b+6,x+ew/2,ey-6,{stroke:C.green,dash:'3 3'});
+    });
+    T(a.cx,(tpl.b+ey)/2+2,'same file, different parameter values',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 3 — deploying (CLI/PowerShell, linked/nested) */
+{
+  tab:'Deploying',
+  title:'Deploy with CLI or PowerShell — to a scope',
+  gist:`You deploy a template against a <b>scope</b> (commonly a resource group). The commands: Azure CLI <code>az deployment group create --resource-group RG --template-file main.json</code>, or PowerShell <code>New-AzResourceGroupDeployment -ResourceGroupName RG -TemplateFile main.json</code>. Each needs a deployment <b>name</b> so it shows in deployment history. For complex solutions, split into <b>linked templates</b> (a main template triggers others, often secured by a SAS token) or <b>nested templates</b> (a template embedded inside another). CI/CD via Azure Pipelines or GitHub Actions automates it.`,
+  facts:[['Scope','resource group (commonly)'],['Azure CLI','az deployment group create'],['PowerShell','New-AzResourceGroupDeployment'],['Name','identifies it in history'],['Linked template','main triggers others (SAS)'],['Nested template','embedded in another']],
+  trap:['Note the CLI verb order — is it "az group deployment create"?','<b>No — that\'s the deprecated form.</b> Use <b>az deployment group create</b> (the noun "deployment" first, then the scope "group"). The old <code>az group deployment create</code> is being retired.'],
+  exam:['"Break a large deployment into reusable pieces triggered from one entry point."','<b>Linked templates</b> — a main template references and triggers separate template files (commonly stored/secured with a SAS token). Nested templates embed one inside another.'],
+  scn:[
+    ['Deploy a template to a resource group from the command line.','az deployment group create','--resource-group + --template-file + a name'],
+    ['Manage a big multi-part deployment as modular files.','Linked templates','a main template orchestrates the linked ones'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A template deploys to a scope, via CLI or PowerShell',{anchor:'middle',size:15,weight:600});
+    /* commands */
+    const cy=a.y+a.h*0.18;
+    box(a.x,cy,a.w,46,{stroke:C.blue,sw:1.5,fill:'#f4f7fb'});
+    T(a.x+a.w/2,cy+28,'az deployment group create  --resource-group RG  --template-file main.json',{anchor:'middle',size:11.5,fill:C.blue,font:MONO});
+    box(a.x,cy+56,a.w,46,{stroke:C.blue,sw:1.5,fill:'#f4f7fb'});
+    T(a.x+a.w/2,cy+84,'New-AzResourceGroupDeployment  -ResourceGroupName RG  -TemplateFile main.json',{anchor:'middle',size:11.5,fill:C.blue,font:MONO});
+    /* linked/nested */
+    const ly=cy+126, lw=(a.w-20)/2;
+    box(a.x,ly,lw,a.b-ly,{stroke:C.purple,sw:1.6});
+    T(a.x+lw/2,ly+28,'Linked templates',{anchor:'middle',size:13.5,weight:600,fill:C.purple});
+    Twrap(a.x+lw/2,ly+(a.b-ly)/2+10,'a main template triggers separate files (SAS-secured)',Math.floor(lw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+    box(a.x+lw+20,ly,lw,a.b-ly,{stroke:C.purple,sw:1.6});
+    T(a.x+lw+20+lw/2,ly+28,'Nested templates',{anchor:'middle',size:13.5,weight:600,fill:C.purple});
+    Twrap(a.x+lw+20+lw/2,ly+(a.b-ly)/2+10,'a template embedded inside another',Math.floor(lw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+  }
+},
+/* 4 — Bicep */
+{
+  tab:'Bicep',
+  title:'Bicep — a cleaner language that compiles to ARM',
+  gist:`<b>Bicep</b> is Microsoft's modern IaC language and the recommended choice for new Azure work. It's a <b>transparent abstraction over ARM JSON</b>: at deploy time the CLI <b>transpiles</b> the <code>.bicep</code> file into an ARM template — same resource types, same power, nothing lost. The win is authoring: <b>concise syntax</b> (no <code>[...]</code> expressions), <b>symbolic names</b> with <b>automatic dependencies</b> (no manual <code>dependsOn</code>), reusable <b>modules</b>, and params/vars/outputs declared anywhere. It's still declarative + idempotent, deploys the same way, and has <b>no state file</b> to manage (Azure stores state). Convert with <b>decompile</b> (JSON→Bicep) and <b>build</b> (Bicep→JSON).`,
+  facts:[['Bicep','recommended IaC for Azure','green'],['Relationship','transpiles to ARM JSON'],['Syntax','concise, no [...] brackets'],['Dependencies','automatic (symbolic names)','green'],['Modules','reusable components'],['JSON↔Bicep','decompile / build']],
+  trap:['Does Bicep do anything ARM JSON can\'t?','<b>No — it\'s the same power.</b> Bicep is a friendlier <i>syntax</i> that <b>compiles to ARM JSON</b>; any resource/API/property valid in ARM is valid in Bicep. The gain is authoring (concise, auto-dependencies, modules), not new capability.'],
+  exam:['"Convert an existing ARM JSON template to Bicep."','Use <b>bicep decompile</b> (JSON → Bicep). The reverse, <b>bicep build</b>, compiles Bicep → ARM JSON. Both are valid AZ-104 tasks.'],
+  scn:[
+    ['Author IaC for a new project with the least boilerplate.','Bicep','concise syntax, auto dependencies, modules'],
+    ['Inherit an old ARM JSON template, want it in Bicep.','bicep decompile','converts JSON → Bicep'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'You write Bicep · ARM still does the deploying',{anchor:'middle',size:15,weight:600});
+    const bicep=node(a.x,a.y+a.h*0.32,Math.min(210,a.w*0.25),96,C.green,'main.bicep',null,{strong:true,tsize:14});
+    Twrap(bicep.cx,bicep.cy+16,'concise · auto deps · modules',Math.floor(bicep.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const json=node(bicep.r+a.w*0.10,a.y+a.h*0.32,Math.min(210,a.w*0.25),96,C.blue,'ARM JSON',null,{tsize:14});
+    Twrap(json.cx,json.cy+16,'(transpiled at deploy)',Math.floor(json.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(bicep.r+6,bicep.cy,json.x-6,json.cy,{stroke:C.green});
+    T((bicep.r+json.x)/2,bicep.cy-12,'transpile',{anchor:'middle',size:11,fill:C.green,weight:600});
+    /* reverse decompile */
+    arrow(json.x-6,bicep.cy+30,bicep.r+6,bicep.cy+30,{stroke:C.faint,dash:'4 4'});
+    T((bicep.r+json.x)/2,bicep.cy+44,'decompile',{anchor:'middle',size:10.5,fill:C.faint});
+    const arm=node(json.r+a.w*0.10,a.y+a.h*0.32,a.r-(json.r+a.w*0.10),96,C.purple,'ARM deploys',null,{tsize:13.5});
+    Twrap(arm.cx,arm.cy+16,'idempotent · no state file',Math.floor(arm.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(json.r+6,json.cy,arm.x-6,arm.cy,{stroke:C.soft});
+  }
+},
+/* 5 — ARM vs Bicep vs Terraform (the choice) */
+{
+  tab:'ARM vs Bicep',
+  title:'ARM JSON vs Bicep — and where Terraform differs',
+  gist:`Both ARM JSON and Bicep are <b>Azure-native, declarative, idempotent</b>, deploy through ARM, and keep <b>no state file</b> (Azure stores state). The difference is authoring: <b>ARM JSON</b> is verbose, with bracket expressions and manual <code>dependsOn</code>; <b>Bicep</b> is concise, auto-dependencies, modular — the recommended choice for new work, and it compiles down to ARM anyway. The notable contrast on the exam is <b>Terraform</b> (HashiCorp, multi-cloud) which <b>does</b> keep a separate <b>state file</b> — the headline difference from the Azure-native tools.`,
+  place:{here:'ARM &amp; Bicep are the Azure-native IaC covered here.',
+    other:'<b>Terraform</b> is multi-cloud and managed via the CLI/portal too, but it keeps its OWN <b>state file</b> — unlike ARM/Bicep where Azure stores state. That state-file distinction is the common exam contrast.'},
+  facts:[['ARM JSON','verbose, manual dependsOn'],['Bicep','concise, auto deps — recommended','green'],['Both','declarative, idempotent, via ARM'],['Both','no state file (Azure stores it)','green'],['Terraform','multi-cloud, HAS a state file','red'],['Bicep ↔ ARM','same power (transpiles)']],
+  trap:['Which IaC tool keeps a separate state file you manage?','<b>Terraform</b> — it maintains its own state file. <b>ARM and Bicep keep no state file</b>; Azure stores the state for you. That\'s the classic ARM/Bicep-vs-Terraform exam contrast.'],
+  exam:['"Recommended Azure-native IaC for a new deployment, concise and modular."','<b>Bicep</b> — Microsoft\'s recommended native IaC: concise, auto-dependencies, modules, compiles to ARM. (ARM JSON still works; Terraform is multi-cloud with a state file.)'],
+  scn:[
+    ['New Azure-only project, want clean maintainable IaC.','Bicep','recommended native choice, transpiles to ARM'],
+    ['Same IaC tool across Azure, AWS, and GCP.','Terraform','multi-cloud; note it manages its own state file'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two Azure-native (no state file) · one multi-cloud (state file)',{anchor:'middle',size:15,weight:600});
+    const cols=[
+      [C.blue,'ARM JSON','Azure-native','verbose · manual dependsOn','no state file'],
+      [C.green,'Bicep','Azure-native','concise · auto deps · modules','no state file'],
+      [C.amber,'Terraform','multi-cloud','HashiCorp HCL','HAS a state file'],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.16, h=a.h*0.66;
+    cols.forEach((c,i)=>{const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:c[0],sw:i===1?2.1:1.7});
+      T(x+w/2,y+30,c[1],{anchor:'middle',size:15,weight:600,fill:c[0]});
+      T(x+w/2,y+52,c[2],{anchor:'middle',size:11.5,fill:C.soft});
+      Twrap(x+w/2,y+h*0.52,c[3],Math.floor(w/7),{anchor:'middle',size:12,fill:C.ink,lh:15});
+      box(x+16,y+h-46,w-32,32,{stroke:i===2?'#eccccb':'#dceee3',fill:i===2?'#fdf6f6':'#f3faf6'});
+      T(x+w/2,y+h-26,c[4],{anchor:'middle',size:11.5,fill:i===2?C.red:C.green,weight:600});
+    });
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,71 @@
+**Exercise environment needs** - this lab assumes you have a basic Microsoft Entra tenant with at least User Administrator rights to complete it. You can get a free trial subscription for at [Try Azure for Free](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn).
+
+## Create a new user in Microsoft Entra ID
+
+You can skip creating this user if you created the same user in the earlier module.
+
+1. Browse to the Identity menu in the [Microsoft Entra admin center](https://entra.microsoft.com/).
+2. In the left navigation, under select **Users**, then **All Users.**
+3. Within the Users page, on the menu, select + **New user** and **Create new user**.
+4. Create a user using the following information:
+    
+   | **Setting**         | **Value**                 |
+   | ------------------- | ------------------------- |
+   | User principal name | ChrisG                    |
+   | Name                | Chris Green               |
+   | First name          | Chris                     |
+   | Last name           | Green                     |
+   | Password            | make up a unique password |
+   |                     |                           |
+5.  When complete, verify the account for Chris Green is shown in the **All users** list.
+
+## Create a security group in Microsoft Entra ID
+
+1. Browse to the Microsoft Entra admin center screen.
+2. In the left navigation, under **Identity**, select **Groups** and then **All groups**.
+3. In the Groups screen, on the menu, select **New group**.
+4. Create a group using the following information:
+    
+   | **Setting**     | **Value**                                                |
+   | --------------- | -------------------------------------------------------- |
+   | Group type      | Security                                                 |
+   | Group name      | Marketing                                                |
+   | Membership type | Assigned                                                 |
+   | Owners          | Assign your own administrator account as the group owner |
+   | Members         | Chris Green                                              |
+    
+   :::image type="content" source="../media/create-group.png" alt-text="Screenshot of the new group creation page in Microsoft Entra ID. Create new groups and add members.":::
+    
+5.  When complete, verify the group named **Marketing** is shown in the **All groups** list.
+
+## Assign a license to a group
+
+License assignment to groups is managed through the Microsoft 365 admin center.
+
+1. Go to the Microsoft 365 admin center at [https://admin.microsoft.com](https://admin.microsoft.com).
+2. Select **Billing** from the menu on the left.
+3. Select **Licenses**.
+4. From the list of licenses you have available, select one.
+5. Select **Groups** from the list near the top of the screen.
+6. On the Groups page, select **+ Assign license**.
+7. Search for and select the **Marketing** group you created earlier.
+8. Select the **Assign** button at the bottom of the dialog.
+9. You should get a message that licenses were successfully assigned.
+
+## Restore or remove a recently deleted user with Microsoft Entra ID
+
+After you delete a user, the account remains in a suspended state for 30 days. During that 30-day window, the user account can be restored, along with all its properties. After that 30-day window passes, the permanent deletion process is automatically started.
+
+You can view your restorable users, restore a deleted user, or permanently delete a user using Microsoft Entra ID user interface.
+
+> [!IMPORTANT]
+> You can't restore a permanently deleted user.
+
+## Required permissions
+
+You must have one of the following roles to restore or permanently delete users.
+
+- Global administrator
+- Partner Tier-1 Support
+- Partner Tier-2 Support
+- User administrator

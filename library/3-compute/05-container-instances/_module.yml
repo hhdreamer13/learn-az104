@@ -1,0 +1,48 @@
+### YamlMime:Module
+uid: learn.wwl.configure-azure-container-instances
+metadata:
+  adobe-target: true
+  prefetch-feature-rollout: true
+  title: Configure Azure Container Instances
+  description: "Learn how to configure Azure Container Instances including container groups."
+  ms.date: 06/23/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-container-instances
+  ai-usage: ai-assisted
+title: Configure Azure Container Instances
+summary: Learn how to configure Azure Container Instances including container groups.
+abstract: |
+  In this module, you learn how to:
+
+  -   Identify when to use containers versus virtual machines.
+
+  -   Identify the features and usage cases of Azure Container Instances.
+
+  -   Implement Azure container groups.
+prerequisites: |
+  -   Working knowledge of containerization concepts and terminology.
+
+  -   Familiarity with cloud computing and experience with the Azure portal.
+iconUrl: /training/achievements/azure-container-instance-configure.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure-container-instances
+units:
+- learn.wwl.configure-azure-container-instances.introduction
+- learn.wwl.configure-azure-container-instances.compare-containers-to-virtual-machines
+- learn.wwl.configure-azure-container-instances.review
+- learn.wwl.configure-azure-container-instances.implement-container-groups
+- learn.wwl.configure-azure-container-instances.review-docker-platform
+- learn.wwl.configure-azure-container-instances.interactive-lab-simulation-containers
+- learn.wwl.configure-azure-container-instances.knowledge-check
+- learn.wwl.configure-azure-container-instances.summary-resources
+badge:
+  uid: learn.wwl.configure-azure-container-instances.badge

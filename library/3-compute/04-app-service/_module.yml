@@ -1,0 +1,61 @@
+### YamlMime:Module
+uid: learn.wwl.configure-azure-app-services
+metadata:
+  adobe-target: true
+  prefetch-feature-rollout: true
+  title: Configure Azure App Service
+  description: "Configure Azure App Service"
+  ms.date: 06/23/2026
+  author: wwlpublish
+  ms.author: cynthist
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-app-service
+  ai-usage: ai-assisted
+title: Configure Azure App Service
+summary: Learn how to configure and monitor Azure App Service instances, including deployment slots.
+abstract: |
+  In this module, you learn how to:
+
+  -   Identify features and usage cases for Azure App Service.
+
+  -   Create an app with Azure App Service.
+
+  -   Configure deployment settings, specifically deployment slots.
+
+  -   Secure your Azure App Service app.
+
+  -   Configure custom domain names.
+
+  -   Back up and restore your Azure App Service app.
+
+  -   Configure Azure Application Insights.
+prerequisites: |
+  -   Working knowledge of the Azure portal, so you can configure the service.
+
+  -   Familiarity with cloud-based services, specifically web hosting services.
+iconUrl: /training/achievements/azure-app-services-configure.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure-app-service
+units:
+- learn.wwl.configure-azure-app-services.introduction
+- learn.wwl.configure-azure-app-services.implement
+- learn.wwl.configure-azure-app-services.create-app-service
+- learn.wwl.configure-azure-app-services.explore-continuous-integration-deployment
+- learn.wwl.configure-azure-app-services.create-deployment-slots
+- learn.wwl.configure-azure-app-services.add-deployment-slots
+- learn.wwl.configure-azure-app-services.secure-app-service
+- learn.wwl.configure-azure-app-services.create-custom-domain-names
+- learn.wwl.configure-azure-app-services.backup-app-service
+- learn.wwl.configure-azure-app-services.use-application-insights
+- learn.wwl.configure-azure-app-services.interactive-simulation-web-apps
+- learn.wwl.configure-azure-app-services.knowledge-check
+- learn.wwl.configure-azure-app-services.summary-resources
+badge:
+  uid: learn.wwl.configure-azure-app-services.badge

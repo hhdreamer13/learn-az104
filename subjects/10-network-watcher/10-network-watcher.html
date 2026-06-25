@@ -1,0 +1,375 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Network Watcher — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+/* scenario block — the heart of this subject */
+.scn{margin-top:14px}
+.scn .row{display:grid;grid-template-columns:1fr;gap:0;border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Networking</div>
+  <h1>Azure Network Watcher</h1>
+  <div class="lede">A suite of tools for monitoring and diagnosing connectivity in Azure <b>IaaS</b> networks — VMs, VNets, NSGs, routes, gateways. Each tool answers one kind of "why can't this reach that?" question. It turns on automatically per region when you create a virtual network.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone" id="factszone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — THE THREE FAMILIES (the map, straight from the docs taxonomy) */
+{
+  tab:'The three families',
+  title:'Network Watcher is organised into three families of tools',
+  gist:`Microsoft groups every Network Watcher tool into three families, and this grouping is the whole mental model. <b>Monitoring</b> tools show you the network and watch links over time. <b>Diagnostic</b> tools answer a specific "why is this failing?" on demand. <b>Traffic</b> tools log and visualise the actual packets flowing through your network. Every tool lives in exactly one family — learn the family and you always know where a tool belongs.`,
+  facts:[['Monitoring','Topology · Connection monitor'],['Diagnostic','7 on-demand "why?" tools'],['Traffic','Flow logs · Traffic analytics'],['Works on','IaaS only','green'],['Availability','auto, per region'],['Enabled by','creating a VNet']],
+  trap:['Connection <i>monitor</i> and Connection <i>troubleshoot</i> sound identical — same family?','<b>No — different families.</b> Connection <b>monitor</b> is a <b>Monitoring</b> tool (continuous, over time). Connection <b>troubleshoot</b> is a <b>Diagnostic</b> tool (one test, on demand). The names collide; the families don\'t.'],
+  exam:['Given a tool name, how do you place it fast?','Ask what it does: <i>shows/watches</i> → Monitoring; <i>tests one thing now</i> → Diagnostic; <i>logs traffic</i> → Traffic. That three-way split answers most "which category" questions.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One service, three families of tools',{anchor:'middle',size:15,weight:600});
+    const fams=[
+      [C.blue,'Monitoring','see the network & watch over time',['Topology','Connection monitor']],
+      [C.amber,'Diagnostic','answer one "why is it failing?" on demand',['IP flow verify','NSG diagnostics','Next hop','Effective security rules','Connection troubleshoot','Packet capture','VPN troubleshoot']],
+      [C.green,'Traffic','log & visualise the actual packets',['Flow logs','Traffic analytics']],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.13, h=a.h*0.80;
+    fams.forEach((f,i)=>{
+      const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:f[0],sw:1.8});
+      T(x+w/2,y+28,f[1],{anchor:'middle',size:15,weight:600,fill:f[0]});
+      Twrap(x+w/2,y+50,f[2],Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+      const ly=y+74, lh=Math.min(30,(h-90)/f[3].length);
+      f[3].forEach((t,j)=>{
+        const yy=ly+j*lh;
+        box(x+14,yy,w-28,lh-7,{stroke:'#e7e9ee',fill:'#fafbfc'});
+        T(x+w/2,yy+(lh-7)/2+4,t,{anchor:'middle',size:11.5,fill:C.ink});
+      });
+    });
+  }
+},
+/* 1 — MONITORING family */
+{
+  tab:'Monitoring',
+  title:'Monitoring — Topology and Connection monitor',
+  gist:`The two tools that help you <b>see</b> and <b>watch</b>, rather than test one thing. <b>Topology</b> draws an interactive map of your network — subnets, NICs, NSGs, load balancers, peerings, gateways — across subscriptions and regions, so you can spot what's involved before you dig in. <b>Connection monitor</b> measures connectivity and latency between endpoints <b>continuously</b>, detects changes (like a new NSG rule breaking a path), and alerts you. It needs the Network Watcher agent on the monitored hosts.`,
+  facts:[['Topology','interactive network map'],['Topology spans','subs · RGs · regions'],['Connection monitor','continuous probing'],['…measures','reachability + latency','green'],['…detects','config/NSG changes'],['…needs','Network Watcher agent','red']],
+  trap:['You want ongoing alerts if two app tiers stop talking. Topology?','<b>No — Topology only draws the map, it doesn\'t watch.</b> For continuous monitoring with alerts use <b>Connection monitor</b>. Topology is for seeing structure at the start of troubleshooting.'],
+  exam:['"Continuously verify connectivity between two VMs and alert on change."','<b>Connection monitor</b> — ongoing, end-to-end, hybrid-capable, alerts on change. (A one-time check would be Connection troubleshoot, a Diagnostic tool.)'],
+  scn:[
+    ['You inherit a tangled multi-VNet setup and need to see what connects to what.','Topology','draws the whole network map so you can find the resource involved'],
+    ['You must know the moment the app-to-database link degrades.','Connection monitor','probes continuously and raises an alert when latency or reachability changes'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'See the network · watch the links',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(330,a.w*0.42), gap=a.w*0.06, x0=a.cx-w-gap/2, x1=a.cx+gap/2;
+    const y=a.y+a.h*0.18, h=a.h*0.60;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+30,'Topology',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    Twrap(x0+w/2,y+62,'an interactive map of resources and how they connect',Math.floor(w/7),{anchor:'middle',size:12.5,fill:C.soft,lh:15});
+    Twrap(x0+w/2,y+h-40,'spans subscriptions, resource groups, regions',Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.ink,lh:14});
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+30,'Connection monitor',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    Twrap(x1+w/2,y+62,'continuous reachability + latency between endpoints',Math.floor(w/7),{anchor:'middle',size:12.5,fill:C.soft,lh:15});
+    Twrap(x1+w/2,y+h-40,'alerts on change · needs the Network Watcher agent',Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.red,lh:14});
+  }
+},
+/* 2 — DIAGNOSTIC family overview (the 7, organised by what they answer) */
+{
+  tab:'Diagnostic',
+  title:'Diagnostic — seven on-demand "why is it failing?" tools',
+  gist:`The biggest family: seven tools, each answering one question right now. They split cleanly by what they inspect. <b>Filtering</b> (is an NSG blocking it?): IP flow verify, NSG diagnostics, Effective security rules. <b>Routing</b> (is it going the wrong way?): Next hop. <b>End-to-end test</b> (does it actually connect, and if not why?): Connection troubleshoot. <b>Capture</b> (record the raw packets): Packet capture. <b>Gateway</b> (is the VPN healthy?): VPN troubleshoot.`,
+  facts:[['Filtering','IP flow verify, NSG diag, Eff. rules'],['Routing','Next hop'],['Connectivity test','Connection troubleshoot'],['Raw capture','Packet capture'],['VPN gateway','VPN troubleshoot'],['All are','on-demand, point-in-time']],
+  trap:['Traffic fails. Is it always an NSG (filtering) problem?','<b>No.</b> Split first: <b>filtered</b> (NSG denies → IP flow verify) vs <b>misrouted</b> (a route misdirects → Next hop). An allowed NSG with broken routing still fails — and only Next hop reveals it.'],
+  exam:['How to navigate the 7 diagnostic tools?','By the question: "which NSG rule?" → IP flow verify; "where does the packet go?" → Next hop; "does A reach B + why not?" → Connection troubleshoot; "record traffic" → Packet capture; "VPN down" → VPN troubleshoot.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Seven diagnostic tools, grouped by what they inspect',{anchor:'middle',size:15,weight:600});
+    const groups=[
+      [C.red,'Filtering — "is an NSG blocking it?"',['IP flow verify','NSG diagnostics','Effective security rules']],
+      [C.amber,'Routing — "is it going the wrong way?"',['Next hop']],
+      [C.blue,'Connectivity & capture',['Connection troubleshoot','Packet capture','VPN troubleshoot']],
+    ];
+    let y=a.y+a.h*0.14;
+    const rowH=(a.h*0.80)/3, gap=12;
+    groups.forEach(g=>{
+      box(a.x,y,a.w,rowH-gap,{stroke:g[0],fill:'#fff',sw:1.6});
+      T(a.x+18,y+26,g[1],{size:13.5,weight:600,fill:g[0]});
+      const tw=(a.w-40-(g[2].length-1)*12)/g[2].length;
+      g[2].forEach((t,j)=>{
+        const tx=a.x+20+j*(tw+12);
+        box(tx,y+38,tw,rowH-gap-52,{stroke:'#e7e9ee',fill:'#fafbfc'});
+        Twrap(tx+tw/2,y+38+(rowH-gap-52)/2,t,Math.floor(tw/7),{anchor:'middle',size:12,fill:C.ink,lh:14});
+      });
+      y+=rowH;
+    });
+  }
+},
+/* 3 — DIAGNOSTIC deep: the filtering trio + next hop (the confusable core) */
+{
+  tab:'Filtering vs routing',
+  title:'Inside Diagnostic: the NSG trio, and Next hop',
+  gist:`The four diagnostic tools people mix up. Three are about <b>NSG filtering</b> and differ by what you ask: <b>IP flow verify</b> tests one 5-tuple packet → allow/deny + the deciding rule. <b>Effective security rules</b> lists every rule on a NIC (subnet NSG + NIC NSG merged). <b>NSG diagnostics</b> is the newer combined checker that can also suggest a fix. The fourth, <b>Next hop</b>, is not about NSGs at all — it's <b>routing</b>: where does a packet from this VM to that IP actually go, and via which route?`,
+  facts:[['IP flow verify','one packet → allow/deny + rule','green'],['Effective sec. rules','lists ALL rules on a NIC'],['NSG diagnostics','combined check + suggest fix'],['Next hop','routing, not filtering','red'],['Next hop returns','hop type + IP + route'],['"None" =','packet dropped','red']],
+  trap:['NSG allows the traffic but the VM still can\'t reach the internet. Which tool?','<b>Next hop</b>, not IP flow verify. The packet isn\'t filtered — it\'s misrouted (often a user-defined route 0.0.0.0/0 forcing it to an appliance, or to <code>None</code>).'],
+  exam:['"Which NSG rule is blocking RDP?" vs "show all rules on the NIC."','First → <b>IP flow verify</b> (tests that packet, names the rule). Second → <b>Effective security rules</b> (lists everything, tests nothing).'],
+  scn:[
+    ['A VM refuses RDP and you need the exact rule responsible.','IP flow verify','tests TCP 3389 and returns allow/deny plus the deciding NSG rule'],
+    ['Outbound internet traffic vanishes although the NSG allows it.','Next hop','reveals a route redirecting it to an appliance — or to None (dropped)'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Three filtering tools + one routing tool',{anchor:'middle',size:15,weight:600});
+    /* filtering trio on a tinted band */
+    const by=a.y+a.h*0.13, bh=a.h*0.46;
+    box(a.x,by,a.w,bh,{stroke:C.red,fill:'#fdf6f6',sw:1.4});
+    T(a.x+18,by+24,'Filtering — about NSGs',{size:13,weight:600,fill:C.red});
+    const trio=[['IP flow verify','test ONE packet → allow/deny + rule'],['Effective security rules','LIST all rules on the NIC'],['NSG diagnostics','combined check + suggest a fix']];
+    const tw=(a.w-40-2*12)/3;
+    trio.forEach((t,j)=>{
+      const tx=a.x+20+j*(tw+12);
+      box(tx,by+36,tw,bh-52,{stroke:C.red,fill:'#fff'});
+      T(tx+tw/2,by+60,t[0],{anchor:'middle',size:12.5,weight:600,fill:C.red});
+      Twrap(tx+tw/2,by+(bh)/2+18,t[1],Math.floor(tw/7),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+    });
+    /* next hop on its own band */
+    const ny=by+bh+a.h*0.06, nh=a.b-ny;
+    box(a.x,ny,a.w,nh,{stroke:C.amber,fill:'#fffaf0',sw:1.4});
+    T(a.x+18,ny+24,'Routing — about routes, not NSGs',{size:13,weight:600,fill:C.amber});
+    box(a.x+20,ny+34,a.w-40,nh-46,{stroke:C.amber,fill:'#fff'});
+    T(a.x+40,ny+34+(nh-46)/2-6,'Next hop',{size:13,weight:600,fill:C.amber,baseline:'middle'});
+    T(a.x+150,ny+34+(nh-46)/2-6,'where does the packet go? type · IP · route (System or UDR). "None" = dropped.',{size:11.5,fill:C.soft,baseline:'middle'});
+  }
+},
+/* 4 — Connection troubleshoot detail (its fault types are gold) */
+{
+  tab:'Connection troubleshoot',
+  title:'Connection troubleshoot — one test that names the fault',
+  gist:`The end-to-end diagnostic. You give it a source (VM, scale set, app gateway, or Bastion) and a destination (VM, FQDN, URI, or IP), and it runs a single TCP connectivity test. If it succeeds, it reports latency, probes sent, and hop count. If it fails, it tells you <b>why</b> with a specific fault type — and that fault type is the whole point: it pinpoints whether the cause is an NSG, a route, DNS, a guest firewall, or resource exhaustion.`,
+  facts:[['Source','VM/VMSS/app gw/Bastion'],['Destination','VM, FQDN, URI, IP'],['On success','latency, probes, hops'],['On failure','a fault type','green'],['Fault: NetworkSecurityRule','an NSG blocked it'],['Fault: UserDefinedRoute','a bad route']],
+  trap:['Connection troubleshoot vs Connection monitor — same thing?','<b>No — time, and family.</b> Troubleshoot = one test now (Diagnostic family). Monitor = continuous probing + alerts (Monitoring family). "Right now" → troubleshoot; "over time / alert" → monitor.'],
+  exam:['A connection fails and you need to know if it\'s the NSG, a route, or DNS.','<b>Connection troubleshoot</b> — its fault type tells you directly: <code>NetworkSecurityRule</code>, <code>UserDefinedRoute</code>, <code>DNSResolution</code>, <code>GuestFirewall</code>, or CPU/Memory.'],
+  scn:[
+    ['Mid-incident: does the app tier reach the DB tier on 1433, and if not, why?','Connection troubleshoot','one test now; on failure it returns the fault type — NSG, route, DNS, or firewall'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One test → success metrics, or a named fault',{anchor:'middle',size:15,weight:600});
+    const src=node(a.x,a.y+a.h*0.42,Math.min(150,a.w*0.18),84,C.blue,'Source',null,{tsize:14});
+    const dst=node(a.r-Math.min(150,a.w*0.18),a.y+a.h*0.42,Math.min(150,a.w*0.18),84,C.blue,'Destination',null,{tsize:14});
+    arrow(src.r+6,src.cy,dst.x-6,dst.cy,{stroke:C.soft,sw:1.8});
+    T((src.r+dst.x)/2,src.cy-14,'TCP test',{anchor:'middle',size:12,fill:C.faint});
+    /* fault types fan below */
+    const faults=['NetworkSecurityRule','UserDefinedRoute','DNSResolution','GuestFirewall','CPU / Memory'];
+    const fy=a.y+a.h*0.66, fw=(a.w-(faults.length-1)*12)/faults.length, fh=Math.min(60,a.b-fy);
+    T(a.cx,fy-12,'…if it fails, a fault type tells you which layer:',{anchor:'middle',size:12,fill:C.soft});
+    faults.forEach((t,i)=>{const x=a.x+i*(fw+12);box(x,fy,fw,fh,{stroke:C.red,fill:'#fdf6f6'});Twrap(x+fw/2,fy+fh/2,t,Math.floor(fw/6.5),{anchor:'middle',size:11,fill:C.red,weight:600,lh:13});});
+  }
+},
+/* 5 — TRAFFIC family */
+{
+  tab:'Traffic',
+  title:'Traffic — Flow logs and Traffic analytics',
+  gist:`The family that records what actually flowed. <b>Flow logs</b> capture information about IP traffic going through an <b>NSG</b> (or a VNet) and store it in an Azure <b>storage account</b> — the raw record of allowed and denied connections. <b>Traffic analytics</b> sits on top of flow logs and turns that raw data into rich visualisations: who's talking to whom, traffic hotspots, and security insights. Flow logs are the data; Traffic analytics is the dashboard over it.`,
+  facts:[['Flow logs','record IP traffic through an NSG'],['Stored in','an Azure storage account','green'],['Captures','allowed + denied flows'],['Traffic analytics','visualises flow logs'],['…shows','who talks to whom, hotspots'],['Relationship','analytics needs flow logs']],
+  trap:['Want a visual of traffic patterns — just enable Traffic analytics?','<b>Traffic analytics needs Flow logs underneath.</b> Flow logs are the raw data source; analytics is the visualisation layer. No flow logs = nothing to analyse.'],
+  exam:['"Keep a record of allowed/denied connections through an NSG."','<b>NSG Flow logs</b> → stored in a storage account. For dashboards/insights over that data, add <b>Traffic analytics</b>.'],
+  scn:[
+    ['Security asks for an audit trail of what connected through a subnet\'s NSG.','Flow logs','log every allowed/denied flow to a storage account'],
+    ['Leadership wants a picture of traffic hotspots and top talkers.','Traffic analytics','visualises the flow-log data into maps and insights'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Flow logs are the data · Traffic analytics is the dashboard',{anchor:'middle',size:15,weight:600});
+    const nsg=node(a.x,a.y+a.h*0.40,Math.min(150,a.w*0.18),84,C.soft,'NSG / VNet',null,{tsize:13});
+    const fl=node(nsg.r+a.w*0.06,a.y+a.h*0.40,Math.min(180,a.w*0.22),84,C.green,'Flow logs',null,{tsize:14});
+    const st=node(fl.r+a.w*0.05,a.y+a.h*0.16,Math.min(170,a.w*0.20),70,C.soft,'Storage account',null,{tsize:12.5});
+    const ta=node(fl.r+a.w*0.05,a.y+a.h*0.58,Math.min(190,a.w*0.23),84,C.blue,'Traffic analytics',null,{tsize:13.5});
+    arrow(nsg.r+6,nsg.cy,fl.x-6,fl.cy,{stroke:C.soft});T((nsg.r+fl.x)/2,nsg.cy-12,'logs',{anchor:'middle',size:11,fill:C.faint});
+    arrow(fl.r+6,fl.cy,st.x-6,st.cy,{stroke:C.green});T((fl.r+st.x)/2,(fl.cy+st.cy)/2-8,'stored',{anchor:'middle',size:11,fill:C.faint});
+    arrow(fl.r+6,fl.cy,ta.x-6,ta.cy,{stroke:C.blue});T((fl.r+ta.x)/2,(fl.cy+ta.cy)/2+14,'visualised',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 6 — SCOPE & PLACEMENT */
+{
+  tab:'Scope & limits',
+  title:'What Network Watcher can and can\'t see',
+  gist:`Network Watcher works on <b>IaaS</b> resources — virtual machines, VNets, subnets, NSGs, routes, load balancers, and gateways. It does <b>not</b> diagnose <b>PaaS</b> services or web apps; for those you look at Azure Service Health or the service's own diagnostics. It becomes available automatically, one instance per region, the moment you create a virtual network in that region. You reach it from the Networking area of the portal.`,
+  place:{here:'Lives in the <b>Networking</b> area; on the exam it\'s scored under the <b>Monitor</b> domain.',
+    other:'So when a question is about <i>diagnosing or observing</i> IaaS network connectivity, the Monitor-domain answer is Network Watcher / Connection Monitor — even though you configure it under Networking.'},
+  facts:[['Works on','IaaS only','green'],['Does NOT cover','PaaS / web apps','red'],['Availability','auto, per region'],['Trigger to enable','create a VNet'],['Configured in','Networking blade'],['Scored under','Monitor','green']],
+  trap:['Your App Service (PaaS) has connectivity issues. Use Network Watcher?','<b>No.</b> Network Watcher is <b>IaaS-only</b>. For PaaS, check Service Health or the service\'s own diagnostics. The PaaS-vs-IaaS line is a deliberate trap.'],
+  exam:['"Is Network Watcher networking or monitoring?"','<b>Both — but scored as Monitor.</b> If the task is diagnosing/observing IaaS network connectivity, the Monitor-domain answer is Network Watcher / Connection Monitor.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'IaaS-only · auto-enabled per region · configured in networking',{anchor:'middle',size:15,weight:600});
+    const cy=a.y+a.h*0.16, cw=a.w*0.44, ch=a.h*0.40;
+    box(a.x,cy,cw,ch,{stroke:C.green,fill:'#f3faf6'});
+    T(a.x+16,cy+26,'✓ Covers (IaaS)',{size:13.5,weight:600,fill:C.green});
+    ['VMs / VMSS','VNets / subnets','NSGs · routes','Load balancers · gateways'].forEach((t,i)=>T(a.x+16,cy+50+i*24,'· '+t,{size:12.5,fill:C.soft}));
+    const nx=a.r-cw;
+    box(nx,cy,cw,ch,{stroke:C.red,fill:'#fdf6f6'});
+    T(nx+16,cy+26,'✗ Does NOT cover',{size:13.5,weight:600,fill:C.red});
+    ['PaaS services','Web analytics','App Service issues','→ use Service Health'].forEach((t,i)=>T(nx+16,cy+50+i*24,'· '+t,{size:12.5,fill:C.soft}));
+    const by=cy+ch+a.h*0.08, bw=a.w*0.40, bh=a.h*0.16;
+    box(a.x,by,bw,bh,{stroke:C.blue,fill:'#f4f7fb'});
+    Twrap(a.x+bw/2,by+bh/2,'configured in the Networking blade',Math.floor(bw/6.5),{anchor:'middle',size:12.5,fill:C.blue,weight:600,lh:15});
+    const w2x=a.r-bw;
+    box(w2x,by,bw,bh,{stroke:C.green,fill:'#f3faf6'});
+    Twrap(w2x+bw/2,by+bh/2,'scored under the Monitor domain',Math.floor(bw/6.5),{anchor:'middle',size:12.5,fill:C.green,weight:600,lh:15});
+    arrow(a.x+bw+6,by+bh/2,w2x-6,by+bh/2,{stroke:C.faint,dash:'5 4'});
+    T(a.cx,by+bh/2-10,'same tool',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

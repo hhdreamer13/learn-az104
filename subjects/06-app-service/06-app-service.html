@@ -1,0 +1,363 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure App Service — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Deploy &amp; manage compute</div>
+  <h1>Azure App Service</h1>
+  <div class="lede">A managed PaaS for hosting web apps, APIs, and mobile backends — no servers to patch. The story is plan-first: the <b>App Service plan</b> is the compute the app runs on, so we cover the plan (tiers, scaling) before the <b>app</b> itself (deploy, slots, domains, backup).</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — THE PLAN (the host) */
+{
+  tab:'The plan',
+  title:'The App Service plan is the compute the app runs on',
+  gist:`Start with the <b>plan</b>, because the app can't exist without one. An <b>App Service plan</b> is a set of compute resources — like a server farm — defined by its <b>OS</b> (Windows/Linux), <b>region</b>, <b>pricing tier</b>, and <b>VM instance size + count</b>. One or more <b>apps</b> run <i>inside</i> a plan and share its compute. Putting many apps in one plan saves money but they compete for resources; isolate a resource-hungry app (or one you must scale independently) into its own plan.`,
+  facts:[['Plan','compute resources (server farm)'],['Defines','OS · region · tier · instance size/count'],['Apps','run inside a plan, share its compute'],['Many apps, 1 plan','cheaper, but they compete'],['Isolate when','resource-heavy or scale alone','green'],['Overload','can cause downtime','red']],
+  trap:['Two apps in one plan — do they get separate compute?','<b>No.</b> All apps in a plan <b>share the same VM instances and compute</b>. That saves cost but they compete; overloading a plan can take apps down. Put a heavy app (or one needing independent scaling) in its <b>own plan</b>.'],
+  exam:['"One app is resource-intensive and must scale on its own." What do you do?','Move it to its <b>own App Service plan</b> — apps in the same plan share compute and scale together; isolation gives it dedicated resources and independent scaling.'],
+  scn:[
+    ['Three small low-traffic sites, minimize cost.','One shared plan','they share compute — cheapest for light apps'],
+    ['A busy API that can\'t be slowed by neighbors.','Its own plan','dedicated compute, scale independently'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Apps live inside a plan and share its compute',{anchor:'middle',size:15,weight:600});
+    const px=a.x+a.w*0.10, pw=a.w*0.80, py=a.y+a.h*0.18, ph=a.h*0.62;
+    box(px,py,pw,ph,{stroke:C.purple,sw:2});
+    T(px+16,py+26,'App Service plan',{size:14,weight:600,fill:C.purple});
+    T(px+16,py+44,'OS · region · pricing tier · VM size + count',{size:11,fill:C.soft});
+    const apps=['Web app','API app','Mobile backend'];
+    const aw=(pw-32-2*16)/3, ay=py+62, ah=ph-80;
+    apps.forEach((ap,i)=>{const x=px+16+i*(aw+16);
+      box(x,ay,aw,ah,{stroke:C.blue,sw:1.6});
+      T(x+aw/2,ay+ah/2-6,ap,{anchor:'middle',size:13,weight:600,fill:C.blue});
+      T(x+aw/2,ay+ah/2+14,'shares the compute',{anchor:'middle',size:10.5,fill:C.soft});
+    });
+  }
+},
+/* 1 — PRICING TIERS */
+{
+  tab:'Pricing tiers',
+  title:'Tiers: Shared compute, Dedicated, or Isolated',
+  gist:`The tier sets both features and isolation, in three categories. <b>Shared compute</b> — <b>Free</b> and <b>Shared</b> run your app on a VM shared with other customers' apps; no scale-out; dev/test only. <b>Dedicated compute</b> — <b>Basic / Standard / Premium (v2/v3)</b> run on dedicated VMs just for your plan; higher tier = more scale-out and features. <b>Isolated</b> — <b>Isolated / IsolatedV2</b> run dedicated VMs in a dedicated VNet (App Service Environment) with maximum scale-out (up to 100 instances). Higher tiers unlock features like slots, custom domains/TLS, autoscale, and backup.`,
+  facts:[['Free / Shared','shared VM, dev/test, no scale-out','red'],['Basic','dedicated VM, manual scale'],['Standard','autoscale, 5 slots, backup','green'],['Premium','more scale + slots'],['Isolated','dedicated VNet, up to 100 inst','green'],['Higher tier','unlocks slots/TLS/backup/autoscale']],
+  trap:['Free or Shared tier — can you scale the app out across instances?','<b>No.</b> Shared-compute tiers (Free/Shared) <b>can\'t scale out</b> — they\'re dev/test only, sharing a VM with other customers. Scale-out (and most features) need a <b>Dedicated</b> (Basic+) or <b>Isolated</b> tier.'],
+  exam:['"Production web app needing autoscale, staging slots, and backups." Minimum tier?','<b>Standard</b> — it unlocks autoscale rules, deployment slots, and backup. Free/Shared/Basic lack one or more of these.'],
+  scn:[
+    ['Quick test app, pay nothing.','Free / Shared','shared compute, dev/test, no scale-out or slots'],
+    ['App must run in an isolated VNet at large scale.','Isolated (ASE)','dedicated VMs in a dedicated VNet, up to 100 instances'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Three categories — isolation and features rise with the tier',{anchor:'middle',size:15,weight:600});
+    const cats=[
+      [C.red,'Shared compute','Free · Shared','shared VM with other customers · dev/test · no scale-out'],
+      [C.blue,'Dedicated compute','Basic · Standard · Premium','dedicated VMs for your plan · higher = more scale-out + features'],
+      [C.green,'Isolated','Isolated · IsolatedV2','dedicated VMs in a dedicated VNet (ASE) · up to 100 instances'],
+    ];
+    const y0=a.y+a.h*0.16, gap=12, rh=(a.h*0.72-2*gap)/3;
+    cats.forEach((c,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:c[0],sw:1.8});
+      T(a.x+18,y+30,c[1],{size:14.5,weight:600,fill:c[0]});
+      T(a.x+a.w*0.28,y+30,c[2],{size:12.5,weight:600,fill:C.ink});
+      Twrap(a.x+18,y+rh-18,c[3],Math.floor((a.w-36)/6.8),{anchor:'start',size:11.5,fill:C.soft,lh:13});
+    });
+  }
+},
+/* 2 — SCALING (up vs out) */
+{
+  tab:'Scaling',
+  title:'Scale up (bigger tier) vs scale out (more instances)',
+  gist:`App Service does <b>both</b> kinds of scaling — and the distinction maps to two different controls. <b>Scale up</b> = change the <b>pricing tier</b> of the plan (more CPU/memory/disk, and unlock features like slots and TLS) — you scale up by moving Free→Basic→Standard→Premium. <b>Scale out</b> = increase the <b>number of instances</b> running your app, up to your tier's max (manual, or <b>autoscale</b> on Standard+; Isolated goes to 100). No redeploy needed — scale changes apply in seconds to all apps in the plan.`,
+  facts:[['Scale up','change the pricing TIER'],['…gives','more CPU/mem + features','green'],['Scale out','more INSTANCES'],['…how','manual, or autoscale (Standard+)'],['Isolated scale-out','up to 100 instances'],['Either','no redeploy, seconds to apply','green']],
+  trap:['You need staging slots — scale up or scale out?','<b>Scale up</b> — slots are a <i>feature</i> unlocked by a higher <b>pricing tier</b> (Standard+), not by adding instances. Scale-out only changes how many instances run; it doesn\'t add features.'],
+  exam:['"Handle a traffic surge automatically without changing code." Up or out?','<b>Scale out</b> with <b>autoscale</b> (Standard+) — add instances on rules/schedule. Scaling up (bigger tier) adds power/features but is a manual tier change.'],
+  scn:[
+    ['Need an SSL binding + staging slots the current tier lacks.','Scale up','move to a higher tier that includes those features'],
+    ['Traffic spikes during business hours, drops at night.','Scale out (autoscale)','rules add/remove instances; no redeploy'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Up = bigger tier (power + features) · Out = more instances',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.amber,sw:1.8});
+    T(x0+w/2,y+28,'Scale UP',{anchor:'middle',size:15,weight:600,fill:C.amber});
+    T(x0+w/2,y+50,'change the pricing tier',{anchor:'middle',size:12,fill:C.soft});
+    ['more CPU / memory / disk','unlocks slots, TLS, backup…','Free → Basic → Standard → Premium','a manual tier change'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Scale OUT',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+50,'more instances of the app',{anchor:'middle',size:12,fill:C.soft});
+    ['up to the tier max','manual, or autoscale (Standard+)','Isolated → up to 100 instances','no redeploy needed'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 3 — THE APP: deploy / CI-CD */
+{
+  tab:'Deploy the app',
+  title:'Deploy code: continuous (CI/CD) or manual',
+  gist:`Now the app itself. App Service supports many languages (.NET, Java, Node, Python, PHP) and you get code in via the <b>Deployment Center</b>. <b>Continuous deployment (CI/CD)</b> auto-syncs from a source — <b>GitHub</b> (defaults to GitHub Actions), <b>Azure Repos</b>, <b>Bitbucket</b>, or <b>local Git</b> — so every commit builds and deploys with no manual step. <b>Manual deployment</b> pushes code on demand. CI/CD is the path for "deploy on every commit"; combine it with deployment slots (next) for zero-downtime releases.`,
+  facts:[['Languages','.NET, Java, Node, Python, PHP'],['Configured in','Deployment Center'],['CI/CD sources','GitHub, Azure Repos, Bitbucket, local Git'],['GitHub default','GitHub Actions'],['Continuous','auto-build/deploy on commit','green'],['Manual','push on demand']],
+  trap:['You want every push to GitHub to deploy automatically — manual deployment?','<b>No — continuous deployment (CI/CD).</b> Connect the GitHub repo in the Deployment Center; each commit auto-builds and deploys (GitHub Actions by default). Manual deployment requires you to push each time.'],
+  exam:['"Deploy automatically from a GitHub repo on every commit."','Set up <b>continuous deployment</b> in the Deployment Center pointing at the GitHub repo (GitHub Actions build provider by default).'],
+  scn:[
+    ['A team wants every merge to main to ship to the app.','Continuous deployment','connect the repo; commits auto-deploy'],
+    ['A one-off code push from a laptop.','Manual / local Git','push on demand without a pipeline'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Source → App Service, automatically or on demand',{anchor:'middle',size:15,weight:600});
+    /* sources */
+    const srcs=['GitHub','Azure Repos','Bitbucket','Local Git'];
+    const sw=Math.min(150,a.w*0.19), sgap=(a.w-4*sw)/3, sy=a.y+a.h*0.18;
+    srcs.forEach((s,i)=>{const x=a.x+i*(sw+sgap);box(x,sy,sw,52,{stroke:C.blue,sw:1.5});T(x+sw/2,sy+31,s,{anchor:'middle',size:12.5,weight:600,fill:C.blue});});
+    /* deployment center */
+    const dc=node(a.cx-Math.min(240,a.w*0.30)/2,a.y+a.h*0.50,Math.min(240,a.w*0.30),70,C.purple,'Deployment Center',null,{tsize:13.5});
+    Twrap(dc.cx,dc.cy+15,'continuous (CI/CD) or manual',Math.floor(dc.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    srcs.forEach((s,i)=>{const x=a.x+i*(sw+sgap)+sw/2;arrow(x,sy+52+4,dc.cx,dc.y-6,{stroke:C.faint,dash:'3 3'});});
+    /* app */
+    const app=node(a.cx-Math.min(180,a.w*0.22)/2,a.b-78,Math.min(180,a.w*0.22),64,C.green,'App Service app',null,{tsize:13.5});
+    arrow(dc.cx,dc.b+6,app.cx,app.y-6,{stroke:C.green});
+    T(dc.r+10,(dc.b+app.y)/2,'deploys',{size:10.5,fill:C.faint});
+  }
+},
+/* 4 — DEPLOYMENT SLOTS */
+{
+  tab:'Deployment slots',
+  title:'Slots — stage, swap, and roll back with no downtime',
+  gist:`A <b>deployment slot</b> is a live copy of the app with its own hostname (e.g. a <b>staging</b> slot alongside production). You deploy to staging, validate it, then <b>swap</b> it into production — the swap warms up instances first, so there's <b>zero downtime</b> and no dropped requests. If the new version misbehaves, <b>swap again</b> to return to the "last known good" production app. <b>Auto-swap</b> automates this for CI/CD. Slots require the <b>Standard, Premium, or Isolated</b> tier (Free/Shared/Basic have none).`,
+  facts:[['Slot','live app, own hostname'],['Use','stage → validate → swap'],['Swap','warms up first → zero downtime','green'],['Roll back','swap again = last known good','green'],['Auto-swap','automate on deploy'],['Requires','Standard / Premium / Isolated','red']],
+  trap:['You\'re on the Basic tier and want a staging slot. Available?','<b>No.</b> Deployment slots need <b>Standard, Premium, or Isolated</b>. Basic (and Free/Shared) have no slots — you\'d scale up first.'],
+  exam:['"Release a new version with zero downtime and instant rollback."','Deploy to a <b>staging slot</b>, validate, then <b>swap</b> into production (warm-up = no downtime). If broken, <b>swap back</b> to the previous app. Needs Standard+.'],
+  scn:[
+    ['Test a new build under real config before going live.','Staging slot','validate in staging, then swap to production'],
+    ['A swapped release is faulty — recover fast.','Swap back','the old production app is now in the staging slot'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Deploy to staging, validate, swap into production',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(300,a.w*0.36), y=a.y+a.h*0.28, h=a.h*0.34;
+    const stage=node(a.x,y,w,h,C.amber,'Staging slot',null,{tsize:14});
+    Twrap(stage.cx,stage.cy+16,'new version · own hostname',Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const prod=node(a.r-w,y,w,h,C.green,'Production slot',null,{tsize:14});
+    Twrap(prod.cx,prod.cy+16,'live traffic',Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    /* swap arrows both ways */
+    arrow(stage.r+6,y+h*0.35,prod.x-6,y+h*0.35,{stroke:C.green,sw:2});
+    T(a.cx,y+h*0.35-12,'swap (warm-up → zero downtime)',{anchor:'middle',size:11.5,fill:C.green,weight:600});
+    arrow(prod.x-6,y+h*0.7,stage.r+6,y+h*0.7,{stroke:C.faint,sw:1.4,dash:'4 4'});
+    T(a.cx,y+h*0.7+18,'swap back = last known good',{anchor:'middle',size:11,fill:C.faint});
+    T(a.cx,a.b-6,'requires Standard / Premium / Isolated tier',{anchor:'middle',size:11,fill:C.red,weight:600});
+  }
+},
+/* 5 — DOMAINS, TLS, SECURITY */
+{
+  tab:'Domains & security',
+  title:'Custom domains, TLS, and built-in auth',
+  gist:`A new app gets a default <b>&lt;name&gt;.azurewebsites.net</b> URL. For production you map a <b>custom domain</b> (e.g. <code>www.contoso.com</code>) you own, then secure it with a <b>TLS/SSL binding</b> (a custom domain needs any paid tier — Shared and up, not Free; the TLS/SSL binding needs Basic or higher). App Service also has built-in <b>authentication</b> ("Easy Auth") — sign users in with <b>Microsoft Entra ID</b> or social providers (Google, Facebook, etc.) without writing auth code — plus IP restrictions and managed identities for secure access to other resources.`,
+  facts:[['Default URL','&lt;name&gt;.azurewebsites.net'],['Custom domain','map a domain you own'],['TLS/SSL binding','secure the custom domain'],['Built-in auth','Entra ID or social ("Easy Auth")','green'],['Also','IP restrictions, managed identity'],['Custom domain','Shared+ (not Free)'],['TLS/SSL binding','Basic+','red']],
+  trap:['Do you have to write sign-in code to protect an App Service app?','<b>No.</b> App Service has built-in authentication ("Easy Auth") — enable <b>Entra ID</b> or a social provider and it handles sign-in with no auth code in your app.'],
+  exam:['"Serve the app from www.contoso.com over HTTPS." Steps?','Map the <b>custom domain</b> (DNS) — needs a paid tier (Shared+, not Free) — then add a <b>TLS/SSL binding</b> with a certificate, which needs <b>Basic or higher</b>.'],
+  scn:[
+    ['Brand the app at your own domain with HTTPS.','Custom domain + TLS binding','map the domain, bind a certificate'],
+    ['Require users to sign in with their work accounts.','Built-in auth (Entra ID)','enable Easy Auth — no code'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'From default URL to a secured, branded, authenticated app',{anchor:'middle',size:15,weight:600});
+    const steps=[[C.soft,'Default URL','name.azurewebsites.net'],[C.blue,'Custom domain','www.contoso.com (you own)'],[C.green,'TLS/SSL binding','HTTPS with a certificate'],[C.purple,'Built-in auth','Entra ID / social, no code']];
+    const y0=a.y+a.h*0.16, gap=12, rh=(a.h*0.72-3*gap)/4;
+    steps.forEach((s,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:s[0],sw:1.6});
+      T(a.x+18,y+rh/2-6,s[1],{size:14,weight:600,fill:s[0],baseline:'middle'});
+      T(a.x+a.w*0.34,y+rh/2-6,s[2],{size:12,fill:C.soft,baseline:'middle'});
+      if(i<3)arrow(a.x+a.w*0.17,y+rh,a.x+a.w*0.17,y+rh+gap,{stroke:C.faint});
+    });
+  }
+},
+/* 6 — BACKUP + MONITOR */
+{
+  tab:'Backup & monitor',
+  title:'Back up the app, and watch it with App Insights',
+  gist:`Two operational features. <b>Backup and Restore</b> saves app <b>configuration, file content, and connected databases</b> (SQL/MySQL/PostgreSQL) to an <b>Azure storage account in the same subscription</b>, manually or on a schedule — available in <b>Basic and above</b> (Basic backs up the production slot only). For monitoring, <b>Application Insights</b> is the App Service-integrated APM: request rates, response times, failures, dependencies, and live metrics — the way you observe a web app's health.`,
+  place:{here:'Backup &amp; Application Insights are configured on the <b>App Service app</b>.',
+    other:'<b>Application Insights</b> is part of <b>Azure Monitor</b> (the monitoring domain) — same telemetry platform, surfaced here for web apps. If a question is about app request/latency/failure telemetry, it\'s App Insights.'},
+  facts:[['Backup saves','config + files + databases'],['Backup target','storage acct, same subscription'],['Backup tier','Basic+ (Basic = prod slot only)','red'],['Schedule','manual or scheduled'],['App Insights','request/latency/failure telemetry','green'],['App Insights','part of Azure Monitor']],
+  trap:['Where do App Service backups go, and any tier limit?','To an <b>Azure storage account in the same subscription</b>. Backup needs <b>Basic or higher</b> — and on Basic you can only back up the <b>production slot</b>. Free/Shared have no backup.'],
+  exam:['"Monitor request rates, failures, and dependencies for a web app."','<b>Application Insights</b> — the App Service-integrated APM (part of Azure Monitor). It tracks requests, response times, failures, and dependency calls.'],
+  scn:[
+    ['Schedule nightly backups of the app and its database.','Backup & Restore','to a same-subscription storage account; Basic+ tier'],
+    ['Diagnose slow requests and failures in production.','Application Insights','APM telemetry for the web app'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Protect the app (backup) and observe it (App Insights)',{anchor:'middle',size:15,weight:600});
+    const app=node(a.cx-Math.min(200,a.w*0.24)/2,a.y+a.h*0.16,Math.min(200,a.w*0.24),74,C.green,'App Service app',null,{strong:true,tsize:14});
+    /* backup -> storage */
+    const bk=node(a.x,a.b-110,a.w*0.44,84,C.blue,'Backup & Restore',null,{tsize:13.5});
+    Twrap(bk.cx,bk.cy+16,'config + files + DB → storage acct (same sub) · Basic+',Math.floor(bk.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(app.cx,app.b+6,bk.cx,bk.y-6,{stroke:C.blue,dash:'4 4'});
+    /* app insights */
+    const ai=node(a.r-a.w*0.44,a.b-110,a.w*0.44,84,C.purple,'Application Insights',null,{tsize:13.5});
+    Twrap(ai.cx,ai.cy+16,'requests · latency · failures (Azure Monitor)',Math.floor(ai.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(app.cx,app.b+6,ai.cx,ai.y-6,{stroke:C.purple,dash:'4 4'});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

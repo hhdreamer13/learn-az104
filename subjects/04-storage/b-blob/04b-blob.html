@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Blob Storage — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Storage (2 of 4)</div>
+  <h1>Azure Blob Storage</h1>
+  <div class="lede">Object storage for unstructured data — images, backups, logs, video. Blobs live in containers, come in three types, and sit in an access tier you can age automatically with lifecycle rules. This file is blobs specifically; accounts, SAS/encryption, and Files are separate.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — containers + public access */
+{
+  tab:'Containers & access',
+  title:'Blobs live in containers — and who can read them',
+  gist:`A blob can't exist alone; it sits in a <b>container</b> (an account can hold unlimited containers, each unlimited blobs). Container names are lowercase letters/numbers/hyphens, 3–63 chars. The key setting is <b>public access level</b>: <b>Private</b> (default — owner only), <b>Blob</b> (anonymous read of blobs only), <b>Container</b> (anonymous read + list the whole container). Crucially, Blob/Container levels do <b>nothing</b> unless the account's <b>Allow Blob anonymous access</b> switch is on — and Microsoft recommends keeping it off.`,
+  facts:[['Container','holds blobs; required'],['Private','default — owner only','green'],['Blob','anon read of blobs'],['Container','anon read + list'],['Account switch','Allow anonymous access','red'],['…if off','all stays private']],
+  trap:['You set a container to "Blob" public access but anonymous reads still fail. Why?','The <b>account-level "Allow Blob anonymous access" switch is off</b>. Container access levels have <b>no effect</b> until that account switch is enabled. Two gates: account switch + container level.'],
+  exam:['"Serve images publicly to browsers without SAS." How?','Enable the account anonymous-access switch, then set the container to <b>Blob</b> (read blobs) — or <b>Container</b> if listing is also needed. Otherwise keep Private and use SAS.'],
+  scn:[
+    ['Host a public website\'s images, read-only, no auth.','Container access = Blob','anonymous read of blobs (account switch must be on)'],
+    ['Default safe posture for a new container.','Private','no anonymous access; share via SAS instead'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Account → container → blob, with an access level per container',{anchor:'middle',size:15,weight:600});
+    /* nesting */
+    const acc=box(a.x,a.y+a.h*0.16,a.w,a.h*0.66,{stroke:C.purple,sw:1.8});
+    T(a.x+16,a.y+a.h*0.16+24,'Storage account',{size:13,weight:600,fill:C.purple});
+    const cw=(a.w-32-2*16)/3, cy=a.y+a.h*0.16+40, ch=a.h*0.66-56;
+    const levels=[[C.green,'Private','owner only (default)'],[C.amber,'Blob','anon read blobs'],[C.red,'Container','anon read + list']];
+    levels.forEach((l,i)=>{const x=a.x+16+i*(cw+16);
+      box(x,cy,cw,ch,{stroke:l[0],sw:1.6});
+      T(x+cw/2,cy+26,'Container',{anchor:'middle',size:12,fill:C.soft});
+      T(x+cw/2,cy+ch/2-2,l[1],{anchor:'middle',size:15,weight:600,fill:l[0]});
+      Twrap(x+cw/2,cy+ch/2+20,l[2],Math.floor(cw/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    });
+    T(a.cx,a.b-4,'Blob & Container levels need the account "Allow anonymous access" switch ON',{anchor:'middle',size:11,fill:C.red,weight:600});
+  }
+},
+/* 1 — blob types (block/append/page) */
+{
+  tab:'Blob types',
+  title:'Block, append, page — pick by write pattern',
+  gist:`Three blob types, chosen by how you write. <b>Block blob</b> — the default; assembled from blocks, ideal for files, images, video, backups (most scenarios). <b>Append blob</b> — also block-based but optimized for <b>append-only</b> writes; the classic use is <b>logging</b>, where data grows at the end. <b>Page blob</b> — up to <b>8 TB</b>, efficient random read/write; backs <b>Azure VM OS and data disks</b>. One hard rule: once a blob is created, you <b>can't change its type</b>.`,
+  facts:[['Block blob','default · files/images/video','green'],['Append blob','append-only · logging'],['Page blob','random R/W · VM disks'],['Page blob max','8 TB'],['Type after create','cannot change','red'],['Pick by','write pattern']],
+  trap:['You have an append blob and now need random read/write. Convert it to page?','<b>No — blob type is fixed at creation.</b> You\'d create a new page blob and copy the data. Choose the right type up front based on the write pattern.'],
+  exam:['"A service continuously appends log lines to one file." Which blob type?','<b>Append blob</b> — optimized for append operations, the logging use case. (Random R/W → page; everything else → block.)'],
+  scn:[
+    ['Store and serve product images.','Block blob','the default; ideal for files and media'],
+    ['Back a VM\'s OS disk.','Page blob','random read/write, up to 8 TB'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Three types, fixed at creation, chosen by write pattern',{anchor:'middle',size:15,weight:600});
+    const types=[
+      [C.green,'Block blob','blocks assembled','files · images · video · backups','the DEFAULT'],
+      [C.blue,'Append blob','append-optimized','logging — data grows at the end','append-only'],
+      [C.amber,'Page blob','random R/W · 8 TB','Azure VM OS & data disks','random access'],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.16, h=a.h*0.62;
+    types.forEach((t,i)=>{const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:t[0],sw:1.8});
+      T(x+w/2,y+30,t[1],{anchor:'middle',size:15,weight:600,fill:t[0]});
+      T(x+w/2,y+52,t[2],{anchor:'middle',size:11.5,fill:C.soft});
+      Twrap(x+w/2,y+h/2+14,t[3],Math.floor(w/7),{anchor:'middle',size:12,fill:C.ink,lh:15});
+      T(x+w/2,y+h-16,t[4],{anchor:'middle',size:11,fill:C.faint});
+    });
+    T(a.cx,a.b-2,'a blob\'s type cannot be changed after it is created',{anchor:'middle',size:11,fill:C.red,weight:600});
+  }
+},
+/* 2 — access tiers */
+{
+  tab:'Access tiers',
+  title:'Hot · Cool · Cold · Archive — by access frequency',
+  gist:`Each blob has an <b>access tier</b> trading storage vs access cost. <b>Hot</b> — frequent, costliest storage, cheapest access. <b>Cool</b> — infrequent, min <b>30 days</b>. <b>Cold</b> — rarer, min <b>90 days</b>. <b>Archive</b> — offline, cheapest storage but retrieval takes <b>hours</b> (rehydrate via Copy Blob or Set Blob Tier), min <b>180 days</b>. Hot/Cool/Cold all have millisecond latency; only Archive is offline. Early-deletion charges apply if you remove data before the minimum.`,
+  facts:[['Hot','frequent · costliest storage'],['Cool','infrequent · min 30 days'],['Cold','rare · min 90 days'],['Archive','offline · min 180 days','red'],['Archive latency','hours (rehydrate)','red'],['Hot/Cool/Cold','ms latency']],
+  trap:['Need a file from Archive immediately for an incident. Can you read it directly?','<b>No — Archive is offline.</b> You must <b>rehydrate</b> to an online tier first (Standard up to ~15 h, or High priority within ~1 h at extra cost). Don\'t Archive data you might need fast.'],
+  exam:['"Backups kept 7 years, retrieval can wait hours, cheapest storage."','<b>Archive</b> tier — lowest storage cost, accept hours-long rehydrate, 180-day minimum.'],
+  scn:[
+    ['Logs hot for a month, then rarely read but must stay instantly available.','Cool','cheaper storage, still ms latency, min 30 days'],
+    ['Raw compliance data kept years, almost never read.','Archive','cheapest; tolerate rehydrate latency'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Colder = cheaper storage, slower/costlier to read',{anchor:'middle',size:15,weight:600});
+    const tiers=[[C.red,'Hot','no minimum','ms'],[C.amber,'Cool','min 30 days','ms'],[C.blue,'Cold','min 90 days','ms'],[C.soft,'Archive','min 180 days','HOURS']];
+    const gap=14, w=(a.w-3*gap)/4, y=a.y+a.h*0.18, h=a.h*0.5;
+    tiers.forEach((t,i)=>{const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:t[0],sw:1.8});
+      T(x+w/2,y+34,t[1],{anchor:'middle',size:16,weight:600,fill:t[0]});
+      T(x+w/2,y+h/2+10,t[2],{anchor:'middle',size:12,fill:C.ink});
+      T(x+w/2,y+h-16,'latency: '+t[3],{anchor:'middle',size:11,fill:i===3?C.red:C.faint,weight:i===3?600:400});
+    });
+    arrow(a.x+w/2,y+h+18,a.r-w/2,y+h+18,{stroke:C.faint});
+    T(a.cx,y+h+34,'lifecycle rules can age blobs along this automatically',{anchor:'middle',size:11.5,fill:C.green,weight:600});
+  }
+},
+/* 3 — lifecycle management */
+{
+  tab:'Lifecycle rules',
+  title:'Lifecycle management — age blobs by If→Then rules',
+  gist:`A <b>lifecycle management</b> policy is a set of <b>If → Then</b> rules (GPv2 / Premium block-blob accounts) that act on a blob's age. <b>If</b> a blob hasn't been modified/accessed in N days, <b>Then</b> move it to a cooler tier (Hot→Cool→Cold→Archive — only ever cooler) or <b>delete</b> it (current versions, previous versions, or snapshots). Rules can target the whole account, specific containers, or a subset via <b>name prefix / blob index tag</b> filters. You can also auto-return Cool→Hot on access for unpredictable patterns.`,
+  facts:[['Policy','If → Then rules'],['Account types','GPv2 / Premium block blob'],['Transition','to cooler tiers only','red'],['Or','delete blobs / versions / snapshots'],['Filter by','prefix or index tag'],['Bonus','auto Cool→Hot on access']],
+  trap:['Can a lifecycle rule move a blob from Archive back to Hot automatically?','<b>No — transitions go COOLER only</b> (Hot→Cool→Cold→Archive). Lifecycle can\'t rehydrate Archive→Hot; that\'s a manual rehydrate. (It can auto-return Cool→Hot on access, but not from Archive.)'],
+  exam:['"Move blobs to Cool after 30 days, Archive after 90, delete after 365 — automatically."','A <b>lifecycle management policy</b>: If last-modified > N days, Then transition/delete. No manual moves.'],
+  scn:[
+    ['Trim storage cost as data ages, no manual effort.','Lifecycle policy','rules tier-down and expire blobs by age'],
+    ['Apply aging only to blobs under logs/.','Prefix filter','scope the rule to that name prefix'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'If a blob is old enough → then move it cooler or delete it',{anchor:'middle',size:15,weight:600});
+    /* If box */
+    const ifw=a.w*0.40, ix=a.x, iy=a.y+a.h*0.20, ih=a.h*0.5;
+    box(ix,iy,ifw,ih,{stroke:C.amber,sw:1.8,fill:'#fffaf0'});
+    T(ix+ifw/2,iy+30,'IF',{anchor:'middle',size:15,weight:700,fill:C.amber});
+    Twrap(ix+ifw/2,iy+ih/2+6,'last modified more than N days ago',Math.floor(ifw/7),{anchor:'middle',size:12.5,fill:C.ink,lh:15});
+    T(ix+ifw/2,iy+ih-18,'filter: prefix / index tag',{anchor:'middle',size:11,fill:C.soft});
+    /* arrow */
+    const tx=ix+ifw+a.w*0.06;
+    arrow(ix+ifw+6,iy+ih/2,tx-6,iy+ih/2,{stroke:C.soft});
+    /* Then box with actions */
+    const tw=a.r-tx, th=ih;
+    box(tx,iy,tw,th,{stroke:C.green,sw:1.8,fill:'#f3faf6'});
+    T(tx+tw/2,iy+26,'THEN',{anchor:'middle',size:15,weight:700,fill:C.green});
+    ['→ move to Cool / Cold / Archive (cooler only)','→ or delete blob / version / snapshot'].forEach((t,i)=>Twrap(tx+tw/2,iy+ih/2+i*24,t,Math.floor(tw/6.5),{anchor:'middle',size:12,fill:C.ink,lh:14}));
+  }
+},
+/* 4 — object replication + versioning */
+{
+  tab:'Object replication',
+  title:'Object replication — async copy across accounts',
+  gist:`<b>Object replication</b> asynchronously copies blobs from a <b>source</b> container to a <b>destination</b> container in another account/region, per policy rules. It copies content, metadata, and versions. Two requirements stand out: <b>blob versioning must be enabled on both</b> accounts, and it works only for blobs in Hot/Cool/Cold (source and dest can differ); <b>snapshots are not replicated</b>. Use it to put data closer to readers, distribute compute, or replicate results — distinct from account-level redundancy (GRS), which copies the whole account, not per-container.`,
+  place:{here:'Object replication is a <b>blob</b> feature (per-container).',
+    other:'Don\'t confuse it with account <b>redundancy</b> (LRS/GRS/GZRS) on the storage-accounts page. Redundancy copies the WHOLE account for durability; object replication copies CHOSEN containers, asynchronously, for locality/distribution.'},
+  facts:[['What','async copy src→dest container'],['Copies','content, metadata, versions'],['Requires','versioning on both','red'],['Tiers','Hot / Cool / Cold'],['Snapshots','NOT replicated','red'],['vs redundancy','per-container, not whole account']],
+  trap:['Object replication vs GRS — same thing?','<b>No.</b> GRS (redundancy) copies the <b>entire account</b> to the paired region for durability, automatically. <b>Object replication</b> copies <b>specific containers</b> you choose to a destination you pick, asynchronously, for locality/distribution. Different purpose, different scope.'],
+  exam:['"Replicate one container\'s blobs to a second region for low-latency reads."','<b>Object replication</b> (source → destination container) — and remember <b>versioning must be enabled on both</b> accounts.'],
+  scn:[
+    ['Readers in another region need fast access to one container\'s data.','Object replication','async copy to a destination account in that region'],
+    ['Whole account must survive a regional disaster.','Account redundancy (GRS/GZRS)','not object replication — that\'s durability, account-wide'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Copy chosen containers between accounts, asynchronously',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(290,a.w*0.34), y=a.y+a.h*0.26, h=a.h*0.42, cy=y+h/2;
+    /* draw boxes plainly: title up top, wrapped sub in lower half — no collision */
+    box(a.x,y,w,h,{stroke:C.blue,sw:1.7});
+    T(a.x+w/2,y+30,'Source account',{anchor:'middle',size:14,weight:600,fill:C.blue});
+    Twrap(a.x+w/2,y+h*0.62,'source container · versioning ON',Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:15});
+    box(a.r-w,y,w,h,{stroke:C.green,sw:1.7});
+    T(a.r-w/2,y+30,'Destination account',{anchor:'middle',size:14,weight:600,fill:C.green});
+    Twrap(a.r-w/2,y+h*0.62,'dest container · versioning ON · other region',Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:15});
+    /* arrow + labels well clear of the boxes */
+    arrow(a.x+w+6,cy,a.r-w-6,cy,{stroke:C.amber,sw:2});
+    T(a.cx,cy-14,'async replicate',{anchor:'middle',size:12,fill:C.amber,weight:600});
+    T(a.cx,y+h+26,'copies content · metadata · versions  (not snapshots)',{anchor:'middle',size:11.5,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

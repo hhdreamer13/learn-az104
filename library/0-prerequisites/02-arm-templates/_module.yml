@@ -1,0 +1,49 @@
+### YamlMime:Module
+uid: learn.azure.create-resource-manager-template-vs-code
+metadata:
+  title: Deploy Azure infrastructure by using JSON ARM templates
+  description: Write JSON Azure Resource Manager templates by using Visual Studio Code to deploy your infrastructure to Azure consistently and reliably.
+  ms.date: 10/20/2025
+  author: wwlpublish
+  ms.author: cynthist
+  ms.topic: module-standard-task-based
+  ms.service: azure-resource-manager
+title: Deploy Azure infrastructure by using JSON ARM templates
+summary: Write JSON Azure Resource Manager templates (ARM templates) by using Visual Studio Code to deploy your infrastructure to Azure consistently and reliably.
+abstract: |
+  In this module, you will:
+  - Implement a JSON ARM template by using Visual Studio Code. 
+  - Declare resources and add flexibility to your template by adding resources, parameters, and outputs.
+prerequisites: |
+  - Familiarity with Azure, including the Azure portal, subscriptions, resource groups, and resource definitions
+  - An Azure account. You can get a free account [here](https://azure.microsoft.com/pricing/purchase-options/azure-account?cid=msft_learn)
+  - [Visual Studio Code](https://code.visualstudio.com?azure-portal=true) installed locally
+  - Either:
+    - The latest [Azure CLI](/cli/azure/install-azure-cli?azure-portal=true) tools installed locally
+    - The latest [Azure PowerShell](/powershell/azure/install-az-ps?azure-portal=true) installed locally
+iconUrl: /training/achievements/create-azure-resource-manager-template-vs-code.svg
+ratingEnabled: true
+levels:
+- beginner
+roles:
+- administrator
+- developer
+- solution-architect
+products:
+- azure
+- vs-code
+- azure-resource-manager
+- azure-storage-accounts
+subjects:
+- infrastructure
+units:
+- learn.azure.create-resource-manager-template-vs-code.1-introduction
+- learn.azure.create-resource-manager-template-vs-code.2-explore-template-structure
+- learn.azure.create-resource-manager-template-vs-code.3-exercise-create-and-deploy-template
+- learn.azure.create-resource-manager-template-vs-code.4-add-flexibility-arm-template
+- learn.azure.create-resource-manager-template-vs-code.5-exercise-parameters-output
+- learn.azure.create-resource-manager-template-vs-code.6-knowledge-check
+- learn.azure.create-resource-manager-template-vs-code.7-summary
+badge:
+  uid: learn.azure.create-resource-manager-template-vs-code.badge
+

@@ -1,0 +1,307 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Network Connectivity & Security — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Networking (2 of 4)</div>
+  <h1>Connectivity &amp; security</h1>
+  <div class="lede">With a VNet in place, you control what traffic is <b>allowed</b> (NSGs &amp; ASGs), how VNets are <b>connected</b> (peering), and where traffic is <b>routed</b> (system routes &amp; UDRs). These three decide whether a packet reaches its destination.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.font||'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+const MONO='ui-monospace, monospace';
+
+const facets=[
+/* 0 — NSG basics + defaults */
+{
+  tab:'NSGs',
+  title:'NSGs filter traffic with priority-ordered allow/deny rules',
+  gist:`A <b>network security group (NSG)</b> is a set of <b>security rules</b> that allow or deny traffic, attached to a <b>subnet</b> and/or a <b>NIC</b>. Each rule matches on source, destination, port, protocol, direction, and has a <b>priority 100–4096</b> — <b>lower number = higher precedence</b>, and the first matching rule wins. Azure adds <b>default rules</b> you can't delete (only override): inbound <b>denies all except from the VNet and Azure Load Balancer</b>; outbound <b>allows to the VNet and internet</b>. So by default: inbound mostly blocked, outbound open.`,
+  facts:[['NSG','allow/deny security rules'],['Attach to','subnet and/or NIC'],['Priority','100–4096, lower wins','green'],['First match','wins, stops eval'],['Default inbound','deny all except VNet/LB','red'],['Default outbound','allow to VNet + internet']],
+  trap:['Two NSG rules match a packet — priority 200 (deny) and 300 (allow). Result?','<b>Denied.</b> Lower priority number = higher precedence, and the <b>first match wins</b>. 200 (deny) is evaluated before 300 (allow), so the packet is dropped. Lower number = stronger.'],
+  exam:['"Allow inbound HTTPS to a VM that\'s otherwise blocked by default." How?','Add an <b>inbound allow rule</b> for TCP 443 at a low priority number (100–4096, which outranks every default rule — the default deny is <b>DenyAllInbound</b> at priority 65500). You can\'t delete the default deny — you override it with a higher-priority allow.'],
+  scn:[
+    ['Block all inbound except RDP from your office IP.','NSG inbound rules','allow RDP from your IP (low priority number), default deny handles the rest'],
+    ['You didn\'t attach any NSG to a subnet/NIC.','Secure by default','a Standard-IP VM blocks inbound from the internet; outbound + intra-VNet allowed'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Rules evaluated by priority — lower number wins, first match stops',{anchor:'middle',size:15,weight:600});
+    const rules=[['100','Allow','RDP from office IP',C.green],['200','Deny','SQL from internet',C.red],['65000','Allow','VNet inbound (default)',C.faint],['65500','Deny','All inbound (default)',C.faint]];
+    const y0=a.y+a.h*0.18, gap=10, rh=(a.h*0.64-3*gap)/4;
+    rules.forEach((r,i)=>{const y=y0+i*(rh+gap);const def=i>=2;
+      box(a.x,y,a.w,rh,{stroke:def?'#dfe3e9':r[3],sw:def?1.3:1.7,fill:def?'#fafbfc':'#fff'});
+      T(a.x+18,y+rh/2+5,r[0],{size:14,weight:700,fill:def?C.faint:C.ink,font:MONO,baseline:'middle'});
+      T(a.x+a.w*0.14,y+rh/2+5,r[1],{size:13,weight:600,fill:r[1]==='Allow'?C.green:C.red,baseline:'middle'});
+      T(a.x+a.w*0.30,y+rh/2+5,r[2],{size:12.5,fill:def?C.faint:C.ink,baseline:'middle'});
+      if(def)T(a.r-16,y+rh/2+5,'default · can\'t delete',{anchor:'end',size:11,fill:C.faint,baseline:'middle'});
+    });
+    T(a.cx,a.b-4,'priority 100–4096 for your rules · lower = evaluated first',{anchor:'middle',size:11.5,fill:C.faint});
+  }
+},
+/* 1 — NSG evaluation: subnet vs NIC */
+{
+  tab:'NSG evaluation',
+  title:'Effective rules: subnet and NIC NSGs both apply',
+  gist:`An NSG can sit on the <b>subnet</b>, the <b>NIC</b>, or both — and each is evaluated <b>independently</b>. For <b>inbound</b> traffic Azure checks the <b>subnet NSG first, then the NIC NSG</b>; for <b>outbound</b> it's reversed (<b>NIC first, then subnet</b>). Traffic must be <b>allowed at every level it passes</b> — if either the subnet or the NIC NSG denies it, it's blocked. The <b>effective security rules</b> view (a Network Watcher feature) shows the merged result. Default rules live <b>inside</b> an NSG; with <b>no NSG attached at all</b>, a VM with a Standard public IP is <b>secure by default</b> — inbound from the internet is blocked, while outbound and intra-VNet traffic flow freely.`,
+
+  facts:[['NSG on','subnet, NIC, or both'],['Inbound order','subnet → NIC'],['Outbound order','NIC → subnet'],['Must allow','at EVERY level','red'],['Either denies','traffic blocked','red'],['See merged','Effective security rules']],
+  trap:['Subnet NSG allows the traffic but the NIC NSG doesn\'t. Does it get through?','<b>No.</b> Traffic must be <b>allowed at every level</b> — both subnet and NIC NSG. If either denies (or lacks an allow), it\'s blocked. An allow on one level doesn\'t override a deny/absence on the other.'],
+  exam:['"A VM can\'t be reached even though the subnet NSG allows it." First check?','The <b>NIC NSG</b> — both subnet and NIC NSGs apply, and inbound is evaluated subnet→NIC. The NIC NSG may be missing the allow. (Use Effective security rules / IP flow verify to confirm.)'],
+  scn:[
+    ['You set an allow on the subnet but traffic still blocked.','Check the NIC NSG too','it must also allow — both levels are evaluated'],
+    ['Need to see the net effect of subnet + NIC rules.','Effective security rules','merged view (Network Watcher)'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Inbound: subnet then NIC · both must allow',{anchor:'middle',size:15,weight:600});
+    /* inbound flow: internet -> subnet NSG -> NIC NSG -> VM */
+    const w=Math.min(170,a.w*0.21), y=a.y+a.h*0.40, gap=(a.w-4*w)/3;
+    const stops=[[C.soft,'Inbound'],[C.amber,'Subnet NSG'],[C.blue,'NIC NSG'],[C.green,'VM']];
+    const ns=stops.map((s,i)=>{const x=a.x+i*(w+gap);return node(x,y-40,w,80,s[0],s[1],null,{tsize:13.5});});
+    for(let i=0;i<ns.length-1;i++)arrow(ns[i].r+6,y,ns[i+1].x-6,y,{stroke:C.soft});
+    T((ns[0].r+ns[1].x)/2,y-50,'1st',{anchor:'middle',size:10.5,fill:C.faint});
+    T((ns[1].r+ns[2].x)/2,y-50,'2nd',{anchor:'middle',size:10.5,fill:C.faint});
+    T(a.cx,y+64,'outbound is the reverse: NIC NSG → subnet NSG',{anchor:'middle',size:12,fill:C.soft});
+    T(a.cx,y+86,'a deny (or missing allow) at EITHER level blocks the traffic',{anchor:'middle',size:11.5,fill:C.red,weight:600});
+  }
+},
+/* 2 — ASGs */
+{
+  tab:'ASGs',
+  title:'Application security groups — rules by workload, not IP',
+  gist:`Managing NSG rules by IP gets brittle as VMs come and go. An <b>application security group (ASG)</b> lets you <b>group VMs by role</b> (e.g. "web", "app") and then write NSG rules using the <b>ASG as the source or destination</b> instead of IP ranges. Add a VM to the "web" ASG and it automatically inherits the rules — no IP bookkeeping. Classic pattern: allow web→app on SQL by referencing the web ASG as source and the app ASG as destination.`,
+  facts:[['ASG','group VMs by workload/role'],['Used in','NSG rules as src/dest','green'],['Benefit','no IP management','green'],['Add a VM to ASG','inherits the rules'],['Pairs with','NSGs (doesn\'t replace)'],['Scope','within a VNet']],
+  trap:['Does an ASG replace the NSG?','<b>No — ASGs work WITH NSGs.</b> The ASG is just a label you reference as source/destination <i>inside</i> NSG rules. The NSG still does the allow/deny; the ASG removes the need to track IPs.'],
+  exam:['"Allow web servers to reach app servers on SQL, without listing IPs."','Put web VMs in a <b>web ASG</b>, app VMs in an <b>app ASG</b>, then an NSG rule: source = web ASG, destination = app ASG, port 1433, allow. New VMs joining an ASG inherit it.'],
+  scn:[
+    ['VMs scale up/down constantly; IP-based rules keep breaking.','ASGs','reference roles, not IPs — membership handles the rest'],
+    ['Two-tier app: web tier may talk to app tier only.','web ASG → app ASG rule','clean source/destination by role'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Group VMs by role, then write rules between the groups',{anchor:'middle',size:15,weight:600});
+    /* web ASG -> app ASG */
+    const web=node(a.x,a.y+a.h*0.28,a.w*0.30,a.h*0.4,C.blue,'web ASG',null,{tsize:14});
+    Twrap(web.cx,web.cy+16,'web VMs',Math.floor(web.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const app=node(a.r-a.w*0.30,a.y+a.h*0.28,a.w*0.30,a.h*0.4,C.green,'app ASG',null,{tsize:14});
+    Twrap(app.cx,app.cy+16,'app VMs',Math.floor(app.w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(web.r+6,web.cy,app.x-6,app.cy,{stroke:C.amber,sw:2});
+    T((web.r+app.x)/2,web.cy-14,'NSG rule',{anchor:'middle',size:12,fill:C.amber,weight:600});
+    T((web.r+app.x)/2,web.cy+8,'allow 1433',{anchor:'middle',size:11,fill:C.faint});
+    T(a.cx,a.b-6,'rule uses ASGs as source/destination — no IP addresses to manage',{anchor:'middle',size:11.5,fill:C.faint});
+  }
+},
+/* 3 — peering */
+{
+  tab:'VNet peering',
+  title:'Peering connects VNets into one network — regional or global',
+  gist:`<b>VNet peering</b> links two VNets so they communicate <b>privately over the Microsoft backbone</b> as if one network (low latency, no public internet, no gateway needed for basic connectivity). Two kinds: <b>regional</b> (same region) and <b>global</b> (across regions). Peering works <b>across subscriptions and tenants</b>. Key gotcha: peering is <b>not transitive</b> — if A↔B and B↔C are peered, A still <b>can't</b> reach C through B. For hub-and-spoke you enable <b>gateway transit</b> so spokes use the hub's VPN gateway, and use UDRs/NVA for chaining.`,
+  facts:[['Peering','private VNet-to-VNet link'],['Over','Microsoft backbone','green'],['Regional','same region'],['Global','across regions'],['Across','subscriptions & tenants'],['Not transitive','A–B–C ≠ A–C','red']],
+  trap:['VNet A peers with B, and B peers with C. Can A reach C?','<b>No — peering is not transitive.</b> A can reach B and C can reach B, but A↔C needs its <b>own peering</b> (or a hub with gateway transit + UDRs routing through an NVA/firewall). Don\'t assume the middle VNet relays.'],
+  exam:['"Connect a VNet in East US to one in West Europe, privately."','<b>Global VNet peering</b> — connects VNets across regions over the Microsoft backbone. (Regional peering is same-region only.)'],
+  scn:[
+    ['Two VNets in the same region must talk privately.','Regional peering','private, low-latency, no internet'],
+    ['Spokes should share one VPN gateway in a hub.','Gateway transit','enable it on the hub peering so spokes use the hub gateway'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Peering joins VNets — but it does not chain through a middle VNet',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(150,a.w*0.18), y=a.y+a.h*0.40;
+    const A=node(a.x,y-40,w,80,C.blue,'VNet A',null,{tsize:14});
+    const B=node(a.cx-w/2,y-40,w,80,C.purple,'VNet B',null,{tsize:14});
+    const Cn=node(a.r-w,y-40,w,80,C.blue,'VNet C',null,{tsize:14});
+    arrow(A.r+6,y,B.x-6,y,{stroke:C.green,sw:2});arrow(B.x-6,y+14,A.r+6,y+14,{stroke:C.green,sw:1.2});
+    arrow(B.r+6,y,Cn.x-6,y,{stroke:C.green,sw:2});arrow(Cn.x-6,y+14,B.r+6,y+14,{stroke:C.green,sw:1.2});
+    T((A.r+B.x)/2,y-50,'peered',{anchor:'middle',size:10.5,fill:C.green});
+    T((B.r+Cn.x)/2,y-50,'peered',{anchor:'middle',size:10.5,fill:C.green});
+    /* the non-transitive X */
+    const cy=y+74;
+    el('path',{d:`M ${A.cx} ${cy} Q ${a.cx} ${cy+50} ${Cn.cx} ${cy}`,fill:'none',stroke:C.red,'stroke-width':1.5,'stroke-dasharray':'5 4'});
+    T(a.cx,cy+44,'✗ A cannot reach C through B  (peering is not transitive)',{anchor:'middle',size:12,fill:C.red,weight:600});
+  }
+},
+/* 4 — routing: system routes vs UDR */
+{
+  tab:'Routing (UDR)',
+  title:'System routes carry traffic — UDRs override them',
+  gist:`Azure auto-creates <b>system routes</b> on every subnet so VMs can reach each other, the internet, and on-prem — you <b>can't delete</b> them. Defaults include <code>0.0.0.0/0 → Internet</code> and the private ranges → <code>None</code>. To change where traffic goes, add a <b>user-defined route (UDR)</b> in a <b>route table</b> attached to a subnet; a UDR with a more specific or equal prefix <b>overrides</b> the system route. The classic use is <b>forced tunneling</b>: a UDR <code>0.0.0.0/0 → a virtual appliance (NVA/firewall)</code> so all outbound goes through inspection.`,
+  facts:[['System routes','auto, can\'t delete','red'],['Default','0.0.0.0/0 → Internet'],['Private ranges','→ None (dropped)'],['UDR','your override, in a route table'],['Attached to','a subnet'],['Forced tunneling','0.0.0.0/0 → NVA','green']],
+  trap:['You want all outbound traffic to pass through a firewall appliance. How?','Add a <b>UDR</b>: <code>0.0.0.0/0 → next hop = the NVA/firewall</code> (Virtual appliance), attached to the subnet. This <b>overrides</b> the default <code>0.0.0.0/0 → Internet</code> system route — known as forced tunneling.'],
+  exam:['"Route traffic between two subnets through a network virtual appliance."','Create a <b>route table</b> with a <b>UDR</b> whose next hop is the NVA (Virtual appliance), and associate it with the source subnet. The NVA must have IP forwarding enabled.'],
+  scn:[
+    ['Force all internet-bound traffic through a security appliance.','UDR 0.0.0.0/0 → NVA','forced tunneling; overrides the default internet route'],
+    ['Default behavior with no route table.','System routes','VMs reach each other + internet automatically'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A UDR redirects traffic the system route would send to the internet',{anchor:'middle',size:15,weight:600});
+    const vm=node(a.x,a.y+a.h*0.40,Math.min(150,a.w*0.18),80,C.blue,'VM',null,{tsize:14});
+    /* default route (greyed) */
+    const net=node(a.r-Math.min(150,a.w*0.18),a.y+a.h*0.18,Math.min(150,a.w*0.18),70,C.faint,'Internet',null,{tsize:13});
+    arrow(vm.r+6,vm.cy-10,net.x-6,net.cy,{stroke:'#cdd3da',dash:'4 4'});
+    T((vm.r+net.x)/2,vm.cy-44,'system route 0.0.0.0/0 (overridden)',{anchor:'middle',size:10.5,fill:C.faint});
+    /* UDR route through NVA */
+    const nva=node(a.cx-Math.min(150,a.w*0.18)/2,a.b-92,Math.min(150,a.w*0.18),76,C.amber,'NVA / firewall',null,{tsize:13});
+    arrow(vm.r+6,vm.cy+12,nva.x-6,nva.cy,{stroke:C.amber,sw:2});
+    T((vm.r+nva.x)/2-10,(vm.cy+12+nva.cy)/2-8,'UDR',{anchor:'middle',size:11,fill:C.amber,weight:600});
+    arrow(nva.r+6,nva.cy,net.cx,net.b+6,{stroke:C.amber,sw:2});
+    T(a.cx,a.b-6,'UDR 0.0.0.0/0 → NVA  (forced tunneling) overrides the default internet route',{anchor:'middle',size:11.5,fill:C.amber,weight:600});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

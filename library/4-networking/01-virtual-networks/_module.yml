@@ -1,0 +1,55 @@
+### YamlMime:Module
+uid: learn.wwl.configure-virtual-networks
+metadata:
+  adobe-target: true
+  prefetch-feature-rollout: true
+  title: Configure Virtual Networks
+  description: "Learn how to configure virtual networks and subnets, including IP addressing."
+  ms.date: 06/20/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-virtual-network
+  ai-usage: ai-assisted
+title: Configure virtual networks
+summary: Learn to configure virtual networks and subnets, including IP addressing.
+abstract: |
+  In this module, you learn how to:
+
+  -   Describe Azure virtual network features and components.
+
+  -   Identify features and usage cases for subnets and subnetting.
+
+  -   Identify usage cases for private and public IP addresses.
+
+  -   Create a virtual network and assign IP address.
+prerequisites: |
+  -   Basic knowledge of virtual networking in cloud environments.
+
+  -   Familiarity with IP address formats and subnetting.
+iconUrl: /training/achievements/virtual-network-configure.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure-virtual-network
+subjects:
+- networking
+units:
+- learn.wwl.configure-virtual-networks.introduction
+- learn.wwl.configure-virtual-networks.plan
+- learn.wwl.configure-virtual-networks.create-subnets
+- learn.wwl.configure-virtual-networks.create
+- learn.wwl.configure-virtual-networks.plan-ip-addressing
+- learn.wwl.configure-virtual-networks.create-public-ip-addressing
+- learn.wwl.configure-virtual-networks.associate-public-ip-addresses
+- learn.wwl.configure-virtual-networks.associate-private-ip-addresses
+- learn.wwl.configure-virtual-networks.lab-simulation-create-networks
+- learn.wwl.configure-virtual-networks.knowledge-check
+- learn.wwl.configure-virtual-networks.summary-resources
+badge:
+  uid: learn.wwl.configure-virtual-networks.badge

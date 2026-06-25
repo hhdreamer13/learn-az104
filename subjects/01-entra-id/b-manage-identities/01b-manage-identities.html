@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Manage Identities — Entra ID — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Identity &amp; governance · Entra ID (2 of 3)</div>
+  <h1>Managing identities in Entra ID</h1>
+  <div class="lede">The day-to-day objects you administer inside a tenant: <b>users</b> (and where they come from), <b>groups</b> (and how membership is decided), <b>devices</b> (and how they join), and <b>licensing</b> (assigned to groups, not just people). The fundamentals — what Entra ID is — are a separate file.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — USERS: three identity sources */
+{
+  tab:'Users',
+  title:'Users come from three places',
+  gist:`Every user is an account in the tenant, but where it <b>originates</b> differs, and that origin decides how you manage it. <b>Cloud identities</b> are created and live only in Entra ID (admins, cloud-only users). <b>Directory-synchronised identities</b> originate in on-premises <b>Active Directory</b> and are brought in by a sync tool — <b>Entra Cloud Sync</b> (the lightweight, recommended agent) or <b>Entra Connect Sync</b> (for complex cases like device sync or 50,000+ member groups). <b>Guest users</b> are external people (other tenants, Microsoft accounts) invited in for collaboration.`,
+  facts:[['Cloud identity','created in Entra ID'],['Synced identity','from on-prem AD'],['Sync tool (default)','Entra Cloud Sync','green'],['Sync tool (complex)','Entra Connect Sync'],['Guest user','invited, external'],['User Type column','Member or Guest']],
+  trap:['A synced user\'s details are wrong. Fix them in Entra ID?','<b>No — fix them at the source (on-prem AD).</b> Directory-synchronised accounts are mastered on-premises; edits in Entra get overwritten by the next sync. Only cloud identities are edited directly in Entra.'],
+  exam:['"Bring on-prem AD users into Entra ID — which tool by default?"','<b>Entra Cloud Sync</b> (lightweight, multi-forest). Use <b>Entra Connect Sync</b> only for complex needs (device sync, very large groups).'],
+  scn:[
+    ['A contractor from another company needs access to your SharePoint for a month.','Guest user','invite them as a guest (B2B); remove when the engagement ends'],
+    ['You run on-prem AD and want those staff to sign in to Microsoft 365.','Entra Cloud Sync','synchronise the on-prem accounts into the tenant as synced identities'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Three origins feed one tenant directory',{anchor:'middle',size:15,weight:600});
+    const tenant=node(a.cx-Math.min(180,a.w*0.22)/2,a.b-100,Math.min(180,a.w*0.22),84,C.purple,'Tenant',null,{strong:true,tsize:14});
+    const srcs=[
+      [C.green,'Cloud identity','created in Entra ID'],
+      [C.blue,'Synced identity','from on-prem AD (Cloud Sync)'],
+      [C.amber,'Guest user','invited from outside'],
+    ];
+    const w=Math.min(230,a.w*0.28), gap=(a.w-3*w)/2;
+    srcs.forEach((s,i)=>{
+      const x=a.x+i*(w+gap), y=a.y+a.h*0.12;
+      box(x,y,w,72,{stroke:s[0],sw:1.7});
+      T(x+w/2,y+30,s[1],{anchor:'middle',size:14,weight:600,fill:s[0]});
+      Twrap(x+w/2,y+52,s[2],Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+      arrow(x+w/2,y+74,tenant.cx,tenant.y-6,{stroke:s[0],dash:'4 4'});
+    });
+  }
+},
+/* 1 — GROUPS: type x membership matrix */
+{
+  tab:'Groups',
+  title:'Two group types × three ways to fill them',
+  gist:`A group is defined by two independent choices. <b>Type</b>: a <b>Security group</b> manages access to resources (members can be users, devices, service principals); a <b>Microsoft 365 group</b> is for collaboration (shared mailbox, calendar, SharePoint, Teams). <b>Membership type</b>: <b>Assigned</b> (you add members by hand), <b>Dynamic User</b> (members auto-managed by user-attribute rules), or <b>Dynamic Device</b> (auto by device attributes — <b>security groups only</b>). M365 groups support dynamic users but <b>not</b> dynamic devices.`,
+  facts:[['Security group','manages resource access'],['…members','users, devices, SPNs'],['M365 group','collaboration (mailbox…)'],['Assigned','manual membership'],['Dynamic User','rule on user attributes'],['Dynamic Device','security groups only','red']],
+  trap:['You want a Microsoft 365 group with dynamic <i>device</i> membership. Possible?','<b>No.</b> Dynamic <b>Device</b> membership is for <b>security groups only</b>. M365 groups can be dynamic by user, but never by device.'],
+  exam:['"Grant a set of permissions to many users at once for a resource." Which group type?','A <b>Security group</b> — it manages access. M365 groups are for collaboration (mailbox/SharePoint/Teams), not resource permissions.'],
+  scn:[
+    ['Give the whole marketing department access to a shared app.','Security group','assign the app\'s permission once to the group'],
+    ['Give a project team a shared mailbox, calendar, and SharePoint site.','Microsoft 365 group','that\'s the collaboration group type'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Type (what it\'s for) × Membership (how it\'s filled)',{anchor:'middle',size:15,weight:600});
+    /* matrix: rows = type, cols = membership */
+    const cols=['Assigned','Dynamic User','Dynamic Device'];
+    const rows=[['Security group',[true,true,true]],['Microsoft 365 group',[true,true,false]]];
+    const gx=a.x+a.w*0.22, gw=a.w*0.74, cw=gw/3;
+    const gy=a.y+a.h*0.18, rh=a.h*0.30;
+    cols.forEach((c,i)=>T(gx+i*cw+cw/2,gy-10,c,{anchor:'middle',size:12.5,weight:600,fill:C.soft}));
+    rows.forEach((r,ri)=>{
+      const y=gy+ri*(rh+14);
+      T(a.x,y+rh/2,r[0],{size:13,weight:600,fill:ri===0?C.blue:C.purple,baseline:'middle'});
+      r[1].forEach((ok,ci)=>{
+        const x=gx+ci*cw;
+        box(x+6,y,cw-12,rh,{stroke:ok?C.green:C.red,fill:ok?'#f3faf6':'#fdf6f6'});
+        T(x+cw/2,y+rh/2+6,ok?'✓ yes':'✗ no',{anchor:'middle',size:14,weight:600,fill:ok?C.green:C.red});
+      });
+    });
+    T(a.cx,gy+2*(rh+14)+8,'M365 groups can be dynamic by USER, never by DEVICE',{anchor:'middle',size:11.5,fill:C.red,weight:600});
+  }
+},
+/* 2 — DYNAMIC MEMBERSHIP detail */
+{
+  tab:'Dynamic membership',
+  title:'Dynamic groups — membership by rule, needs P1',
+  gist:`Instead of adding members by hand, a <b>dynamic group</b> has a rule over attributes, and Entra keeps membership current automatically. Write a rule like <code>user.department -eq "Marketing"</code> and anyone whose department is Marketing is in — when someone transfers out, they're removed on the next re-evaluation. It removes the PowerShell-script churn of manual upkeep. Two things to remember: it requires <b>Entra ID P1</b>, and changing membership type later (assigned ⇄ dynamic) <b>resets</b> the group's members.`,
+  facts:[['What','rule-based membership'],['Rule on','user or device attributes'],['Re-evaluates','when attributes change'],['Requires','Entra ID P1','red'],['Replaces','manual / PowerShell upkeep','green'],['Switching type','wipes existing members','red']],
+  trap:['You want dynamic groups on the Free tier. Works?','<b>No — dynamic membership requires P1.</b> On Free you only have Assigned (manual) groups. Dynamic user/device rules are a P1 feature.'],
+  exam:['"Group membership should follow the Department attribute automatically."','A <b>Dynamic User</b> group with a rule like <code>user.department -eq "X"</code> — needs <b>P1</b>. No manual maintenance.'],
+  scn:[
+    ['Sales hires and transfers constantly; their access group must stay current.','Dynamic User group','rule on department auto-adds/removes as HR updates attributes (P1)'],
+    ['All company-owned Windows laptops should auto-join a compliance group.','Dynamic Device group','rule on device attributes — security group, P1'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'A rule keeps membership current as attributes change',{anchor:'middle',size:15,weight:600});
+    /* rule box */
+    const rw=Math.min(420,a.w*0.5), rx=a.cx-rw/2, ry=a.y+a.h*0.14;
+    box(rx,ry,rw,56,{stroke:C.amber,fill:'#fffaf0'});
+    T(rx+rw/2,ry+24,'Rule',{anchor:'middle',size:12,weight:700,fill:C.amber});
+    T(rx+rw/2,ry+44,'user.department -eq "Marketing"',{anchor:'middle',size:13,fill:C.ink,font:'ui-monospace, monospace'});
+    /* users evaluated */
+    const uy=ry+90, uw=Math.min(120,a.w*0.15);
+    const users=[['Ana · Marketing',true],['Ben · Sales',false],['Cleo · Marketing',true]];
+    const totalW=3*uw+2*30, ux0=a.cx-totalW/2;
+    users.forEach((u,i)=>{
+      const x=ux0+i*(uw+30);
+      box(x,uy,uw,54,{stroke:u[1]?C.green:'#dfe3e9',fill:u[1]?'#f3faf6':'#fafbfc'});
+      Twrap(x+uw/2,uy+27,u[0],Math.floor(uw/6.5),{anchor:'middle',size:11,fill:u[1]?C.green:C.faint,lh:13});
+      arrow(rx+rw*0.5,ry+56,x+uw/2,uy-4,{stroke:u[1]?C.green:'#cdd3da',dash:'3 3'});
+    });
+    /* group result */
+    const gy=uy+86;
+    box(a.cx-uw, gy, uw*2, 50,{stroke:C.purple,sw:2});
+    T(a.cx,gy+30,'Marketing group → { Ana, Cleo }',{anchor:'middle',size:12.5,weight:600,fill:C.purple});
+    users.forEach((u,i)=>{if(u[1]){const x=ux0+i*(uw+30);arrow(x+uw/2,uy+54,a.cx,gy-4,{stroke:C.green,dash:'3 3'});}});
+  }
+},
+/* 3 — DEVICES: three join types */
+{
+  tab:'Device join types',
+  title:'Three ways a device relates to Entra ID',
+  gist:`Devices get an identity in Entra too, and there are three kinds. <b>Registered</b>: a personal device (<b>BYOD</b>, phones) that signs in with a local account but has an Entra identity attached for access — ownership is the user's. <b>Joined</b>: an organisation-owned device joined <b>only</b> to Entra ID; you sign in with your <b>org account</b> — the cloud-first/cloud-only model. <b>Hybrid joined</b>: an org device joined to <b>both</b> on-prem AD and Entra ID — for organisations that still run AD and use Group Policy/imaging.`,
+  facts:[['Registered','BYOD / personal','green'],['…sign-in','local account + Entra attached'],['Joined','org-owned, Entra only'],['…sign-in','organisational account'],['Hybrid joined','on-prem AD + Entra ID'],['Hybrid for','existing AD + GPO shops']],
+  trap:['A device is "Entra registered" — does the user sign in with their org account?','<b>No — registered = personal/BYOD, signs in with a local account</b> (org identity just attached). Signing in with the <b>org account</b> is Entra <b>joined</b> (or hybrid joined).'],
+  exam:['"Cloud-only org, company-owned Windows laptops, no on-prem AD." Which join?','<b>Entra joined</b> — org-owned, joined only to Entra ID. Hybrid joined would require on-prem AD; registered is for personal BYOD.'],
+  scn:[
+    ['An employee wants email on their personal phone.','Entra registered','BYOD pattern — personal device, org identity attached, Conditional Access via Intune'],
+    ['A company with existing on-prem AD wants laptops managed by Group Policy AND Entra.','Hybrid joined','joined to both on-prem AD and Entra ID'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Personal → cloud-only → both worlds',{anchor:'middle',size:15,weight:600});
+    const cols=[
+      [C.green,'Registered','Personal · BYOD',['Local-account sign-in','Org identity attached','User-owned','Phones, home PCs']],
+      [C.blue,'Joined','Org-owned, Entra only',['Org-account sign-in','Not joined to on-prem AD','Works in hybrid orgs too','Autopilot, OOBE']],
+      [C.purple,'Hybrid joined','On-prem AD + Entra',['Org-account sign-in','Joined to BOTH','Group Policy + imaging','Existing AD shops']],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.14, h=a.h*0.78;
+    cols.forEach((c,i)=>{
+      const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:c[0],sw:1.8});
+      T(x+w/2,y+28,c[1],{anchor:'middle',size:15,weight:600,fill:c[0]});
+      Twrap(x+w/2,y+50,c[2],Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
+      c[3].forEach((t,j)=>{const yy=y+78+j*26;Twrap(x+16,yy,'· '+t,Math.floor((w-24)/6.5),{anchor:'start',size:11.5,fill:C.ink,lh:13});});
+    });
+  }
+},
+/* 4 — LICENSING (group-based + usage location) */
+{
+  tab:'Licensing',
+  title:'Group-based licensing (and the usage-location catch)',
+  gist:`Licenses (Microsoft 365, EMS, Dynamics) can be assigned to a <b>group</b> instead of to each user. Every member of the group gets the license automatically; new members get it on join, leavers lose it — no PowerShell upkeep. You can assign to any <b>security group</b>, and disable individual service plans within a product. Requirements: <b>P1 (or Office 365 E3) or higher</b>, and enough licenses for <b>every unique member</b>. One catch worth knowing: a user with no <b>usage location</b> set can\'t be assigned a license — set it on the profile, or it inherits the directory's.`,
+  facts:[['Assign to','a security group'],['Members get it','automatically','green'],['Requires','P1 / O365 E3+'],['Need licenses for','every unique member'],['Usage location','required to assign','red'],['Managed in','Microsoft 365 admin center']],
+  trap:['Group licensing is set up but one user got no license. Likely cause?','Often a missing <b>usage location</b> on that user (or not enough licenses, or a service-plan conflict). No usage location = the license can\'t be assigned.'],
+  exam:['"License all members of a department automatically as people join/leave."','<b>Group-based licensing</b> on a security group (P1/E3+). Ensure each member has a <b>usage location</b> and you hold enough licenses.'],
+  scn:[
+    ['400 staff in a department all need Microsoft 365, and the roster changes weekly.','Group-based licensing','assign M365 to their security group; membership changes flow automatically'],
+    ['A new hire in the licensed group shows a license error.','Set usage location','assign location on the user profile so the license can apply'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'License the group once · members inherit automatically',{anchor:'middle',size:15,weight:600});
+    const grp=node(a.x,a.y+a.h*0.40,Math.min(190,a.w*0.22),90,C.purple,'Security group',null,{strong:true,tsize:13.5});
+    /* license badge above */
+    box(grp.x,a.y+a.h*0.12,Math.min(190,a.w*0.22),50,{stroke:C.green,fill:'#f3faf6'});
+    T(grp.cx,a.y+a.h*0.12+30,'M365 license',{anchor:'middle',size:13,weight:600,fill:C.green});
+    arrow(grp.cx,a.y+a.h*0.12+52,grp.cx,grp.y-6,{stroke:C.green});T(grp.cx+10,(a.y+a.h*0.12+52+grp.y)/2,'assigned to group',{size:10.5,fill:C.faint});
+    /* members inherit */
+    const mx=grp.r+a.w*0.12, mw=a.r-mx;
+    const mem=['Member 1','Member 2','New member'];
+    mem.forEach((m,i)=>{const my=a.y+a.h*0.14+i*((a.h*0.7)/3);box(mx,my,mw,(a.h*0.7)/3-14,{stroke:i===2?C.green:'#e7e9ee',fill:i===2?'#f3faf6':'#fafbfc'});T(mx+14,my+((a.h*0.7)/3-14)/2+4,m+(i===2?'  ← gets it on join':'  ✓ licensed'),{size:12,fill:i===2?C.green:C.ink});arrow(grp.r+6,grp.cy,mx-6,my+((a.h*0.7)/3-14)/2,{stroke:C.soft,dash:'3 3'});});
+    T(a.cx+a.w*0.1,a.b-6,'each member needs a usage location, or the license fails',{anchor:'middle',size:11,fill:C.red});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

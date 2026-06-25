@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>AZ-104 · Subject Map</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;min-height:100vh}
+
+.wrap{max-width:1180px;margin:0 auto;padding:34px 40px 60px}
+
+.head{display:flex;align-items:flex-end;justify-content:space-between;gap:24px;flex-wrap:wrap;margin-bottom:6px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:30px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:7px;max-width:680px}
+.head .count{font-size:13px;color:var(--faint);font-weight:600;white-space:nowrap}
+
+/* domain bands */
+.domain{margin-top:30px}
+.domain .dhead{display:flex;align-items:baseline;gap:12px;margin-bottom:13px;padding-bottom:8px;border-bottom:1px solid var(--hair)}
+.domain .dname{font-size:12px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--ink)}
+.domain .dweight{font-size:11.5px;font-weight:700;color:var(--soft);background:#f1f2f5;padding:2px 9px;border-radius:20px}
+.domain .ddot{width:9px;height:9px;border-radius:50%;flex:0 0 auto;align-self:center}
+
+.grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(232px,1fr));gap:14px}
+
+.card{display:block;text-decoration:none;color:inherit;border:1px solid var(--hair);border-radius:11px;padding:15px 16px 14px;background:#fff;transition:border-color .12s,box-shadow .12s,transform .12s;cursor:pointer}
+.card:hover{border-color:var(--soft);box-shadow:0 4px 14px rgba(20,24,29,.06);transform:translateY(-1px)}
+.card .top{display:flex;align-items:center;gap:9px}
+.card .num{font-family:var(--mono);font-size:12px;font-weight:600;color:#fff;padding:2px 7px;border-radius:5px;letter-spacing:.02em}
+.card .name{font-size:16px;font-weight:650;letter-spacing:-.01em;line-height:1.2}
+.card .desc{font-size:12.5px;color:var(--soft);margin-top:8px;line-height:1.45}
+
+/* placement reminder strip */
+.place{margin-top:36px;background:#f5f3fa;border:1px solid #e6e0f2;border-radius:11px;padding:17px 20px}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:11px}
+.place .rows{display:grid;grid-template-columns:repeat(auto-fit,minmax(280px,1fr));gap:9px 26px}
+.place .row{font-size:13px;color:var(--soft);line-height:1.5}
+.place .row b{color:var(--ink);font-weight:600}
+.place .row .pin{color:var(--purple);font-weight:600}
+
+.foot{margin-top:34px;font-size:12.5px;color:var(--faint);line-height:1.6}
+.foot kbd{font-family:var(--mono);font-size:11px;background:#f1f2f5;border:1px solid var(--hair);border-radius:4px;padding:1px 6px;color:var(--soft)}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="head">
+    <div>
+      <div class="kicker">AZ-104 · Azure Administrator</div>
+      <h1>Subject Map</h1>
+      <div class="lede">Every subject in one picture, grouped the way the exam scores it. Pick a card to open its deck — split subjects open at the part you click.</div>
+    </div>
+    <div class="count" id="count"></div>
+  </div>
+
+  <div id="board"></div>
+
+  <div class="place">
+    <div class="lbl">Where did I see this? — the cross-links that trip people up</div>
+    <div class="rows">
+      <div class="row"><b>Activity Log</b> is taught in RBAC but it's a <span class="pin">Monitor</span> tool — used there for access auditing.</div>
+      <div class="row"><b>Application Insights</b> is taught in App Service but it's a <span class="pin">Monitor</span> tool.</div>
+      <div class="row"><b>Network Watcher</b> is configured under Networking but scored under <span class="pin">Monitor</span> — it lives in both.</div>
+      <div class="row"><b>Backup</b> is name-dropped in the VM module but it's a <span class="pin">Monitor & maintain</span> objective — it lives with 11-Backup.</div>
+    </div>
+  </div>
+
+  <div class="foot">
+    21 decks across 11 subjects. &nbsp;·&nbsp; Tip: each deck is a stepped board of facets — use <kbd>←</kbd> <kbd>→</kbd> inside a deck to move between facets.
+  </div>
+
+</div>
+
+<script>
+// base = subjects/ relative to this index.html at project root
+const B = 'subjects/';
+
+// domains: how the exam scores you. dot = the color tag.
+// every subject is one full card; split subjects are flattened into their parts.
+const DOMAINS = [
+  {name:'Identity & Governance', weight:'20–25%', dot:'#7a52b3', subjects:[
+    {num:'01a', name:'Entra — Fundamentals', color:'#7a52b3', desc:'Tenants, the directory, licenses — what Entra ID is and how it is shaped.',
+      href:'01-entra-id/a-entra-fundamentals/01a-entra-fundamentals.html'},
+    {num:'01b', name:'Entra — Identities', color:'#7a52b3', desc:'Users, groups, external (guest) users — creating and managing identities.',
+      href:'01-entra-id/b-manage-identities/01b-manage-identities.html'},
+    {num:'01c', name:'Entra — SSPR', color:'#7a52b3', desc:'Self-service password reset, authentication methods, directory branding.',
+      href:'01-entra-id/c-sspr/01c-sspr.html'},
+    {num:'02', name:'RBAC', color:'#7a52b3', desc:'Roles, scopes, assignments — access to Azure resources.',
+      href:'02-rbac/02-rbac.html'},
+    {num:'03', name:'Governance', color:'#7a52b3', desc:'Policy, resource locks, tags, mgmt groups, subscriptions, cost.',
+      href:'03-governance/03-governance.html'},
+  ]},
+  {name:'Storage', weight:'15–20%', dot:'#1f8a5b', subjects:[
+    {num:'04a', name:'Storage Accounts', color:'#1f8a5b', desc:'Account types, redundancy (LRS/ZRS/GRS), endpoints, access tiers.',
+      href:'04-storage/a-storage-accounts/04a-storage-accounts.html'},
+    {num:'04b', name:'Blob Storage', color:'#1f8a5b', desc:'Containers, block/page/append blobs, tiers, lifecycle, versioning.',
+      href:'04-storage/b-blob/04b-blob.html'},
+    {num:'04c', name:'Azure Files', color:'#1f8a5b', desc:'SMB/NFS file shares, File Sync, mounting and identity-based access.',
+      href:'04-storage/c-files/04c-azure-files.html'},
+    {num:'04d', name:'Storage Security', color:'#1f8a5b', desc:'SAS, access keys, stored access policies, encryption — last by dependency.',
+      href:'04-storage/d-security/04d-storage-security.html'},
+  ]},
+  {name:'Compute', weight:'20–25%', dot:'#b07d1a', subjects:[
+    {num:'05', name:'VMs', color:'#b07d1a', desc:'VMs, availability sets/zones, scale sets, autoscale.',
+      href:'05-vms/05-vms.html'},
+    {num:'06', name:'App Service', color:'#b07d1a', desc:'App Service plans, web apps, deployment slots, scaling.',
+      href:'06-app-service/06-app-service.html'},
+    {num:'07', name:'Containers', color:'#b07d1a', desc:'ACI & container groups, plus ACR and Container Apps.',
+      href:'07-containers/07-containers.html'},
+    {num:'08', name:'IaC', color:'#b07d1a', desc:'ARM templates, plus Bicep and deployment stacks.',
+      href:'08-iac/08-iac.html'},
+  ]},
+  {name:'Networking', weight:'15–20%', dot:'#2f6fb0', subjects:[
+    {num:'09a', name:'VNets', color:'#2f6fb0', desc:'Virtual networks, subnets, address planning, public & private IPs.',
+      href:'09-networking/a-vnets/09a-vnets.html'},
+    {num:'09b', name:'Connectivity', color:'#2f6fb0', desc:'NSG/ASG, VNet peering, user-defined routes — controlling traffic.',
+      href:'09-networking/b-connectivity/09b-connectivity.html'},
+    {num:'09c', name:'DNS', color:'#2f6fb0', desc:'Azure DNS — public zones, private zones, record sets, delegation.',
+      href:'09-networking/c-dns/09c-dns.html'},
+    {num:'09d', name:'Load Balancing', color:'#2f6fb0', desc:'LB (L4) vs App Gateway (L7) vs Front Door vs Traffic Manager.',
+      href:'09-networking/d-load-balancing/09d-load-balancing.html'},
+  ]},
+  {name:'Monitor & maintain', weight:'10–15%', dot:'#c8453d', subjects:[
+    {num:'10', name:'VM Monitor', color:'#c8453d', desc:'Azure Monitor, metrics, logs, VM Insights, diagnostics.',
+      href:'10-vm-monitor/10-vm-monitor.html'},
+    {num:'10', name:'Network Watcher', color:'#c8453d', desc:'Topology, diagnostic & traffic tools for IaaS networks.',
+      href:'10-network-watcher/10-network-watcher.html'},
+    {num:'11', name:'Backup & Recovery', color:'#c8453d', desc:'Azure Backup, vaults, VM backup/restore, Site Recovery.',
+      href:'11-backup-recovery/11-backup-recovery.html'},
+  ]},
+  {name:'Tooling', weight:'cross-cutting', dot:'#98a1ad', subjects:[
+    {num:'00', name:'Cloud Shell', color:'#5a6472', desc:'Cloud Shell, CLI vs PowerShell — the cross-cutting tooling layer.',
+      href:'00-tooling-cloud-shell/00-tooling-cloud-shell.html'},
+  ]},
+];
+
+function card(s){
+  const a=document.createElement('a');
+  a.className='card';
+  a.href=B+s.href;
+  a.innerHTML=
+    `<div class="top"><span class="num" style="background:${s.color}">${s.num}</span>`+
+    `<span class="name">${s.name}</span></div>`+
+    `<div class="desc">${s.desc}</div>`;
+  return a;
+}
+
+const board=document.getElementById('board');
+let total=0;
+DOMAINS.forEach(d=>{
+  const sec=document.createElement('div');
+  sec.className='domain';
+  const dh=document.createElement('div');
+  dh.className='dhead';
+  dh.innerHTML=`<span class="ddot" style="background:${d.dot}"></span>`+
+               `<span class="dname">${d.name}</span>`+
+               `<span class="dweight">${d.weight}</span>`;
+  sec.appendChild(dh);
+  const g=document.createElement('div');
+  g.className='grid';
+  d.subjects.forEach(s=>{ g.appendChild(card(s)); total += 1; });
+  sec.appendChild(g);
+  board.appendChild(sec);
+});
+document.getElementById('count').textContent=total+' decks · 11 subjects';
+</script>
+</body>
+</html>

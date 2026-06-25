@@ -1,0 +1,54 @@
+### YamlMime:Module
+uid: learn.wwl.configure-virtual-machine-availability
+metadata:
+  title: Configure Virtual Machine Availability
+  description: "Learn how to configure virtual machine availability including vertical and horizontal scaling."
+  ms.date: 06/23/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-virtual-machines
+  ai-usage: ai-assisted
+title: Configure virtual machine availability
+summary: Learn how to configure virtual machine availability including vertical and horizontal scaling.&nbsp;
+abstract: |
+  In this module, you learn how to:
+
+  -   Implement availability sets and availability zones.
+
+  -   Implement update and fault domains.
+
+  -   Implement Azure Virtual Machine Scale Sets.
+
+  -   Autoscale virtual machines.
+prerequisites: |
+  -   Familiarity with creating and managing Azure virtual machines.
+
+  -   General knowledge of scaling infrastructure resources in fluctuating workloads.
+iconUrl: /training/achievements/configure-virtual-machine-availability.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure-virtual-machines
+subjects:
+- virtual-machine
+units:
+- learn.wwl.configure-virtual-machine-availability.introduction
+- learn.wwl.configure-virtual-machine-availability.plan-for-maintenance-downtime
+- learn.wwl.configure-virtual-machine-availability.setup-availability-sets
+- learn.wwl.configure-virtual-machine-availability.review-update-fault-domains
+- learn.wwl.configure-virtual-machine-availability.review-availability-zones
+- learn.wwl.configure-virtual-machine-availability.compare-vertical-horizontal-scaling
+- learn.wwl.configure-virtual-machine-availability.implement-scale-sets
+- learn.wwl.configure-virtual-machine-availability.create-scale-sets
+- learn.wwl.configure-virtual-machine-availability.implement-autoscale
+- learn.wwl.configure-virtual-machine-availability.configure-autoscale
+- learn.wwl.configure-virtual-machine-availability.knowledge-check
+- learn.wwl.configure-virtual-machine-availability.summary-resources
+badge:
+  uid: learn.wwl.configure-virtual-machine-availability.badge

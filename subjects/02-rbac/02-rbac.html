@@ -1,0 +1,332 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure RBAC — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Identity &amp; governance</div>
+  <h1>Azure RBAC</h1>
+  <div class="lede">Role-based access control is Azure's authorization system — it decides <b>who</b> can do <b>what</b>, and <b>where</b>. Built on Azure Resource Manager, it works by binding a role to a user/group/app at a scope. Get the three-part assignment and the scope hierarchy and the rest follows.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — THE THREE-PART ASSIGNMENT (the hero) */
+{
+  tab:'Who · what · where',
+  title:'A role assignment = principal + role + scope',
+  gist:`Everything in RBAC is one structure: a <b>role assignment</b> binds three things. <b>Security principal (who)</b> — a user, group, or app/service principal. <b>Role definition (what)</b> — a named collection of permissions like Reader or Virtual Machine Contributor. <b>Scope (where)</b> — the level the access applies to. You grant access by <b>creating</b> an assignment and revoke it by <b>removing</b> the assignment. You do this in the <b>Access control (IAM)</b> blade.`,
+  facts:[['Assignment =','principal + role + scope','green'],['Principal (who)','user · group · app'],['Role (what)','collection of permissions'],['Scope (where)','mgmt group→sub→RG→resource'],['Grant / revoke','add / remove assignment'],['Done in','Access control (IAM)']],
+  trap:['To give someone access, do you edit the role definition?','<b>No.</b> You create a <b>role assignment</b> — binding an existing role to the principal at a scope. Role definitions are the permission templates; you rarely touch them (only for custom roles).'],
+  exam:['"Let Alain manage VMs in one resource group only."','Create a <b>role assignment</b>: principal = Alain, role = <b>Virtual Machine Contributor</b>, scope = that <b>resource group</b>. Three parts, every time.'],
+  scn:[
+    ['A DBA group should manage all SQL databases in a subscription.','Role assignment','principal = the group, role = SQL DB Contributor, scope = subscription'],
+    ['An app needs to read every resource in one resource group.','Role assignment','principal = the app (service principal), role = Reader, scope = that RG'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Three pieces combine into one role assignment',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(220,a.w*0.27), gap=a.w*0.05, total=3*w+2*gap, x0=a.cx-total/2;
+    const y=a.y+a.h*0.18, h=Math.min(120,a.h*0.34);
+    const parts=[
+      [C.blue,'WHO','Security principal','user · group · app'],
+      [C.green,'WHAT','Role definition','Reader, Contributor…'],
+      [C.amber,'WHERE','Scope','mgmt grp / sub / RG / resource'],
+    ];
+    const cs=parts.map((p,i)=>{
+      const x=x0+i*(w+gap);
+      box(x,y,w,h,{stroke:p[0],sw:1.8});
+      T(x+w/2,y+26,p[1],{anchor:'middle',size:12,weight:700,fill:p[0]});
+      T(x+w/2,y+52,p[2],{anchor:'middle',size:13.5,weight:600,fill:C.ink});
+      Twrap(x+w/2,y+78,p[3],Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+      return {x,y,w,h,cx:x+w/2,b:y+h};
+    });
+    /* plus signs */
+    T((cs[0].x+w+cs[1].x)/2,y+h/2+5,'+',{anchor:'middle',size:22,fill:C.faint,weight:600});
+    T((cs[1].x+w+cs[2].x)/2,y+h/2+5,'+',{anchor:'middle',size:22,fill:C.faint,weight:600});
+    /* result box */
+    const rw=Math.min(420,a.w*0.5), ry=a.b-78;
+    box(a.cx-rw/2,ry,rw,56,{stroke:C.purple,sw:2.2,fill:'#f7f4fb'});
+    T(a.cx,ry+33,'Role assignment  → access granted',{anchor:'middle',size:14,weight:600,fill:C.purple});
+    cs.forEach(c=>arrow(c.cx,c.b+6,a.cx,ry-6,{stroke:C.purple,dash:'4 4'}));
+  }
+},
+/* 1 — THE FOUR FUNDAMENTAL ROLES */
+{
+  tab:'The core roles',
+  title:'Four built-in roles you must know cold',
+  gist:`Azure has 120+ built-in roles, but four are fundamental and heavily tested. <b>Owner</b> — full access <b>plus</b> the right to delegate (assign roles to others). <b>Contributor</b> — create and manage all resources, but <b>cannot grant access</b> to others. <b>Reader</b> — view only. <b>User Access Administrator</b> — manage <b>access</b> (role assignments) and read resources, but <b>can't change the resources</b> themselves. The Owner-vs-Contributor and Contributor-vs-UAA lines are the classic distinctions.`,
+  facts:[['Owner','full access + can delegate','green'],['Contributor','manage resources, no granting','red'],['Reader','view only'],['User Access Admin','manage access + read, no changes'],['Built-in roles','120+ total'],['Need custom?','build a custom role']],
+  trap:['Contributor can do everything an Owner can, right?','<b>No.</b> Contributor manages resources but <b>cannot assign roles / grant access</b> — only Owner (and User Access Administrator) can. That "can\'t delegate" line is the Owner-vs-Contributor distinction.'],
+  exam:['"User must assign roles to others but should NOT manage the resources."','<b>User Access Administrator</b> — manages access only. Contributor manages resources but can\'t grant; Owner does both.'],
+  scn:[
+    ['A team lead should manage all resources in an RG but not hand out access.','Contributor','full resource control, no role-assignment ability'],
+    ['A security admin should control who has access but not touch the VMs.','User Access Administrator','manages role assignments, not the resources'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two axes: manage resources? · grant access to others?',{anchor:'middle',size:15,weight:600});
+    const roles=[
+      [C.green,'Owner','Manage resources ✓','Grant access ✓','full control + delegate'],
+      [C.blue,'Contributor','Manage resources ✓','Grant access ✗','everything except granting'],
+      [C.amber,'User Access Admin','Manage resources ✗','Grant access ✓','access only, no resources'],
+      [C.soft,'Reader','Manage resources ✗','Grant access ✗','view only'],
+    ];
+    const y0=a.y+a.h*0.16, gap=12, rh=(a.h*0.74-3*gap)/4;
+    roles.forEach((r,i)=>{
+      const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:r[0],sw:1.7});
+      T(a.x+18,y+rh/2-7,r[1],{size:15,weight:600,fill:r[0],baseline:'middle'});
+      T(a.x+18,y+rh/2+13,r[4],{size:11.5,fill:C.soft,baseline:'middle'});
+      const cManage=r[2].includes('✓'), cGrant=r[3].includes('✓');
+      T(a.x+a.w*0.52,y+rh/2,r[2],{anchor:'middle',size:12.5,weight:600,fill:cManage?C.green:C.red,baseline:'middle'});
+      T(a.x+a.w*0.82,y+rh/2,r[3],{anchor:'middle',size:12.5,weight:600,fill:cGrant?C.green:C.red,baseline:'middle'});
+    });
+  }
+},
+/* 2 — SCOPE HIERARCHY + INHERITANCE */
+{
+  tab:'Scope & inheritance',
+  title:'Four scope levels — and access flows downward',
+  gist:`Scope is <i>where</i> an assignment applies, and the four levels nest: <b>management group → subscription → resource group → resource</b>. The rule that drives most scope questions: a role assigned at a <b>parent scope is inherited by all children</b>. Grant Contributor at the subscription and the principal is Contributor on every resource group and resource inside it. So you assign at the <b>highest scope that's still correct</b> — broad at the top, narrow at the bottom — following least privilege.`,
+  facts:[['Levels','mgmt grp → sub → RG → resource'],['Inheritance','parent → all children','green'],['Assign high','applies broadly'],['Assign low','applies narrowly'],['Best practice','least privilege scope'],['Effect','additive across assignments']],
+  trap:['You assign Reader at a resource. Does it also cover the resource group?','<b>No — inheritance flows DOWN, not up.</b> A resource-level assignment doesn\'t affect its parent RG. To cover the whole RG, assign at the RG scope (which then flows down to its resources).'],
+  exam:['"Grant access to all current and future resources in a subscription, minimal effort."','Assign the role at the <b>subscription</b> scope — every RG and resource inside <b>inherits</b> it, including ones created later.'],
+  scn:[
+    ['A platform team needs Contributor on everything in the subscription.','Assign at subscription','inheritance covers all RGs + resources, now and future'],
+    ['A vendor needs access to just one VM.','Assign at the resource','narrowest scope — nothing else is exposed'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Assign at a level → everything beneath it inherits',{anchor:'middle',size:15,weight:600});
+    const levels=[
+      [C.purple,'Management group','a family of subscriptions'],
+      [C.blue,'Subscription','billing + access boundary'],
+      [C.amber,'Resource group','a bucket of resources'],
+      [C.green,'Resource','a single VM, disk, etc.'],
+    ];
+    const y0=a.y+a.h*0.16, gap=10, rh=(a.h*0.70-3*gap)/4;
+    levels.forEach((l,i)=>{
+      const inset=i*(a.w*0.07);
+      const x=a.x+inset, w=a.w-2*inset;
+      box(x,y0+i*(rh+gap),w,rh,{stroke:l[0],sw:1.7});
+      T(x+16,y0+i*(rh+gap)+rh/2-6,l[1],{size:13.5,weight:600,fill:l[0]});
+      T(x+16,y0+i*(rh+gap)+rh/2+13,l[2],{size:11.5,fill:C.soft});
+      if(i<3){const cx=a.x+inset+a.w*0.07/1;arrow(a.cx,y0+i*(rh+gap)+rh,a.cx,y0+(i+1)*(rh+gap)-2,{stroke:C.faint});}
+    });
+    T(a.x+4,a.b-2,'assign higher = broader',{size:10.5,fill:C.faint});
+    T(a.r,a.b-2,'inherits downward ↓',{anchor:'end',size:10.5,fill:C.green,weight:600});
+  }
+},
+/* 3 — ALLOW MODEL + NotActions */
+{
+  tab:'Allow model',
+  title:'RBAC is additive — and how NotActions subtract',
+  gist:`RBAC is an <b>allow</b> model: assignments add up. If one assignment grants read and another grants write on the same scope, you get <b>both</b> — there's no explicit deny in basic RBAC (that's a separate Deny-assignment feature). A role's permissions are <b>Actions minus NotActions</b>: the role lists allowed <code>Actions</code> (often a wildcard <code>*</code>), then <code>NotActions</code> carves exceptions back out. Contributor, for instance, is <code>*</code> Actions minus the role-assignment operations — which is exactly why it can't grant access.`,
+  facts:[['Model','allow / additive','green'],['Two assignments','permissions combine'],['Effective perms','Actions − NotActions'],['NotActions','exceptions removed'],['Contributor','* minus grant operations'],['No deny here','(Deny assignments separate)']],
+  trap:['One assignment gives read, another gives write. What do you have?','<b>Both read and write.</b> RBAC is additive — assignments combine, the broader access wins. There is no "deny" that overrides in basic RBAC.'],
+  exam:['"Why can Contributor do nearly everything but not assign roles?"','Its definition is <code>*</code> Actions <b>minus NotActions</b>, and the NotActions remove the create/delete role-assignment operations. Effective = Actions − NotActions.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Permissions add up · NotActions carve exceptions out',{anchor:'middle',size:15,weight:600});
+    /* additive illustration */
+    const y1=a.y+a.h*0.16;
+    box(a.x,y1,a.w*0.30,64,{stroke:C.blue,fill:'#f4f7fb'});T(a.x+a.w*0.15,y1+38,'read',{anchor:'middle',size:14,weight:600,fill:C.blue});
+    T(a.x+a.w*0.34,y1+38,'+',{anchor:'middle',size:20,fill:C.faint,weight:600});
+    box(a.x+a.w*0.38,y1,a.w*0.30,64,{stroke:C.blue,fill:'#f4f7fb'});T(a.x+a.w*0.53,y1+38,'write',{anchor:'middle',size:14,weight:600,fill:C.blue});
+    T(a.x+a.w*0.72,y1+38,'=',{anchor:'middle',size:20,fill:C.faint,weight:600});
+    box(a.x+a.w*0.76,y1,a.w*0.24,64,{stroke:C.green,sw:2,fill:'#f3faf6'});T(a.x+a.w*0.88,y1+38,'read + write',{anchor:'middle',size:13,weight:600,fill:C.green});
+    /* Actions - NotActions */
+    const y2=a.y+a.h*0.56;
+    T(a.cx,y2-10,'Effective permissions = Actions − NotActions',{anchor:'middle',size:13,weight:600,fill:C.ink});
+    box(a.x,y2+6,a.w*0.44,72,{stroke:C.green,fill:'#f3faf6'});
+    T(a.x+a.w*0.22,y2+34,'Actions:  *',{anchor:'middle',size:14,weight:600,fill:C.green,font:'ui-monospace, monospace'});
+    T(a.x+a.w*0.22,y2+56,'(all control-plane ops)',{anchor:'middle',size:11,fill:C.soft});
+    T(a.x+a.w*0.48,y2+44,'−',{anchor:'middle',size:22,fill:C.faint,weight:600});
+    box(a.x+a.w*0.52,y2+6,a.w*0.48,72,{stroke:C.red,fill:'#fdf6f6'});
+    T(a.x+a.w*0.76,y2+34,'NotActions',{anchor:'middle',size:13,weight:600,fill:C.red,font:'ui-monospace, monospace'});
+    T(a.x+a.w*0.76,y2+56,'create/delete role assignments',{anchor:'middle',size:11,fill:C.soft});
+    T(a.cx,a.b-2,'→ that subtraction is exactly why Contributor can\'t grant access',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 4 — RBAC vs Entra roles (placement) */
+{
+  tab:'RBAC vs Entra roles',
+  title:'Azure RBAC roles are not Entra (directory) roles',
+  gist:`Two separate role systems, and confusing them is a classic mistake. <b>Azure RBAC roles</b> (Owner, Contributor…) control access to <b>Azure resources</b> — VMs, storage, networks — and are scoped to management group/subscription/RG/resource. <b>Entra (directory) roles</b> (Global Administrator, User Administrator…) control access to <b>Entra ID and Microsoft 365</b> — managing users, groups, the directory itself. Different scopes, different purposes. A Global Admin isn't automatically an Owner of Azure resources.`,
+  place:{here:'Azure RBAC roles live in <b>Access control (IAM)</b> on Azure resources.',
+    other:'<b>Entra roles</b> (Global Admin, User Admin…) live in <b>Entra ID</b> and govern the directory/M365 — not Azure resources. If a question is about managing <i>users/groups/the tenant</i>, it\'s an Entra role; about managing <i>VMs/storage/networks</i>, it\'s Azure RBAC.'},
+  facts:[['Azure RBAC','access to Azure resources'],['…scoped at','mgmt grp / sub / RG / resource'],['Entra roles','access to directory / M365'],['…examples','Global Admin, User Admin'],['Global Admin','manages Entra, not resources','red'],['Bridge','GA can elevate to manage subs']],
+  trap:['A Global Administrator automatically owns all Azure resources?','<b>No.</b> Global Admin is an <b>Entra</b> role (directory/M365). It does <b>not</b> grant Azure resource access by default — that needs an Azure RBAC assignment. (A GA can elevate access to gain it, but it isn\'t automatic.)'],
+  exam:['"Manage user accounts and group membership in the tenant." RBAC role?','Trick — that\'s an <b>Entra directory role</b> (e.g. User Administrator), not an Azure RBAC role. RBAC is for Azure resources, not directory objects.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two role systems for two different worlds',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(380,a.w*0.44), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+30,'Azure RBAC roles',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+54,'control Azure RESOURCES',{anchor:'middle',size:12,fill:C.soft});
+    ['Owner · Contributor · Reader','User Access Administrator','scope: mgmt grp→sub→RG→resource','in: Access control (IAM)'].forEach((t,i)=>Twrap(x0+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.purple,sw:1.8});
+    T(x1+w/2,y+30,'Entra (directory) roles',{anchor:'middle',size:15,weight:600,fill:C.purple});
+    T(x1+w/2,y+54,'control the DIRECTORY / M365',{anchor:'middle',size:12,fill:C.soft});
+    ['Global Administrator','User / Groups Administrator','manage users, groups, tenant','in: Microsoft Entra ID'].forEach((t,i)=>Twrap(x1+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

@@ -1,0 +1,313 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure Containers — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Deploy &amp; manage compute</div>
+  <h1>Azure Containers</h1>
+  <div class="lede">Containers package an app with just the OS bits it needs — lighter than a VM. Azure offers two serverless ways to run them: <b>Container Instances (ACI)</b> for simple single workloads, and <b>Container Apps</b> for autoscaling microservices. Both pull images from a registry like <b>ACR</b>.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — containers vs VMs */
+{
+  tab:'Containers vs VMs',
+  title:'A container shares the host OS kernel — a VM doesn\'t',
+  gist:`A <b>container</b> virtualizes the <b>operating system</b>: it bundles your app with just the user-mode OS bits it needs and shares the host's kernel — so it's lightweight, starts in seconds, and packs densely. A <b>VM</b> virtualizes the <b>hardware</b>: each runs a full OS including its own kernel, using more resources but giving a <b>stronger isolation/security boundary</b>. Containers trade some isolation for speed and density; VMs trade weight for complete isolation.`,
+  facts:[['Container','virtualizes the OS'],['…shares','the host kernel','green'],['…isolation','lightweight, weaker boundary','red'],['VM','virtualizes the hardware'],['…runs','a full OS + kernel'],['…isolation','complete, strong boundary','green']],
+  trap:['Need to run two competitors\' apps with a hard security boundary on shared infra — containers?','<b>Prefer VMs.</b> Containers share the host kernel — lighter, but a <b>weaker security boundary</b>. For strong isolation between untrusted/hostile tenants, VMs (full OS isolation) are the safer choice. (Azure\'s container services do add hypervisor-level isolation, but the principle is the exam point.)'],
+  exam:['"Why choose containers over VMs for app deployment?"','Lighter weight, <b>faster startup</b> (seconds), higher density, easier packaging/portability — because they share the host kernel instead of each carrying a full OS.'],
+  scn:[
+    ['Pack many small services densely with fast startup.','Containers','share the kernel — lightweight and quick'],
+    ['Host workloads needing complete OS-level isolation.','VMs','full OS per VM = strong security boundary'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Containers share the kernel · VMs each carry a full OS',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+28,'Containers',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+50,'virtualize the OS',{anchor:'middle',size:12,fill:C.soft});
+    ['share the host kernel','app + just-needed OS bits','start in seconds, dense','lighter, weaker isolation'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.amber,sw:1.8});
+    T(x1+w/2,y+28,'Virtual machines',{anchor:'middle',size:15,weight:600,fill:C.amber});
+    T(x1+w/2,y+50,'virtualize the hardware',{anchor:'middle',size:12,fill:C.soft});
+    ['each runs a full OS + kernel','more CPU/memory/storage','slower to start','complete, strong isolation'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 1 — ACI + container groups */
+{
+  tab:'Container Instances (ACI)',
+  title:'ACI — the simplest, fastest way to run a container',
+  gist:`<b>Azure Container Instances (ACI)</b> runs a container in seconds with <b>no VMs and no orchestrator</b>. The deploy unit is the <b>container group</b> — one or more containers sharing a host, local network, storage, and lifecycle (like a Kubernetes pod; multi-container groups are <b>Linux only</b>). You set exact CPU/memory and pay <b>per second</b>. It can deploy into a VNet and pin to an availability zone, but ACI has <b>no built-in autoscale</b> — it's a fixed group you size yourself. (ACI has <b>no GPU</b> — its GPU preview was retired; for GPU use Container Apps or AKS.)`,
+  facts:[['ACI','serverless single container/group'],['Container group','containers sharing host/net/lifecycle'],['…like','a Kubernetes pod'],['Multi-container','Linux only','red'],['Billing','per second'],['Autoscale','none','red']],
+  trap:['Can ACI automatically scale out as load grows?','<b>No — ACI has no built-in autoscale.</b> It\'s a fixed container group you size manually. For autoscaling containers use <b>Container Apps</b> (KEDA) or <b>AKS</b>. (ACI offers NGroups / virtual-nodes-on-AKS for more, but not simple autoscale.)'],
+  exam:['"Run a short batch/build job in a container, fastest and simplest, pay per second."','<b>Azure Container Instances (ACI)</b> — quick single container group, per-second billing, no orchestrator. Not for autoscaling apps.'],
+  scn:[
+    ['Run a one-off data-processing container for 10 minutes.','ACI','starts in seconds, billed per second, no infra'],
+    ['Bundle an app container with a logging sidecar.','ACI container group','multiple containers sharing one host (Linux)'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A container group = containers sharing one host',{anchor:'middle',size:15,weight:600});
+    const gx=a.x+a.w*0.14, gw=a.w*0.72, gy=a.y+a.h*0.20, gh=a.h*0.5;
+    box(gx,gy,gw,gh,{stroke:C.blue,sw:2});
+    T(gx+16,gy+26,'Container group (ACI)',{size:14,weight:600,fill:C.blue});
+    T(gx+16,gy+44,'shared host · local network · storage · lifecycle · one IP + FQDN',{size:10.5,fill:C.soft});
+    const cs=['App container','Sidecar (logging)'];
+    const cw=(gw-32-16)/2, cy=gy+60, ch=gh-78;
+    cs.forEach((c,i)=>{const x=gx+16+i*(cw+16);box(x,cy,cw,ch,{stroke:C.green,sw:1.5});T(x+cw/2,cy+ch/2,c,{anchor:'middle',size:13,weight:600,fill:C.green});});
+    T(a.cx,a.b-22,'per-second billing · VNet · AZ-pinned · no GPU',{anchor:'middle',size:11.5,fill:C.faint});
+    T(a.cx,a.b-4,'no built-in autoscale — it\'s a fixed group you size',{anchor:'middle',size:11.5,fill:C.red,weight:600});
+  }
+},
+/* 2 — Container Apps */
+{
+  tab:'Container Apps',
+  title:'Container Apps — serverless microservices that autoscale',
+  gist:`<b>Azure Container Apps</b> is a serverless platform built on <b>Kubernetes + KEDA + Dapr</b> — but Microsoft runs the cluster, so you never touch Kubernetes. Its defining trait is <b>autoscaling on any KEDA trigger</b> (HTTP traffic, events like a queue, or CPU/memory), including <b>scale to zero</b> (except when scaling on CPU/memory). It supports <b>revisions</b> with <b>traffic splitting</b> for blue/green and A/B, built-in HTTPS ingress + service discovery, jobs, and Dapr for microservices. Pulls images from any registry (ACR/Docker Hub).`,
+  facts:[['Container Apps','serverless microservices platform'],['Built on','Kubernetes + KEDA + Dapr'],['Autoscale','any KEDA trigger','green'],['Scale to zero','yes (not on CPU/mem)','green'],['Revisions','traffic split → blue/green, A/B'],['You manage','no Kubernetes']],
+  trap:['You want autoscaling containers but don\'t want to manage a Kubernetes cluster. ACI or AKS?','<b>Neither — Azure Container Apps.</b> ACI doesn\'t autoscale; AKS autoscales but you manage the cluster. Container Apps gives KEDA autoscaling (incl. scale-to-zero) on managed infrastructure — no Kubernetes to run.'],
+  exam:['"Event-driven microservice that scales to zero when idle and up on queue depth."','<b>Container Apps</b> — KEDA autoscale on the queue trigger, scales to zero when idle. (ACI = no autoscale; AKS = you manage the cluster.)'],
+  scn:[
+    ['HTTP API that should scale to zero overnight and up under load.','Container Apps','KEDA HTTP autoscale + scale-to-zero'],
+    ['Blue/green rollout splitting traffic between two versions.','Container Apps revisions','traffic splitting across revisions'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Managed serverless containers that scale on triggers',{anchor:'middle',size:15,weight:600});
+    /* triggers -> container apps -> scaled instances */
+    const triggers=['HTTP traffic','Queue / events','CPU / memory'];
+    const tw=Math.min(160,a.w*0.20), tgap=(a.w*0.42-3*0)/1;
+    triggers.forEach((t,i)=>{const x=a.x, y=a.y+a.h*0.16+i*((a.h*0.5)/3); box(x,y,tw,(a.h*0.5)/3-12,{stroke:C.amber,sw:1.5});Twrap(x+tw/2,y+((a.h*0.5)/3-12)/2,t,Math.floor(tw/7),{anchor:'middle',size:11.5,fill:C.amber,weight:600,lh:13});});
+    const ca=node(a.cx-Math.min(220,a.w*0.26)/2,a.y+a.h*0.30,Math.min(220,a.w*0.26),90,C.green,'Container Apps',null,{strong:true,tsize:14});
+    Twrap(ca.cx,ca.cy+16,'KEDA autoscale · scale to zero',Math.floor(ca.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    triggers.forEach((t,i)=>{const y=a.y+a.h*0.16+i*((a.h*0.5)/3)+((a.h*0.5)/3-12)/2;arrow(a.x+tw+6,y,ca.x-6,ca.cy,{stroke:C.amber,dash:'3 3'});});
+    /* instances */
+    const insts=4, iw=Math.min(60,a.w*0.07), igap=10, iy=a.b-70, ix0=a.r-(insts*iw+(insts-1)*igap);
+    for(let i=0;i<insts;i++){const x=ix0+i*(iw+igap);box(x,iy,iw,50,{stroke:i<2?C.green:'#cdd3da',fill:i<2?'#fff':'#fafbfc'});T(x+iw/2,iy+30,i<2?'app':'+',{anchor:'middle',size:12,fill:i<2?C.green:C.faint,weight:600});}
+    arrow(ca.r+6,ca.cy,ix0-6,iy+25,{stroke:C.green});
+    T((ca.r+ix0)/2,ca.cy-12,'scales',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 3 — ACI vs Container Apps vs AKS (the choice) */
+{
+  tab:'Which container service?',
+  title:'ACI vs Container Apps vs AKS — pick by scaling & control',
+  gist:`Three ways to run containers, by how much scaling/orchestration you need and how much you want to manage. <b>ACI</b> — simplest, a single container group, <b>no autoscale</b>; for one-off/burst/batch. <b>Container Apps</b> — serverless microservices with <b>KEDA autoscale (to zero)</b> and revisions, <b>no cluster to manage</b>; for event-driven/HTTP apps that grow and shrink. <b>AKS</b> — full <b>managed Kubernetes</b> where <b>you run the cluster</b>; for complex orchestration at scale. The deciding axis is <b>autoscaling and orchestration</b>. (On GPU they differ: ACI has none; Container Apps offers serverless GPUs; AKS supports GPU node pools.)`,
+  facts:[['ACI','single group, no autoscale'],['…for','one-off / burst / batch'],['Container Apps','KEDA autoscale, no cluster','green'],['…for','microservices, event/HTTP'],['AKS','managed K8s, you run cluster'],['Deciding axis','scaling + orchestration']],
+  trap:['Is GPU the thing that separates ACI from Container Apps?','The real divide is <b>scaling/orchestration</b>: ACI doesn\'t autoscale; Container Apps autoscales (KEDA, to zero) with no cluster; AKS gives full Kubernetes control but you manage it. (GPU also differs: ACI has none; Container Apps has serverless GPUs.)'],
+  exam:['"Complex container orchestration at scale with full Kubernetes control." Which service?','<b>AKS</b> — managed Kubernetes you operate. For autoscaling without running a cluster → Container Apps; for a simple single job → ACI.'],
+  scn:[
+    ['Simple short-lived container, minimal setup.','ACI','single group, per-second, no autoscale'],
+    ['Autoscaling microservice, no desire to run Kubernetes.','Container Apps','KEDA autoscale on managed infra'],
+    ['Full control over a large orchestrated platform.','AKS','managed Kubernetes; you operate the cluster'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'More scaling/control →  more you manage',{anchor:'middle',size:15,weight:600});
+    const cols=[
+      [C.blue,'ACI','single group','no autoscale','one-off · burst · batch','simplest'],
+      [C.green,'Container Apps','serverless microservices','KEDA autoscale, to zero','event/HTTP apps','no cluster to manage'],
+      [C.purple,'AKS','managed Kubernetes','full orchestration','complex, at scale','you run the cluster'],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.14, h=a.h*0.78;
+    cols.forEach((c,i)=>{const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:c[0],sw:i===1?2.1:1.7});
+      T(x+w/2,y+28,c[1],{anchor:'middle',size:15,weight:600,fill:c[0]});
+      Twrap(x+w/2,y+50,c[2],Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
+      [c[3],c[4]].forEach((t,j)=>Twrap(x+w/2,y+86+j*30,t,Math.floor(w/7),{anchor:'middle',size:12,fill:C.ink,lh:14}));
+      box(x+16,y+h-46,w-32,32,{stroke:'#e7e9ee',fill:'#fafbfc'});
+      Twrap(x+w/2,y+h-30,c[5],Math.floor(w/6.5),{anchor:'middle',size:11,fill:C.faint,lh:13});
+    });
+  }
+},
+/* 4 — ACR (the registry) */
+{
+  tab:'Container Registry (ACR)',
+  title:'ACR — the private registry the others pull images from',
+  gist:`Containers run from <b>images</b>, and those images live in a <b>registry</b>. <b>Azure Container Registry (ACR)</b> is the managed <b>private</b> registry for your images — ACI, Container Apps, and AKS all pull from it (or from public registries like Docker Hub). It comes in tiers (Basic/Standard/<b>Premium</b>), and Premium adds <b>geo-replication</b> for multi-region pulls. You can authenticate pulls securely with a <b>managed identity</b> instead of admin credentials. Think of ACR as the storage-and-distribution layer beneath every container service.`,
+  place:{here:'ACR stores images; the container <i>runtimes</i> (ACI / Container Apps / AKS) pull from it.',
+    other:'ACR is the registry layer, not a place containers run. It also ties to identity (managed-identity pulls) and CI/CD (build/push images). Distinct from where the container executes.'},
+  facts:[['ACR','managed private image registry'],['Pulled by','ACI · Container Apps · AKS','green'],['Also','Docker Hub (public) works too'],['Tiers','Basic · Standard · Premium'],['Premium','geo-replication','green'],['Auth','managed identity (no admin creds)']],
+  trap:['Does ACR run your containers?','<b>No.</b> ACR <b>stores and distributes images</b>; the runtimes (ACI, Container Apps, AKS) <b>pull</b> from it and execute them. Registry ≠ runtime.'],
+  exam:['"Store container images privately and pull them into AKS across regions."','<b>Azure Container Registry (ACR)</b>, <b>Premium</b> tier for <b>geo-replication</b>; authenticate the pull with a managed identity.'],
+  scn:[
+    ['Keep your app images private, not on Docker Hub.','ACR','managed private registry'],
+    ['Pull the same image fast from multiple regions.','ACR Premium (geo-replication)','replicates the registry across regions'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'One registry, many runtimes pulling from it',{anchor:'middle',size:15,weight:600});
+    const acr=node(a.cx-Math.min(220,a.w*0.26)/2,a.y+a.h*0.16,Math.min(220,a.w*0.26),84,C.purple,'Azure Container Registry',null,{strong:true,tsize:13.5});
+    Twrap(acr.cx,acr.cy+16,'private images (Basic/Std/Premium)',Math.floor(acr.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const runtimes=['ACI','Container Apps','AKS'];
+    const rw=Math.min(200,a.w*0.26), rgap=(a.w-3*rw)/2, ry=a.b-86;
+    runtimes.forEach((r,i)=>{const x=a.x+i*(rw+rgap);
+      box(x,ry,rw,72,{stroke:C.green,sw:1.6});
+      T(x+rw/2,ry+30,r,{anchor:'middle',size:13.5,weight:600,fill:C.green});
+      T(x+rw/2,ry+50,'pulls images',{anchor:'middle',size:10.5,fill:C.soft});
+      arrow(acr.cx,acr.b+6,x+rw/2,ry-6,{stroke:C.purple,dash:'4 4'});
+    });
+    T(a.cx,(acr.b+ry)/2+4,'registry stores · runtimes pull & execute',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

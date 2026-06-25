@@ -1,0 +1,49 @@
+### YamlMime:Module
+uid: learn.wwl.configure-azure-files-file-sync
+metadata:
+  adobe-target: true
+  prefetch-feature-rollout: true
+  title: Configure Azure Files
+  description: "Learn how to configure Azure Files for cloud file shares."
+  ms.date: 06/23/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-file-storage
+  ai-usage: ai-assisted
+title: Configure Azure Files
+summary: Learn how to configure Azure Files and Azure File Sync.
+abstract: |
+  In this module, you learn how to:
+
+  -   Identify storage for file shares versus blob data.
+
+  -   Configure Azure file shares and file share snapshots.
+
+  -   Identify features and use cases of Azure File Sync.
+prerequisites: None
+iconUrl: /training/achievements/azure-file-sync-configure.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure
+- azure-files
+subjects:
+- cloud-computing
+units:
+- learn.wwl.configure-azure-files-file-sync.introduction
+- learn.wwl.configure-azure-files-file-sync.compare-files-to-blobs
+- learn.wwl.configure-azure-files-file-sync.manage-file-shares
+- learn.wwl.configure-azure-files-file-sync.create-file-share-snapshots
+- learn.wwl.configure-azure-files-file-sync.implement-soft-delete
+- learn.wwl.configure-storage-tools.use-storage-explorer1
+- learn.wwl.configure-azure-files-file-sync.setup
+- learn.wwl.configure-azure-files-file-sync.knowledge-check
+- learn.wwl.configure-azure-files-file-sync.summary-resources
+badge:
+  uid: learn.wwl.configure-azure-files-file-sync.badge

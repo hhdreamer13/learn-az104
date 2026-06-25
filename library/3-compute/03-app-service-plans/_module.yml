@@ -1,0 +1,45 @@
+### YamlMime:Module
+uid: learn.wwl.configure-app-service-plans
+metadata:
+  title: Configure Azure App Service Plans
+  description: "Configure Azure App Service plans"
+  ms.date: 06/10/2026
+  author: wwlpublish
+  ms.author: robbarefoot
+  ms.topic: module
+  ms.collection: N/A
+  ms.custom:
+  - N/A
+  ms.service: azure-app-service
+  ai-usage: ai-assisted
+title: Configure Azure App Service plans
+summary: Learn how to configure an Azure App Service plan, including pricing and scaling.
+abstract: |
+  In this module, you learn how to:
+
+  -   Select an appropriate Azure App Service plan pricing tier.
+
+  -   Scale an Azure App Service plan.
+prerequisites: |
+  -   Basic knowledge of scaling and performance concepts.
+
+  -   Familiarity with the Azure portal so you can configure the correct App Service plan.
+iconUrl: /training/achievements/azure-app-services-configure-service-plans.svg
+levels:
+- intermediate
+roles:
+- administrator
+products:
+- azure-app-service
+subjects:
+- cloud-computing
+units:
+- learn.wwl.configure-app-service-plans.introduction
+- learn.wwl.configure-app-service-plans.implement-azure
+- learn.wwl.configure-app-service-plans.determine-plan-pricing
+- learn.wwl.configure-app-service-plans.scale-up-scale-out
+- learn.wwl.configure-app-service-plans.plan-scaling
+- learn.wwl.configure-app-service-plans.knowledge-check
+- learn.wwl.configure-app-service-plans.summary-resources
+badge:
+  uid: learn.wwl.configure-app-service-plans.badge

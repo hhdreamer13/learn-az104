@@ -1,0 +1,343 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Storage Security — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Storage (4 of 4)</div>
+  <h1>Storage security</h1>
+  <div class="lede">Two questions: how requests are <b>authorized</b> (Entra ID, account keys, or a SAS) and how data is <b>encrypted</b> (always-on at rest, plus enforced HTTPS in transit). The high-value exam topic is the SAS — its types, its parameters, and how to revoke one.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — four authorization strategies */
+{
+  tab:'How requests are authorized',
+  title:'Four ways to authorize a storage request',
+  gist:`Before encryption even matters, a request must be <b>authorized</b>. Four strategies, in rough order of preference. <b>Microsoft Entra ID + managed identity</b> — the recommended way: RBAC roles, no secrets to leak. <b>Shared Key</b> — the account access key; full power, treat like a root password (you can disable Shared Key to force Entra). <b>SAS</b> — a scoped, time-limited token for delegated access. <b>Anonymous</b> — public read, off by default, only for genuinely public content.`,
+  facts:[['Entra ID + managed id','recommended','green'],['Shared Key','account key, full power','red'],['SAS','scoped + time-limited'],['Anonymous','public read, off by default'],['Force Entra','disable Shared Key'],['Scope RBAC','to the account']],
+  trap:['What\'s the most secure way to let an app access blob data — its account key?','<b>No — prefer Microsoft Entra ID with a managed identity.</b> No stored secret to leak, RBAC-controlled. Account keys are full-power and a liability; you can even disable Shared Key to enforce Entra.'],
+  exam:['"App in Azure needs blob access with no secrets stored."','<b>Entra ID + a managed identity</b> assigned an RBAC role on the account — credential-free and auditable.'],
+  scn:[
+    ['An Azure Function reads blobs; you want no keys in config.','Entra ID + managed identity','assign it a Storage RBAC role; no secret to manage'],
+    ['An external client needs temporary write to one container.','SAS','scoped, expiring token — not the account key'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'From most secure to least — pick the lowest-power option that works',{anchor:'middle',size:15,weight:600});
+    const opts=[
+      [C.green,'Entra ID + managed identity','RBAC, no secrets — recommended'],
+      [C.blue,'Shared access signature (SAS)','scoped, time-limited token'],
+      [C.amber,'Shared Key','account access key — full power'],
+      [C.red,'Anonymous','public read — off by default'],
+    ];
+    const y0=a.y+a.h*0.16, gap=12, rh=(a.h*0.72-3*gap)/4;
+    opts.forEach((o,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:o[0],sw:1.7});
+      T(a.x+18,y+rh/2-6,o[1],{size:14.5,weight:600,fill:o[0],baseline:'middle'});
+      T(a.x+a.w*0.50,y+rh/2-6,o[2],{size:12,fill:C.soft,baseline:'middle'});
+    });
+  }
+},
+/* 1 — SAS types */
+{
+  tab:'SAS types',
+  title:'Three kinds of SAS — by what they can reach',
+  gist:`A <b>shared access signature</b> is a URL granting scoped, time-limited access without sharing the account key. Three kinds. <b>User delegation SAS</b> — signed with <b>Entra ID</b> credentials (not the account key); the most secure, for Blob/Data Lake. <b>Service SAS</b> — signed with the account key, scoped to <b>one service</b> (e.g. one container). <b>Account SAS</b> — signed with the account key, the <b>broadest</b> (can span services and do account-level operations). Prefer user delegation where possible.`,
+  facts:[['User delegation SAS','Entra-signed, safest','green'],['…for','Blob / Data Lake'],['Service SAS','key-signed, one service'],['Account SAS','key-signed, broadest','red'],['All','scoped + expiring'],['Prefer','user delegation']],
+  trap:['Which SAS doesn\'t depend on the account key at all?','The <b>user delegation SAS</b> — it\'s signed with <b>Entra ID</b> credentials, so revoking the user\'s access or rotating Entra invalidates it. Service and account SAS are both signed with the account key.'],
+  exam:['"Most secure SAS for granting an app temporary blob access."','A <b>user delegation SAS</b> (Entra-signed) — no account-key dependency. Account SAS is broadest but key-signed and riskiest.'],
+  scn:[
+    ['Grant scoped, key-free blob access to a partner app.','User delegation SAS','Entra-signed; revoke via Entra, not key regen'],
+    ['Let an app list and read one container only.','Service SAS','scoped to that single service/resource'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Same idea — differ by signing key and breadth',{anchor:'middle',size:15,weight:600});
+    const cols=[
+      [C.green,'User delegation SAS','signed with Entra ID','safest · Blob / Data Lake'],
+      [C.blue,'Service SAS','signed with account key','one service / resource'],
+      [C.amber,'Account SAS','signed with account key','broadest · multi-service'],
+    ];
+    const gap=a.w*0.035, w=(a.w-2*gap)/3, y=a.y+a.h*0.16, h=a.h*0.62;
+    cols.forEach((c,i)=>{const x=a.x+i*(w+gap);
+      box(x,y,w,h,{stroke:c[0],sw:i===0?2.1:1.7});
+      Twrap(x+w/2,y+34,c[1],Math.floor(w/8),{anchor:'middle',size:14,weight:600,fill:c[0],lh:17});
+      Twrap(x+w/2,y+h/2+6,c[2],Math.floor(w/7),{anchor:'middle',size:12,fill:C.ink,lh:15});
+      Twrap(x+w/2,y+h-26,c[3],Math.floor(w/7),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    });
+  }
+},
+/* 2 — SAS parameters (the URI) */
+{
+  tab:'SAS parameters',
+  title:'Inside a SAS URL — permissions, time, IP, protocol',
+  gist:`A SAS is the resource URL plus a <b>SAS token</b> of query parameters that define exactly what it allows. The ones worth recognising: <b>sp</b> = permissions (r/w/d/l…), <b>se</b> = expiry time and <b>st</b> = start time (omit start to be valid immediately), <b>sr</b> = resource (b = blob), <b>ss</b> = service (b/f/q/t), <b>sip</b> = allowed IP range, <b>spr</b> = protocol (force https), and <b>sig</b> = the HMAC signature that authenticates it. Narrow these (least permission, short expiry, https, IP range) to limit blast radius if it leaks.`,
+  facts:[['sp','permissions (rwdl)'],['se / st','expiry / start time'],['sr','resource (b=blob)'],['ss','service (b/f/q/t)'],['sip','allowed IP range'],['spr','protocol (force https)']],
+  trap:['You want a SAS that only works over HTTPS from your office IP. Which parameters?','<b>spr=https</b> (protocol) and <b>sip=&lt;your IP range&gt;</b>. Plus <b>sp</b> for least-permission and a short <b>se</b> expiry. These four shrink the damage if the SAS is intercepted.'],
+  exam:['"A leaked SAS is being abused from random IPs." How would limiting it have helped?','Setting <b>sip</b> (IP range) and <b>spr=https</b>, least <b>sp</b> permissions, and a near-term <b>se</b> expiry restrict where/how/how-long a stolen SAS works.'],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'The SAS token = resource URL + these query parameters',{anchor:'middle',size:15,weight:600});
+    /* URL bar */
+    const uy=a.y+a.h*0.16;
+    box(a.x,uy,a.w,46,{stroke:C.purple,sw:1.6,fill:'#f7f4fb'});
+    T(a.x+a.w/2,uy+28,'…blob.core.windows.net/container/blob?sp=rw&se=…&sr=b&spr=https&sig=…',{anchor:'middle',size:11.5,fill:C.purple,font:'ui-monospace, monospace'});
+    /* parameter cards */
+    const params=[['sp','permissions · r w d l'],['se / st','expiry / start time'],['sr','resource · b=blob'],['ss','service · b f q t'],['sip','allowed IP range'],['spr','protocol · force https'],['sv','storage version'],['sig','HMAC signature']];
+    const cols=4, gap=12, w=(a.w-(cols-1)*gap)/cols, py=uy+70, rows=2, ph=Math.min(72,(a.b-py-(rows-1)*gap)/rows);
+    params.forEach((p,i)=>{const r=Math.floor(i/cols),c=i%cols;const x=a.x+c*(w+gap),y=py+r*(ph+gap);
+      box(x,y,w,ph,{stroke:'#d7dbe2',sw:1.4});
+      T(x+w/2,y+26,p[0],{anchor:'middle',size:14,weight:700,fill:C.blue,font:'ui-monospace, monospace'});
+      Twrap(x+w/2,y+ph-18,p[1],Math.floor(w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    });
+  }
+},
+/* 3 — stored access policy + keys */
+{
+  tab:'Keys & revocation',
+  title:'Account keys, and revoking a SAS via stored access policy',
+  gist:`Each account has <b>two 512-bit access keys</b> (primary/secondary) — full control, so rotate them (two keys let you rotate without downtime) and ideally keep them in <b>Key Vault</b>. A standalone SAS can't be revoked except by <b>regenerating the key</b> — which kills <b>every</b> SAS signed with it. The fix: bind the SAS to a <b>stored access policy</b> on the container. The policy holds the permissions/expiry server-side, so you can <b>change or delete the policy to revoke</b> the SAS instantly, with no key regeneration.`,
+  facts:[['Account keys','2 × 512-bit (primary/secondary)'],['Rotate','use 2 keys, no downtime'],['Standalone SAS','revoke = regen key','red'],['…regen kills','every SAS on that key','red'],['Stored access policy','server-side controls'],['Revoke via policy','no key reset','green']],
+  trap:['A SAS leaked. To revoke just that one, regenerate the account key?','<b>Only as a last resort</b> — regenerating the key invalidates <b>every</b> SAS signed with it. If the SAS is tied to a <b>stored access policy</b>, change/delete the policy to revoke just that access, no key reset.'],
+  exam:['"Must be able to revoke a shared SAS centrally without disrupting others."','Bind it to a <b>stored access policy</b> — revoke by modifying/removing the policy. Standalone SAS can only be revoked by key regeneration.'],
+  scn:[
+    ['You issue SAS tokens you may need to cancel.','Stored access policy','back the SAS with it; revoke by changing the policy'],
+    ['Rotate the account key with zero downtime.','Two keys','switch clients to key2, regenerate key1, switch back'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A stored access policy lets you revoke without touching keys',{anchor:'middle',size:15,weight:600});
+    /* SAS -> policy -> container */
+    const w=Math.min(220,a.w*0.26), y=a.y+a.h*0.28, h=a.h*0.34;
+    const sas=node(a.x,y,w,h,C.blue,'SAS token',null,{tsize:14});
+    Twrap(sas.cx,sas.cy+16,'references a policy',Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const pol=node(a.cx-w/2,y,w,h,C.green,'Stored access policy',null,{strong:true,tsize:13.5});
+    Twrap(pol.cx,pol.cy+16,'permissions + expiry, server-side',Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    const con=node(a.r-w,y,w,h,C.purple,'Container',null,{tsize:14});
+    arrow(sas.r+6,sas.cy,pol.x-6,pol.cy,{stroke:C.soft});
+    arrow(pol.r+6,pol.cy,con.x-6,con.cy,{stroke:C.soft});
+    T(a.cx,y+h+30,'delete / change the policy  →  the SAS is revoked instantly (no key regen)',{anchor:'middle',size:12,fill:C.green,weight:600});
+  }
+},
+/* 4 — encryption (rest + transit, MMK vs CMK) */
+{
+  tab:'Encryption',
+  title:'At rest (always on) and in transit (enforce HTTPS)',
+  gist:`<b>At rest:</b> Storage Service Encryption (SSE) encrypts everything with <b>256-bit AES</b>, automatically, on every account — <b>always on, can't be disabled</b>, transparent. Your only choice is the key holder: <b>Microsoft-managed</b> (default) or <b>customer-managed keys (CMK)</b> in <b>Azure Key Vault</b> — and the account and key vault must be in the <b>same region</b> (different subscriptions are fine). For highest compliance, CMK can live in a <b>Managed HSM</b> (FIPS 140-3 Level 3). <b>In transit:</b> set <b>Secure transfer required</b> to force HTTPS (and disallow old TLS).`,
+  facts:[['SSE','AES-256, always on','red'],['Default key','Microsoft-managed'],['CMK','your key in Key Vault'],['CMK region','same region as account','red'],['Managed HSM','FIPS 140-3 Level 3'],['In transit','Secure transfer required = HTTPS']],
+  trap:['"Enable encryption at rest" — is that a setup step?','<b>No — SSE (AES-256) is always on and can\'t be disabled.</b> The only real choice is Microsoft-managed vs customer-managed keys. And CMK requires the Key Vault to be in the <b>same region</b> as the account.'],
+  exam:['"We must control and rotate the storage encryption keys ourselves."','<b>Customer-managed keys (CMK)</b> in Azure Key Vault (same region). For the strictest compliance, store them in a <b>Managed HSM</b>.'],
+  scn:[
+    ['Force all storage traffic over HTTPS.','Secure transfer required','enable it on the account; rejects HTTP'],
+    ['Compliance demands customer-controlled key rotation.','CMK in Key Vault','same region as the account; rotate on your schedule'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Encryption is automatic — you choose the key and enforce HTTPS',{anchor:'middle',size:15,weight:600});
+    /* always-on at rest banner */
+    const by=a.y+a.h*0.16, bh=a.h*0.20;
+    box(a.x,by,a.w,bh,{stroke:C.green,sw:2,fill:'#f3faf6'});
+    T(a.cx,by+bh/2-6,'SSE · AES-256 · at rest · ALWAYS ON, can\'t disable',{anchor:'middle',size:15,weight:700,fill:C.green});
+    T(a.cx,by+bh/2+16,'transparent — no code change',{anchor:'middle',size:12,fill:C.soft});
+    /* key choice + transit */
+    const ky=by+bh+a.h*0.07, kh=a.b-ky, kw=(a.w-2*a.w*0.04)/3;
+    box(a.x,ky,kw,kh,{stroke:C.blue,sw:1.7});
+    T(a.x+kw/2,ky+28,'Microsoft-managed',{anchor:'middle',size:13,weight:600,fill:C.blue});
+    Twrap(a.x+kw/2,ky+kh/2+8,'default · zero effort',Math.floor(kw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+    const k2=a.x+kw+a.w*0.04;
+    box(k2,ky,kw,kh,{stroke:C.purple,sw:1.7});
+    T(k2+kw/2,ky+28,'CMK in Key Vault',{anchor:'middle',size:13,weight:600,fill:C.purple});
+    Twrap(k2+kw/2,ky+kh/2+8,'you rotate · same region · HSM for FIPS',Math.floor(kw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+    const k3=k2+kw+a.w*0.04;
+    box(k3,ky,kw,kh,{stroke:C.amber,sw:1.7});
+    T(k3+kw/2,ky+28,'In transit',{anchor:'middle',size:13,weight:600,fill:C.amber});
+    Twrap(k3+kw/2,ky+kh/2+8,'Secure transfer required = HTTPS only',Math.floor(kw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:14});
+  }
+},
+/* 5 — monitoring: insights vs defender */
+{
+  tab:'Monitor & protect',
+  title:'Storage Insights (watch) vs Defender for Storage (defend)',
+  gist:`Two complementary tools. <b>Storage Insights</b> is <b>passive monitoring</b> — metrics, logs, capacity/latency/transaction KPIs, historical analysis and alerts on your accounts. <b>Microsoft Defender for Storage</b> is <b>active threat protection</b> — it scans blob uploads for <b>malware</b>, detects sensitive-data (PII/credential) exposure, and flags unusual access patterns. Insights tells you how storage is <i>performing</i>; Defender tells you when it's under <i>attack</i>.`,
+  place:{here:'Both are storage-security tools.',
+    other:'Storage Insights is built on <b>Azure Monitor</b> (the monitoring domain) — same metrics/logs engine, applied to storage. Defender for Storage is part of <b>Microsoft Defender for Cloud</b>.'},
+  facts:[['Storage Insights','passive monitoring','green'],['…shows','latency, capacity, KPIs'],['Built on','Azure Monitor'],['Defender for Storage','active threat protection','green'],['…does','malware scan, PII/anomaly'],['Part of','Defender for Cloud']],
+  trap:['You want to block malware in uploaded blobs — Storage Insights?','<b>No — that\'s Microsoft Defender for Storage</b> (active protection: malware scanning, anomaly detection). Storage Insights is passive: performance/usage monitoring and historical reporting.'],
+  exam:['"Detect suspicious access and scan uploads for malware on a storage account."','<b>Microsoft Defender for Storage</b> — active threat detection. (Storage Insights only monitors performance/usage.)'],
+  scn:[
+    ['Track latency and capacity trends, set usage alerts.','Storage Insights','passive metrics/logs monitoring'],
+    ['Alert on unusual download volumes and scan blobs for malware.','Defender for Storage','active threat detection'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'One watches performance · the other defends against threats',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(380,a.w*0.44), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+30,'Storage Insights',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+54,'PASSIVE monitoring',{anchor:'middle',size:12,fill:C.soft});
+    ['metrics, logs, KPIs','latency · capacity · transactions','historical analysis + alerts','built on Azure Monitor'].forEach((t,i)=>Twrap(x0+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:1.8});
+    T(x1+w/2,y+30,'Defender for Storage',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+54,'ACTIVE threat protection',{anchor:'middle',size:12,fill:C.soft});
+    ['malware scan on upload','PII / credential exposure','unusual-access detection','part of Defender for Cloud'].forEach((t,i)=>Twrap(x1+w/2,y+86+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

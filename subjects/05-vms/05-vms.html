@@ -1,0 +1,386 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure Virtual Machines — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Deploy &amp; manage compute</div>
+  <h1>Azure Virtual Machines</h1>
+  <div class="lede">The IaaS workhorse. The story runs in one line: <b>create</b> a VM and its supporting resources, give it the right <b>disks</b>, then — because one VM isn't safe — make it <b>resilient</b> (sets &amp; zones) and able to <b>scale</b> (vertical/horizontal), automate that with scale sets, and run it <b>economically</b>.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — CREATE: the VM + supporting resources */
+{
+  tab:'Create a VM',
+  title:'A VM never comes alone — it needs supporting resources',
+  gist:`Creating a VM means creating a small bundle: the VM, a <b>virtual network</b> + <b>NIC</b> to talk on it, an <b>NSG</b> to filter traffic, an <b>IP</b> (private, optionally public), and <b>disks</b>. You decide a few things up front: <b>name</b> (15 chars Windows / 64 Linux, hard to change later), <b>region</b> (affects price, available sizes, compliance), <b>size</b> (the compute/memory/storage mix), and <b>image</b> (OS). Compute and storage are billed <b>separately</b> — stop-deallocate releases compute cost but you still pay for the disks.`,
+  facts:[['Comes with','VNet · NIC · NSG · IP · disks'],['Name','15 Win / 64 Linux'],['Region','price, sizes, compliance'],['Billing','compute + storage separate','green'],['Deallocated','no compute charge','green'],['…but disks','still billed','red']],
+  trap:['You stop a VM to save money — do all charges stop?','<b>No.</b> Stop-<b>deallocate</b> releases the <b>compute</b> charge (the hardware is freed), but you <b>keep paying for the disks</b> (storage). Storage is billed regardless of VM state.'],
+  exam:['"VM is idle nights/weekends; cut cost without deleting it."','<b>Stop-deallocate</b> it (or schedule it) — no compute charge while deallocated. Disks still cost; for steady 24/7 use a Reserved Instance instead.'],
+  scn:[
+    ['You want predictable lower cost on a VM that runs 24/7 for a year.','Reserved Instance','1- or 3-year commit, up to ~72% off pay-as-you-go'],
+    ['A dev VM is only used in business hours.','Deallocate off-hours','releases compute cost; you still pay for its disks'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'The VM plus the resources it depends on',{anchor:'middle',size:15,weight:600});
+    const vm=node(a.cx-Math.min(200,a.w*0.24)/2,a.y+a.h*0.16,Math.min(200,a.w*0.24),74,C.blue,'Virtual machine',null,{strong:true,tsize:14});
+    const deps=[[C.purple,'VNet + subnet'],[C.purple,'NIC'],[C.amber,'NSG'],[C.green,'IP (priv/pub)'],[C.soft,'OS + data disks']];
+    const cols=5, gap=12, w=(a.w-(cols-1)*gap)/cols, dy=a.b-86, h=72;
+    deps.forEach((d,i)=>{const x=a.x+i*(w+gap);
+      box(x,dy,w,h,{stroke:d[0],sw:1.5});
+      Twrap(x+w/2,dy+h/2,d[1],Math.floor(w/7),{anchor:'middle',size:11.5,fill:d[0],weight:600,lh:14});
+      arrow(vm.cx,vm.b+6,x+w/2,dy-6,{stroke:d[0],dash:'3 3'});
+    });
+    T(a.cx,(vm.b+dy)/2+4,'Azure creates these with the VM (or you supply existing ones)',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 1 — SIZE + image */
+{
+  tab:'Size & image',
+  title:'Size = the compute mix; resize means a reboot',
+  gist:`A <b>VM size</b> bundles CPU, memory, and storage into a named SKU, grouped by workload: <b>general purpose</b> (balanced), <b>compute optimized</b> (high CPU), <b>memory optimized</b> (high RAM, databases), <b>storage optimized</b> (high disk IO), <b>GPU</b> (rendering/ML), and <b>HPC</b>. You can <b>resize</b> a VM later, but it <b>reboots</b> — and a running VM can only move to a size available on its current hardware cluster; deallocate first to pick any size in the region. The <b>image</b> chooses the OS (and bundles its license into the hourly price).`,
+  facts:[['Size families','GP · compute · memory · storage · GPU · HPC'],['Memory-optimized','databases, caches'],['Resize','reboots the VM','red'],['Running resize','limited to cluster sizes'],['Deallocate first','any size in region','green'],['Image','OS; license in hourly price']],
+  trap:['You resize a running production VM — any impact?','<b>Yes — it reboots automatically</b>, causing a brief outage (and can change settings like the IP). Also, while running you\'re limited to sizes on the current cluster; deallocate to unlock all region sizes.'],
+  exam:['"Database VM needs lots of RAM relative to CPU." Which size family?','<b>Memory optimized</b> — high memory-to-CPU ratio, built for relational DBs, caches, in-memory analytics.'],
+  scn:[
+    ['A batch/compute-heavy job needs lots of CPU per GB.','Compute optimized','high CPU-to-memory ratio'],
+    ['You need a bigger VM but it\'s not offered on the current cluster.','Deallocate, then resize','deallocation frees the cluster, unlocking all region sizes'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Six workload families — pick by the CPU/memory/IO mix',{anchor:'middle',size:15,weight:600});
+    const fams=[['General purpose','balanced — test/dev, small DBs, web'],['Compute optimized','high CPU — batch, app servers'],['Memory optimized','high RAM — databases, caches'],['Storage optimized','high disk IO — big databases'],['GPU','rendering, ML training/inference'],['HPC','fastest CPUs, high-throughput net']];
+    const cols=2, gap=14, w=(a.w-gap)/2, rows=3, rh=(a.h*0.74-(rows-1)*gap)/rows;
+    const y0=a.y+a.h*0.16;
+    fams.forEach((f,i)=>{const r=Math.floor(i/cols),c=i%cols;const x=a.x+c*(w+gap),y=y0+r*(rh+gap);
+      box(x,y,w,rh,{stroke:C.blue,sw:1.5});
+      T(x+16,y+rh/2-6,f[0],{size:14,weight:600,fill:C.blue,baseline:'middle'});
+      T(x+16,y+rh/2+13,f[1],{size:11.5,fill:C.soft,baseline:'middle'});
+    });
+  }
+},
+/* 2 — DISKS */
+{
+  tab:'Disks',
+  title:'OS, temp, data — and five managed disk types',
+  gist:`Every VM has an <b>OS disk</b> and a <b>temporary disk</b> (local, scratch — not for data you keep); you add <b>data disks</b> for app data (best practice: keep data off the OS disk so you can detach/reattach it). Managed disk types, fastest to cheapest: <b>Ultra</b> (extreme IOPS, SAP HANA/top DBs), <b>Premium SSD v2</b>, <b>Premium SSD</b> (production), <b>Standard SSD</b> (web/light), <b>Standard HDD</b> (backup/infrequent). Watch the OS-disk rule: <b>Ultra and Premium SSD v2 can't be OS disks</b> — only Premium SSD, Standard SSD, and Standard HDD can.`,
+  facts:[['OS disk','the operating system'],['Temp disk','local scratch — don\'t keep data','red'],['Data disks','app data; max depends on VM size'],['Ultra','extreme IOPS, SAP/top DBs'],['Premium SSD','production'],['OS disk only','Premium SSD / Std SSD / Std HDD','red']],
+  trap:['You picked Ultra disk for the OS disk — works?','<b>No.</b> <b>Ultra and Premium SSD v2 can\'t be OS disks.</b> OS disks must be Premium SSD, Standard SSD, or Standard HDD. Use Ultra/Premium v2 as <i>data</i> disks for extreme-IO workloads.'],
+  exam:['"SAP HANA / transaction-heavy DB needing the highest IOPS." Disk type?','<b>Ultra disk</b> — top throughput/IOPS. (As a data disk; it can\'t be the OS disk.) Premium SSD is the general production choice.'],
+  scn:[
+    ['Backup/archive VM, cost-sensitive, rare access.','Standard HDD','cheapest, fine for infrequent access'],
+    ['Production app needing consistent low latency.','Premium SSD','SSD, production-grade, can be the OS disk'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Five disk types — fastest/costliest to cheapest',{anchor:'middle',size:15,weight:600});
+    const disks=[[C.green,'Ultra','SAP HANA, top DBs','data only'],[C.green,'Premium SSD v2','high IOPS/throughput','data only'],[C.blue,'Premium SSD','production','OS ok'],[C.blue,'Standard SSD','web, light apps','OS ok'],[C.soft,'Standard HDD','backup, infrequent','OS ok']];
+    const y0=a.y+a.h*0.16, gap=10, rh=(a.h*0.72-4*gap)/5;
+    disks.forEach((d,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:d[0],sw:1.5});
+      T(a.x+16,y+rh/2-5,d[1],{size:14,weight:600,fill:d[0],baseline:'middle'});
+      T(a.x+a.w*0.30,y+rh/2-5,d[2],{size:12,fill:C.soft,baseline:'middle'});
+      T(a.r-16,y+rh/2-5,d[3],{anchor:'end',size:12,fill:d[3]==='data only'?C.red:C.green,weight:600,baseline:'middle'});
+    });
+    T(a.cx,a.b-4,'OS disk must be Premium SSD / Standard SSD / Standard HDD — not Ultra or Premium SSD v2',{anchor:'middle',size:11,fill:C.red,weight:600});
+  }
+},
+/* 3 — THE AVAILABILITY PROBLEM (bridge) */
+{
+  tab:'Why one VM isn\'t safe',
+  title:'A single VM has no SLA against host failure or maintenance',
+  gist:`This is the hinge of the whole subject. A VM runs on a <b>physical host</b> in a datacenter — if that host fails, the VM goes down and Azure self-heals it to another host, but that takes <b>minutes of downtime</b>. Azure also does <b>planned maintenance</b> that can <b>reboot</b> the VM. So a lone VM is a single point of failure. The fixes below all answer one question: how do you spread VMs so a failure or an update never takes them all down at once? Availability <b>sets</b> and <b>zones</b> are the two answers.`,
+  facts:[['Single VM','single point of failure','red'],['Host failure','minutes of downtime'],['Planned maintenance','can reboot the VM'],['Fix #1','availability set'],['Fix #2','availability zones'],['Goal','never lose them all at once','green']],
+  trap:['Is one VM enough for a production app with an SLA?','<b>No.</b> A single VM gets no high-availability SLA — a host failure or planned reboot takes it offline. You need <b>2+ VMs</b> spread across an availability set or zones to meet an uptime SLA.'],
+  exam:['"Why does Azure require 2+ VMs across a set/zone for the VM SLA?"','Because a <b>single host failure or maintenance reboot</b> would otherwise take the whole app down. Spreading instances means a failure hits only a subset.'],
+  scn:[
+    ['A host running your only VM fails.','Self-heal to a new host','automatic, but minutes of downtime — unacceptable for HA'],
+    ['Azure schedules host maintenance.','VM may reboot','planned events can interrupt a lone VM'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'One VM, one host — one failure takes it down',{anchor:'middle',size:15,weight:600});
+    const host=box(a.cx-a.w*0.22,a.y+a.h*0.20,a.w*0.44,a.h*0.4,{stroke:C.red,sw:1.8,fill:'#fdf6f6'});
+    T(a.cx,a.y+a.h*0.20+28,'Physical host',{anchor:'middle',size:14,weight:600,fill:C.red});
+    const vm=node(a.cx-Math.min(160,a.w*0.20)/2,a.y+a.h*0.30,Math.min(160,a.w*0.20),72,C.blue,'Your VM',null,{tsize:14});
+    /* failure bolt */
+    T(a.cx,a.y+a.h*0.66,'host failure  or  planned maintenance reboot',{anchor:'middle',size:12.5,fill:C.red,weight:600});
+    arrow(a.cx,a.y+a.h*0.60+6,a.cx,a.y+a.h*0.66-16,{stroke:C.red});
+    T(a.cx,a.b-22,'→ minutes of downtime · no HA SLA for a single VM',{anchor:'middle',size:13,fill:C.ink,weight:600});
+    T(a.cx,a.b-2,'the fix: spread VMs across an availability set or zones (next)',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 4 — SETS vs ZONES */
+{
+  tab:'Sets vs zones',
+  title:'Availability sets vs availability zones',
+  gist:`Two ways to spread VMs. An <b>availability set</b> spreads VMs across <b>fault domains</b> (separate racks/power/network — guards hardware failure) and <b>update domains</b> (rebooted one at a time — guards planned maintenance), all <b>within one datacenter</b>. You can set <b>1–20 update domains (default 5)</b>; this is <b>immutable</b>, and a VM can only join a set <b>at creation</b>. An <b>availability zone</b> spreads VMs across <b>physically separate datacenters</b> (3 per region, independent power/cooling/network) — protecting against a whole datacenter failure, a higher tier of resilience than a set.`,
+  facts:[['Availability set','within ONE datacenter'],['Fault domain','separate rack — hardware fault'],['Update domain','rebooted one at a time'],['Update domains','1–20, default 5; immutable','red'],['Join a set','only at VM creation','red'],['Availability zone','3 separate datacenters/region','green']],
+  trap:['You need to add an existing VM to an availability set — how?','<b>You can\'t add it after the fact.</b> A VM joins an availability set <b>only at creation</b>. To change it you must delete and recreate the VM. (Same for changing the update-domain count — immutable.)'],
+  exam:['"Survive an entire datacenter failure, not just a rack." Set or zones?','<b>Availability zones</b> — VMs span 3 physically separate datacenters. An availability set only protects within a single datacenter (racks/updates).'],
+  scn:[
+    ['Protect a 2-tier app from rack failures and rolling updates, single datacenter.','Availability set','spread each tier across fault + update domains'],
+    ['Protect against losing a whole datacenter.','Availability zones','place VM instances in different zones'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Set = within a datacenter (racks/updates) · Zones = separate datacenters',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    /* availability set */
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+28,'Availability set',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+48,'one datacenter',{anchor:'middle',size:11.5,fill:C.soft});
+    ['fault domains — separate racks','update domains (1–20, default 5)','rebooted one at a time','join only at VM creation'].forEach((t,i)=>Twrap(x0+w/2,y+78+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    /* zones */
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Availability zones',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+48,'3 separate datacenters / region',{anchor:'middle',size:11.5,fill:C.soft});
+    ['independent power/cooling/network','survives a whole datacenter loss','zonal (pinned) or zone-redundant','higher resilience tier'].forEach((t,i)=>Twrap(x1+w/2,y+78+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 5 — SCALING: vertical vs horizontal */
+{
+  tab:'Vertical vs horizontal',
+  title:'Scale up (bigger) vs scale out (more)',
+  gist:`Two ways to handle more load. <b>Vertical scaling</b> (scale <b>up/down</b>) changes the VM's <b>size</b> — more or less powerful — but hits a hardware ceiling and requires a <b>reboot</b>. <b>Horizontal scaling</b> (scale <b>out/in</b>) changes the <b>number</b> of VM instances — add identical VMs behind a load balancer. Horizontal has fewer limits and no single-VM downtime, which is why it's the basis for elastic, highly available apps — and exactly what Scale Sets automate.`,
+  facts:[['Vertical = up/down','change the SIZE'],['…cost','reboot; hardware ceiling','red'],['Horizontal = out/in','change the COUNT'],['…benefit','fewer limits, no single downtime','green'],['Horizontal needs','identical VMs + load balancer'],['Leads to','Scale Sets (next)']],
+  trap:['Black-Friday traffic spike on a web tier — scale up or scale out?','<b>Scale out</b> (horizontal): add more instances behind a load balancer — no ceiling, no reboot, true HA. Scaling up resizes one VM (reboot, hardware limit) and is still a single point of failure.'],
+  exam:['"Add capacity without downtime and beyond one machine\'s limits."','<b>Horizontal scaling</b> (scale out) — more identical instances. Vertical scaling reboots the VM and is capped by available hardware.'],
+  scn:[
+    ['A single under-used VM on weekends — cut cost.','Scale down (vertical)','shrink the size; reboots once'],
+    ['A web app must absorb unpredictable traffic.','Scale out (horizontal)','add instances behind a load balancer — basis for VMSS'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Up/down changes size · out/in changes count',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.amber,sw:1.8});
+    T(x0+w/2,y+28,'Vertical — scale up/down',{anchor:'middle',size:15,weight:600,fill:C.amber});
+    T(x0+w/2,y+50,'change the SIZE of one VM',{anchor:'middle',size:12,fill:C.soft});
+    ['more/less CPU, RAM','hits a hardware ceiling','requires a reboot','still one VM = SPOF'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Horizontal — scale out/in',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+50,'change the NUMBER of VMs',{anchor:'middle',size:12,fill:C.soft});
+    ['add/remove identical instances','behind a load balancer','fewer limits, no single downtime','basis for Scale Sets'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 6 — SCALE SETS + autoscale (payoff) */
+{
+  tab:'Scale Sets & autoscale',
+  title:'VMSS — horizontal scaling, automated',
+  gist:`<b>Virtual Machine Scale Sets (VMSS)</b> are the payoff: a managed group of <b>identical</b> VMs that scale out/in automatically, load-balanced and highly available, with <b>no charge for the set itself</b> (you pay per instance). <b>Autoscale</b> rules add instances when a metric (e.g. CPU) crosses a threshold and remove them when load drops — or scale on a <b>schedule</b>. Orchestration mode is chosen at creation: <b>Uniform</b> (all instances identical, same image) or <b>Flexible</b> (mixed sizes/images). VMSS can also span availability zones for resilience + scale together.`,
+  facts:[['VMSS','identical VMs, auto scale out/in'],['Cost','per instance; set is free','green'],['Autoscale','metric rules or schedule'],['Uniform mode','all instances identical'],['Flexible mode','mixed sizes/images'],['Can span','availability zones','green']],
+  trap:['Can a scale set mix different VM sizes/images?','Only in <b>Flexible</b> orchestration mode. <b>Uniform</b> mode requires all instances be identical (same image/config). The mode is set at creation and can\'t be changed after.'],
+  exam:['"Web tier should add VMs automatically when CPU > 70% and remove them when it drops."','A <b>VM Scale Set</b> with an <b>autoscale rule</b> on CPU — scale out at the threshold, scale in when load falls. Schedule-based autoscale handles known peaks.'],
+  scn:[
+    ['Traffic is spiky and unpredictable; capacity must follow demand.','VMSS + autoscale (metric)','rules add/remove instances as CPU/load changes'],
+    ['Known nightly batch peak at 2am.','Autoscale (scheduled)','scale out on a schedule, then back in'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Identical VMs that grow and shrink on rules',{anchor:'middle',size:15,weight:600});
+    /* scale set box with instances */
+    const sx=a.x, sw=a.w*0.56, sy=a.y+a.h*0.18, sh=a.h*0.6;
+    box(sx,sy,sw,sh,{stroke:C.green,sw:2});
+    T(sx+16,sy+26,'VM Scale Set (identical instances)',{size:13.5,weight:600,fill:C.green});
+    const n=4, iw=(sw-32-3*12)/n, iy=sy+44, ih=sh-90;
+    for(let i=0;i<n;i++){const x=sx+16+i*(iw+12);
+      box(x,iy,iw,ih,{stroke:i<2?C.blue:'#cdd3da',fill:i<2?'#fff':'#fafbfc'});
+      T(x+iw/2,iy+ih/2,i<2?'VM':'+VM',{anchor:'middle',size:12,fill:i<2?C.blue:C.faint,weight:600});
+    }
+    T(sx+sw/2,sy+sh-16,'load-balanced · scale out → add · scale in → remove',{anchor:'middle',size:11,fill:C.soft});
+    /* autoscale rule */
+    const rx=sx+sw+a.w*0.05, rw=a.r-rx;
+    const rule=node(rx,sy+sh*0.10,rw,80,C.amber,'Autoscale rule',null,{tsize:13.5});
+    Twrap(rule.cx,rule.cy+16,'metric (CPU>70%) or schedule',Math.floor(rw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(rx-6,rule.cy,sx+sw+6,sy+sh*0.5,{stroke:C.amber,dash:'4 4'});
+    T(rx+rw/2,sy+sh*0.55,'Uniform = identical',{anchor:'middle',size:11,fill:C.faint});
+    T(rx+rw/2,sy+sh*0.55+18,'Flexible = mixed',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 7 — COST & MANAGEMENT (run it economically + automate operations) */
+{
+  tab:'Cost & management',
+  title:'Pay less, and automate the running of it',
+  gist:`Once it runs, two levers. <b>Cost:</b> compute is billed per-minute and only while running (deallocate to stop it); choose <b>pay-as-you-go</b> for short/unpredictable workloads, or a <b>Reserved Instance (RI)</b> — a 1- or 3-year commit in a region for up to <b>72%</b> savings — for steady 24/7 VMs. <b>Azure Hybrid Benefit</b> cuts the OS-license cost by reusing existing Windows/Linux licenses. <b>Auto-shutdown</b> stops dev VMs on a schedule. <b>Management:</b> <b>VM extensions</b> run post-deploy config (e.g. install/automate software); <b>Azure Automation</b> handles process, configuration, and update management at scale.`,
+  facts:[['Pay-as-you-go','per-minute, no commit'],['Reserved Instance','1/3-yr commit, up to 72% off','green'],['Azure Hybrid Benefit','reuse OS licenses, cut cost','green'],['Auto-shutdown','schedule stop for dev VMs'],['VM extension','post-deploy config/automation'],['Azure Automation','process / config / update mgmt']],
+  trap:['A VM runs 24/7 all year — pay-as-you-go or Reserved Instance?','<b>Reserved Instance.</b> For continuous, predictable workloads an RI saves up to ~72% over pay-as-you-go. PAYG is for short-term/unpredictable workloads you start and stop.'],
+  exam:['"Reduce Windows VM cost by reusing licenses you already own."','<b>Azure Hybrid Benefit</b> — applies existing Windows/Linux licenses to drop the OS-license portion of the VM cost. (RI cuts compute; Hybrid Benefit cuts licensing — they stack.)'],
+  scn:[
+    ['Install and configure software on a VM automatically after it deploys.','VM extension','runs post-deployment config tasks (e.g. custom script)'],
+    ['Patch and track updates across many VMs centrally.','Azure Automation (Update Management)','process/config/update management at scale'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two levers after deployment: cost and management',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.green,sw:1.8});
+    T(x0+w/2,y+30,'Lower the cost',{anchor:'middle',size:15,weight:600,fill:C.green});
+    ['pay-as-you-go — short/unpredictable','Reserved Instance — 1/3 yr, up to 72% off','Azure Hybrid Benefit — reuse licenses','auto-shutdown — stop dev VMs on schedule'].forEach((t,i)=>Twrap(x0+w/2,y+66+i*30,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:14}));
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+30,'Automate management',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    ['VM extensions — post-deploy config','Azure Automation:','· process automation','· configuration management','· update management'].forEach((t,i)=>Twrap(x1+w/2,y+66+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:i===1?C.soft:C.ink,lh:14}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

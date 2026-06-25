@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Backup & Recovery — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Monitor &amp; maintain</div>
+  <h1>Backup &amp; recovery</h1>
+  <div class="lede">Azure Backup protects your data so you can <b>go back in time</b> after loss, corruption, or ransomware. The pieces: the right <b>agent/component</b> for what you're protecting, a <b>vault</b> to hold it, a <b>policy</b> for schedule and retention — and the separate <b>Site Recovery</b> service for failing a whole region over.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — what Azure Backup is */
+{
+  tab:'What it is',
+  title:'Backup as a service — no infrastructure to run',
+  gist:`<b>Azure Backup</b> is a built-in, <b>zero-infrastructure</b> service that protects on-prem and Azure data — VMs, files/folders, Azure Files, and workloads like SQL/SAP HANA in VMs. It stores recovery points in a <b>vault</b>, encrypts data (Microsoft- or customer-managed keys), is governed by <b>RBAC</b>, and protects the backups themselves with <b>soft delete</b> (a deleted backup is retained <b>14 days</b> free). Its purpose is to <b>go back in time</b> — recover from accidental deletion, corruption, or ransomware.`,
+  facts:[['Azure Backup','zero-infrastructure BaaS','green'],['Protects','VMs, files, Azure Files, SQL/HANA'],['Stores in','a vault'],['Encryption','MMK or CMK'],['Soft delete','deleted backup kept 14 days','green'],['Purpose','recover to a point in time']],
+  trap:['Someone deletes a backup, accidentally or maliciously — is it gone?','<b>No — soft delete keeps it 14 days</b> (free), so you can recover it. Enhanced soft delete extends that. Backups are protected against deletion, not just your data.'],
+  exam:['"Recover company data after a ransomware attack encrypts it."','<b>Azure Backup</b> — restore a clean recovery point from before the attack. Backup is the "go back in time" tool for loss/corruption/ransomware (Site Recovery is for region failover, not this).'],
+  scn:[
+    ['A bug overwrote production data yesterday.','Azure Backup restore','recover the recovery point from before the bug'],
+    ['Protect on-prem files and Azure VMs from one service.','Azure Backup','covers both on-prem and Azure with the right component'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Many sources → Azure Backup → recovery points in a vault',{anchor:'middle',size:15,weight:600});
+    const srcs=['On-prem files/servers','Azure VMs','Azure Files','SQL / SAP HANA in VMs'];
+    const sw=Math.min(200,a.w*0.24), sgap=14, sx=a.x, sy0=a.y+a.h*0.16, sh=(a.h*0.66-(srcs.length-1)*sgap)/srcs.length;
+    srcs.forEach((s,i)=>{const y=sy0+i*(sh+sgap);box(sx,y,sw,sh,{stroke:C.blue,sw:1.5});Twrap(sx+sw/2,y+sh/2,s,Math.floor(sw/7),{anchor:'middle',size:11.5,fill:C.blue,weight:600,lh:13});});
+    const bk=node(a.cx-Math.min(180,a.w*0.20)/2,a.y+a.h*0.36,Math.min(180,a.w*0.20),90,C.green,'Azure Backup',null,{strong:true,tsize:14});
+    const vault=node(a.r-Math.min(180,a.w*0.20),a.y+a.h*0.36,Math.min(180,a.w*0.20),90,C.purple,'Vault',null,{tsize:14});
+    Twrap(vault.cx,vault.cy+16,'recovery points',Math.floor(vault.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    srcs.forEach((s,i)=>{const y=sy0+i*(sh+sgap)+sh/2;arrow(sx+sw+6,y,bk.x-6,bk.cy,{stroke:C.faint,dash:'3 3'});});
+    arrow(bk.r+6,bk.cy,vault.x-6,vault.cy,{stroke:C.green});
+  }
+},
+/* 1 — the four components (the agent confusion) */
+{
+  tab:'Which component?',
+  title:'Four components — pick by what you\'re protecting',
+  gist:`The thing people mix up. <b>MARS agent</b> (Microsoft Azure Recovery Services) — installs on a Windows machine to back up <b>files, folders, and system state</b> directly to a vault (on-prem or even files on an Azure VM). <b>MABS / DPM</b> (Azure Backup Server / Data Protection Manager) — a backup <b>server</b> for on-prem workloads (Hyper-V, VMware, app-aware) that then backs up to the vault. <b>VM backup extension</b> — installed on the Azure VM agent to back up the <b>whole Azure VM</b>. (Note: the <b>Azure Monitor Agent</b> is for monitoring, <b>not</b> backup — different agent entirely.)`,
+  facts:[['MARS agent','files/folders/system state → vault'],['MABS / DPM','on-prem server (Hyper-V/VMware)'],['VM backup extension','whole Azure VM','green'],['…files only on a VM?','use MARS instead'],['NOT backup','Azure Monitor Agent','red'],['All write to','a vault']],
+  trap:['To back up just files/folders inside an Azure VM, use the VM backup extension?','<b>No — use the MARS agent</b> for file/folder/system-state backup. The VM backup extension backs up the <b>whole VM</b>. MARS = granular files; extension = entire VM.'],
+  exam:['"Back up on-prem Hyper-V and VMware VMs to Azure." Which component?','<b>MABS or DPM</b> — a backup server that protects on-prem virtualization workloads, then backs them up to the vault. (MARS = files/system-state; VM extension = an Azure VM.)'],
+  scn:[
+    ['Back up an entire Azure VM.','VM backup extension','installed on the Azure VM agent, captures the whole VM'],
+    ['Back up files/folders/system state on a Windows server.','MARS agent','granular file/folder/system-state to the vault'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Match the component to what you protect',{anchor:'middle',size:15,weight:600});
+    const items=[
+      [C.blue,'MARS agent','files, folders, system state','on-prem Windows, or files on an Azure VM'],
+      [C.amber,'MABS / DPM','a backup server','on-prem Hyper-V, VMware, app-aware workloads'],
+      [C.green,'VM backup extension','the whole Azure VM','installed on the Azure VM agent'],
+    ];
+    const y0=a.y+a.h*0.15, gap=12, rh=(a.h*0.64-2*gap)/3;
+    items.forEach((it,i)=>{const y=y0+i*(rh+gap);
+      box(a.x,y,a.w,rh,{stroke:it[0],sw:1.8});
+      T(a.x+18,y+rh/2-6,it[1],{size:14.5,weight:600,fill:it[0],baseline:'middle'});
+      T(a.x+a.w*0.28,y+rh/2-6,it[2],{size:12.5,weight:600,fill:C.ink,baseline:'middle'});
+      T(a.x+a.w*0.28,y+rh/2+13,it[3],{size:11.5,fill:C.soft,baseline:'middle'});
+    });
+    const wy=y0+3*(rh+gap)+2;
+    box(a.x,wy,a.w,a.b-wy,{stroke:C.red,fill:'#fdf6f6',sw:1.4});
+    T(a.cx,(wy+a.b)/2+4,'Azure Monitor Agent is for MONITORING, not backup — don\'t confuse it',{anchor:'middle',size:12,fill:C.red,weight:600});
+  }
+},
+/* 2 — vaults */
+{
+  tab:'Vaults',
+  title:'Recovery Services vault vs Backup vault',
+  gist:`A <b>vault</b> is the online entity that stores backup copies, recovery points, and policies, and is where you manage backups (with RBAC and built-in monitoring). Two kinds: the <b>Recovery Services vault</b> is the established one — used for Azure VM backup, MARS/MABS/DPM, Azure Files, SQL/SAP HANA in VMs, <b>and Azure Site Recovery</b>. The newer <b>Backup vault</b> backs the next-generation workloads (e.g. Azure Blobs, managed disks, PostgreSQL). You also choose the vault's <b>redundancy</b> — LRS, ZRS, or GRS — for how its data is replicated.`,
+  facts:[['Vault','holds recovery points + policies'],['Recovery Services vault','VMs, MARS/MABS, Files, SQL, + ASR','green'],['Backup vault','newer workloads (blobs, disks, PG)'],['Both','RBAC + monitoring built in'],['Redundancy','LRS / ZRS / GRS'],['Site Recovery uses','Recovery Services vault']],
+  trap:['Which vault do you use for Azure Site Recovery?','A <b>Recovery Services vault</b> — ASR (and classic VM/MARS/MABS backup) live there. The newer <b>Backup vault</b> is for next-gen workloads like blobs and managed disks, not Site Recovery.'],
+  exam:['"Back up Azure VMs and also set up Site Recovery." Which vault type?','A <b>Recovery Services vault</b> — it covers Azure VM backup, the MARS/MABS components, and Azure Site Recovery together.'],
+  scn:[
+    ['Set up Azure VM backup + region failover.','Recovery Services vault','classic VM backup and Site Recovery both use it'],
+    ['Back up Azure Blob storage / managed disks.','Backup vault','the newer vault for next-gen workloads'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Two vault types — older covers ASR, newer covers next-gen workloads',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.green,sw:2});
+    T(x0+w/2,y+28,'Recovery Services vault',{anchor:'middle',size:14.5,weight:600,fill:C.green});
+    T(x0+w/2,y+50,'the established vault',{anchor:'middle',size:11.5,fill:C.soft});
+    ['Azure VM backup','MARS / MABS / DPM','Azure Files, SQL, SAP HANA','+ Azure Site Recovery'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x1+w/2,y+28,'Backup vault',{anchor:'middle',size:14.5,weight:600,fill:C.blue});
+    T(x1+w/2,y+50,'the newer vault',{anchor:'middle',size:11.5,fill:C.soft});
+    ['Azure Blobs','Managed disks','PostgreSQL / next-gen','(not Site Recovery)'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+/* 3 — backup types + policy */
+{
+  tab:'Backup types & policy',
+  title:'Full, incremental, differential — and the policy',
+  gist:`A <b>backup policy</b> defines <b>when</b> backups run and <b>how long</b> recovery points are kept. The first backup is always a <b>full</b> backup; after that, Azure uses <b>incremental</b> backups (only the blocks changed since the <i>last</i> backup) — efficient. <b>Differential</b> (a SQL option) captures everything changed since the last <i>full</i>. SQL in VMs also supports <b>transaction log</b> backups for point-in-time restore (every 15 min). VM <b>Enhanced policy</b> allows multiple backups per day (down to a 4-hour RPO). Restore can also do <b>selective disk</b> backup/restore.`,
+  facts:[['Policy','when to back up + retention'],['First backup','always full'],['Then','incremental (since last backup)','green'],['Differential','since last FULL (SQL)'],['Transaction log','point-in-time, every 15 min (SQL)'],['Enhanced policy','multiple/day, 4-hr RPO']],
+  trap:['Incremental vs differential — what\'s each measured against?','<b>Incremental = changes since the last BACKUP</b> (any kind); <b>differential = changes since the last FULL backup</b>. Azure VM backups use incremental after the first full; differential is a SQL backup type.'],
+  exam:['"Restore SQL in a VM to a specific second in time." Which backup type?','<b>Transaction log</b> backups — they enable point-in-time restore (configurable as often as every 15 minutes). Full/differential alone can\'t hit an arbitrary second.'],
+  scn:[
+    ['Keep daily VM recovery points for 30 days.','Backup policy','set schedule = daily, retention = 30 days'],
+    ['Need recovery points more often than once a day for a VM.','Enhanced policy','multiple backups/day, down to a 4-hour RPO'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'First full, then incrementals — policy sets schedule & retention',{anchor:'middle',size:15,weight:600});
+    /* timeline */
+    const ty=a.y+a.h*0.30, tx0=a.x+20, tx1=a.r-20;
+    arrow(tx0,ty,tx1,ty,{stroke:C.faint});
+    const pts=[['Full',C.green,0],['Incr',C.blue,0.2],['Incr',C.blue,0.4],['Incr',C.blue,0.6],['Incr',C.blue,0.8]];
+    pts.forEach(p=>{const x=tx0+(tx1-tx0-20)*p[2]+20;
+      el('circle',{cx:x,cy:ty,r:9,fill:p[1],opacity:0.18,stroke:p[1],'stroke-width':2});
+      T(x,ty-18,p[0],{anchor:'middle',size:11.5,fill:p[1],weight:600});
+    });
+    T(a.cx,ty+26,'incremental = only blocks changed since the last backup',{anchor:'middle',size:11.5,fill:C.soft});
+    /* policy box */
+    const py=ty+56, pw=a.w, ph=a.b-py;
+    box(a.x,py,pw,ph,{stroke:C.purple,sw:1.6});
+    T(a.x+18,py+26,'Backup policy',{size:13.5,weight:600,fill:C.purple});
+    T(a.x+18,py+50,'Schedule — daily/weekly, or Enhanced (multiple/day, 4-hr RPO)',{size:12,fill:C.ink});
+    T(a.x+18,py+72,'Retention — how long recovery points are kept',{size:12,fill:C.ink});
+    T(a.x+18,py+94,'SQL: differential (since last full) · transaction log (point-in-time, 15 min)',{size:11.5,fill:C.soft});
+  }
+},
+/* 4 — Backup vs Site Recovery (the payoff comparison) */
+{
+  tab:'Backup vs Site Recovery',
+  title:'Backup = go back in time · Site Recovery = fail over',
+  gist:`The defining comparison. <b>Azure Backup</b> keeps <b>point-in-time copies</b> so you can <b>restore to an earlier state</b> — for accidental deletion, corruption, or ransomware. <b>Azure Site Recovery (ASR)</b> <b>replicates</b> running machines in near-real-time to a secondary region and lets you <b>fail over</b> there — for a region-wide disaster (so the app keeps running elsewhere). Backup is about <i>recovering data</i>; Site Recovery is about <i>business continuity / staying available</i>. They're complementary, and both can use a Recovery Services vault.`,
+  place:{here:'Both are <b>Monitor &amp; maintain</b> (Domain 5) resiliency tools.',
+    other:'Don\'t confuse with availability sets/zones (Compute) which protect a <i>running</i> VM within a region. Backup = restore old data; Site Recovery = failover to another region; AZ/sets = in-region hardware redundancy.'},
+  facts:[['Azure Backup','point-in-time copies'],['…recovers from','deletion, corruption, ransomware','green'],['Site Recovery','near-real-time replication'],['…for','region-wide disaster → failover','green'],['Backup =','go back in time'],['Site Recovery =','business continuity']],
+  trap:['Region-wide outage — restore from Backup or fail over with Site Recovery?','<b>Site Recovery</b> — it replicates and fails the workload over to a secondary region so it keeps running. <b>Backup</b> restores <i>data</i> to a point in time; it\'s for loss/corruption, not keeping the app available during a regional disaster.'],
+  exam:['"Keep an app running through a regional disaster" vs "recover data after ransomware."','Regional disaster → <b>Site Recovery</b> (replicate + failover). Ransomware/corruption/deletion → <b>Azure Backup</b> (restore a clean recovery point).'],
+  scn:[
+    ['A natural disaster takes out the primary region.','Site Recovery failover','workload runs from the replicated secondary region'],
+    ['Ransomware encrypted the data last night.','Azure Backup restore','recover a clean recovery point from before'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Restore old data vs fail the whole workload over',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.green,sw:2});
+    T(x0+w/2,y+28,'Azure Backup',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x0+w/2,y+50,'go BACK in time',{anchor:'middle',size:12,fill:C.soft});
+    ['point-in-time recovery points','restore to an earlier state','for deletion / corruption / ransomware','recover the DATA'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.amber,sw:2});
+    T(x1+w/2,y+28,'Azure Site Recovery',{anchor:'middle',size:15,weight:600,fill:C.amber});
+    T(x1+w/2,y+50,'FAIL OVER to another region',{anchor:'middle',size:12,fill:C.soft});
+    ['near-real-time replication','run from a secondary region','for a region-wide disaster','keep the app AVAILABLE'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

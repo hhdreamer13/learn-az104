@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Load Balancing — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Networking (4 of 4)</div>
+  <h1>Load balancing</h1>
+  <div class="lede">Distribute traffic across multiple backends for performance and high availability. The choice turns on <b>which OSI layer</b> and <b>regional vs global</b>: <b>Load Balancer</b> (L4, TCP/UDP) and <b>Application Gateway</b> (L7, HTTP/S, WAF) are the two AZ-104 stars — with Front Door and Traffic Manager as the global options.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.font||'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — the layer 4 vs 7 fork (the master decision) */
+{
+  tab:'L4 vs L7',
+  title:'The decision: which OSI layer does the routing?',
+  gist:`Every load-balancing question starts here. <b>Layer 4</b> balances on <b>TCP/UDP + IP + port</b> — it doesn't read the request content. <b>Azure Load Balancer</b> is the L4 option. <b>Layer 7</b> balances on <b>HTTP(S) content</b> — URL path, host header, cookies — so it can do path-based routing, SSL termination, and a Web Application Firewall. <b>Application Gateway</b> is the L7 option. If the routing decision needs anything about the <i>web request</i> (a path, a host, WAF), it's L7 / App Gateway; if it's raw TCP/UDP, it's L4 / Load Balancer.`,
+  facts:[['Layer 4','TCP/UDP, IP, port'],['…tool','Azure Load Balancer'],['Layer 7','HTTP(S) content','green'],['…tool','Application Gateway'],['Need URL/host routing or WAF','→ L7','green'],['Raw TCP/UDP','→ L4']],
+  trap:['You need to route /images to one pool and /api to another. Load Balancer?','<b>No — that\'s Layer 7 (path-based routing) → Application Gateway.</b> Azure Load Balancer is L4 and can\'t see the URL path; it only knows IP/port/protocol.'],
+  exam:['How do you tell an L4 question from an L7 one?','Look at what the routing depends on: <b>IP/port/protocol</b> → <b>L4 Load Balancer</b>; <b>URL path, host header, cookies, or "WAF/SSL"</b> → <b>L7 Application Gateway</b>.'],
+  scn:[
+    ['Balance raw TCP traffic across a set of VMs.','Load Balancer (L4)','distributes by IP/port, no content awareness'],
+    ['Route by URL path and protect with a firewall.','Application Gateway (L7)','reads HTTP, path-based routing + WAF'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'What does the routing decision depend on?',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+28,'Layer 4',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+50,'Azure Load Balancer',{anchor:'middle',size:12.5,weight:600,fill:C.ink});
+    ['balances on TCP/UDP, IP, port','does NOT read request content','ultra-low latency, high throughput','for any TCP/UDP workload'].forEach((t,i)=>Twrap(x0+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Layer 7',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+50,'Application Gateway',{anchor:'middle',size:12.5,weight:600,fill:C.ink});
+    ['balances on HTTP(S) content','URL path / host / cookie routing','SSL termination + WAF','for web applications'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13}));
+  }
+},
+/* 1 — Azure Load Balancer (L4) */
+{
+  tab:'Load Balancer',
+  title:'Load Balancer — L4, public or internal, regional',
+  gist:`<b>Azure Load Balancer</b> distributes TCP/UDP traffic across a <b>backend pool</b> of VMs or a scale set, using a <b>5-tuple hash</b> (source IP/port, dest IP/port, protocol) and <b>health probes</b> to skip unhealthy instances. Two flavours by frontend IP: a <b>public</b> LB (public frontend → internet-facing) and an <b>internal/private</b> LB (private frontend → traffic inside the VNet or from on-prem, never internet-exposed). It's <b>regional</b> and zone-redundant. Remember the SKU rule from VNets: the public IP SKU must match the LB SKU (Standard/Standard).`,
+  facts:[['Layer','4 (TCP/UDP)'],['Public LB','internet-facing frontend'],['Internal LB','private frontend, in-VNet','green'],['Distributes via','5-tuple hash'],['Health probes','skip unhealthy backends'],['Scope','regional, zone-redundant']],
+  trap:['You need to balance traffic between internal app tiers, never exposed to the internet. Public LB?','<b>No — an internal (private) Load Balancer.</b> It uses a private frontend IP and is never internet-exposed. A public LB has a public frontend for internet traffic.'],
+  exam:['"Distribute internet traffic across web-tier VMs at L4." Which LB type?','A <b>public Load Balancer</b> — public frontend IP, maps to the private IPs of the backend pool. (Internal LB is for in-VNet/private traffic.)'],
+  scn:[
+    ['Spread inbound internet TCP across several web VMs.','Public Load Balancer','public frontend → backend pool private IPs'],
+    ['Balance traffic from the web tier to a private app tier.','Internal Load Balancer','private frontend, stays inside the VNet'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A frontend IP → backend pool, health-probed',{anchor:'middle',size:15,weight:600});
+    const fe=node(a.x,a.y+a.h*0.40,Math.min(160,a.w*0.20),84,C.blue,'Front-end IP',null,{tsize:13.5});
+    Twrap(fe.cx,fe.cy+16,'public or private',Math.floor(fe.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const lb=node(fe.r+a.w*0.06,a.y+a.h*0.40,Math.min(150,a.w*0.18),84,C.blue,'Load Balancer',null,{strong:true,tsize:13});
+    Twrap(lb.cx,lb.cy+16,'L4 · 5-tuple',Math.floor(lb.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(fe.r+6,fe.cy,lb.x-6,lb.cy,{stroke:C.soft});
+    /* backend pool */
+    const bx=lb.r+a.w*0.08, bn=3, bw=Math.min(150,a.w*0.18), bgap=14, by0=a.y+a.h*0.14, bh=(a.h*0.72-(bn-1)*bgap)/bn;
+    for(let i=0;i<bn;i++){const y=by0+i*(bh+bgap);box(bx,y,bw,bh,{stroke:i<2?C.green:'#dfe3e9',fill:i<2?'#f3faf6':'#fafbfc'});T(bx+bw/2,y+bh/2-4,'VM '+(i+1),{anchor:'middle',size:12.5,weight:600,fill:i<2?C.green:C.faint});T(bx+bw/2,y+bh/2+14,i<2?'healthy':'unhealthy → skipped',{anchor:'middle',size:9.5,fill:i<2?C.green:C.red});arrow(lb.r+6,lb.cy,bx-6,y+bh/2,{stroke:i<2?C.green:'#cdd3da',dash:i<2?'none':'4 4'});}
+    T((lb.r+bx)/2,a.y+a.h*0.40-14,'backend pool',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 2 — Application Gateway (L7) */
+{
+  tab:'Application Gateway',
+  title:'Application Gateway — L7 web routing + WAF',
+  gist:`<b>Application Gateway</b> load-balances <b>HTTP/HTTPS</b> web traffic with content awareness. It does <b>path-based routing</b> (send <code>/api</code> and <code>/images</code> to different pools), <b>SSL/TLS termination</b> (decrypt at the gateway to offload backend CPU), and <b>session affinity</b> (cookie-based stickiness, important for stateful apps). Its headline security feature is the optional <b>Web Application Firewall (WAF)</b> — blocks SQL injection, cross-site scripting, etc. Plus autoscaling and connection draining. Backends can be VMs, scale sets, App Service, or even on-prem servers.`,
+  facts:[['Layer','7 (HTTP/HTTPS)'],['Path-based routing','/api vs /images → pools','green'],['SSL termination','offload decrypt at gateway'],['WAF','blocks SQLi / XSS','green'],['Session affinity','cookie stickiness'],['Backends','VMs, VMSS, App Service, on-prem']],
+  trap:['You need to block SQL-injection attacks at the load balancer. Which service?','<b>Application Gateway with WAF</b> — the Web Application Firewall inspects HTTP and blocks SQLi/XSS. Azure Load Balancer is L4 and has no WAF (it can\'t see HTTP content).'],
+  exam:['"Route by URL path, terminate SSL, and run a web firewall." Which service?','<b>Application Gateway</b> (L7) — path-based routing + SSL termination + WAF. These are all content-aware features that L4 Load Balancer can\'t do.'],
+  scn:[
+    ['Decrypt HTTPS at the edge so backend VMs don\'t spend CPU on it.','SSL termination (App Gateway)','offloads decryption at the gateway'],
+    ['A stateful app stores session data on individual servers.','Session affinity','cookie stickiness keeps a user on one backend'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Reads the HTTP request and routes by path',{anchor:'middle',size:15,weight:600});
+    const gw=node(a.x,a.y+a.h*0.38,Math.min(190,a.w*0.23),96,C.green,'Application Gateway',null,{strong:true,tsize:13});
+    Twrap(gw.cx,gw.cy+16,'L7 · WAF · SSL term',Math.floor(gw.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const routes=[['/api','API pool',C.blue],['/images','Image pool',C.amber],['/*','Web pool',C.purple]];
+    const rx=gw.r+a.w*0.12, rw=a.r-rx, rh=Math.min(64,(a.h*0.72)/3-12), ry0=a.y+a.h*0.14;
+    routes.forEach((r,i)=>{const y=ry0+i*(rh+18);
+      box(rx,y,rw,rh,{stroke:r[2],sw:1.6});
+      T(rx+16,y+rh/2-4,r[0],{size:13,weight:700,fill:r[2],font:'ui-monospace, monospace'});
+      T(rx+rw*0.40,y+rh/2-4,'→ '+r[1],{size:12,fill:C.ink});
+      arrow(gw.r+6,gw.cy,rx-6,y+rh/2,{stroke:r[2],dash:'3 3'});
+    });
+    T((gw.r+rx)/2,a.y+a.h*0.38-14,'path-based',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 3 — all four options (the full comparison) */
+{
+  tab:'Which service?',
+  title:'Four load balancers — by layer and by reach',
+  gist:`Azure has four, split by <b>OSI layer</b> and <b>regional vs global</b>. <b>Load Balancer</b> — L4, regional, raw TCP/UDP. <b>Application Gateway</b> — L7, regional, web traffic + WAF. <b>Front Door</b> — L7, <b>global</b>, an application delivery network with global routing, WAF, caching, fast failover (load-balance an app across regions). <b>Traffic Manager</b> — <b>DNS-based</b>, global, balances at the <b>domain level</b> (returns the best endpoint by DNS) — so it can't fail over as fast as Front Door because of DNS caching/TTL. Layer + reach picks the answer.`,
+  facts:[['Load Balancer','L4 · regional · TCP/UDP'],['Application Gateway','L7 · regional · web + WAF'],['Front Door','L7 · GLOBAL · ADN + WAF + cache','green'],['Traffic Manager','DNS-based · global · domain-level'],['Global web app','Front Door','green'],['Traffic Manager failover','slower (DNS TTL)','red']],
+  trap:['Front Door vs Traffic Manager for global — same thing?','<b>No.</b> <b>Front Door</b> is an L7 application delivery network (real-time routing, WAF, caching, fast failover). <b>Traffic Manager</b> is <b>DNS-based</b> — it only directs at the domain level and fails over <b>slower</b> due to DNS caching/TTL. For a global web app needing fast failover, Front Door.'],
+  exam:['"Load-balance a web app deployed across multiple Azure regions." Which service?','<b>Front Door</b> — global L7 with WAF and fast failover. (Load Balancer and App Gateway are regional; Traffic Manager is DNS-level and slower to fail over.)'],
+  scn:[
+    ['Regional web app needing path routing + WAF.','Application Gateway','L7, regional'],
+    ['Global web app across regions, fast failover + caching.','Front Door','global L7 application delivery network'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Pick by OSI layer (rows) and regional vs global (cols)',{anchor:'middle',size:15,weight:600});
+    /* 2x2 matrix: rows L4/L7, cols regional/global */
+    const gx=a.x+a.w*0.16, gw=a.w*0.80, cw=gw/2;
+    const gy=a.y+a.h*0.20, rh=a.h*0.30;
+    T(gx+cw*0.5,gy-10,'Regional',{anchor:'middle',size:12.5,weight:600,fill:C.soft});
+    T(gx+cw*1.5,gy-10,'Global',{anchor:'middle',size:12.5,weight:600,fill:C.soft});
+    T(a.x,gy+rh*0.5,'L4',{size:13,weight:700,fill:C.blue,baseline:'middle'});
+    T(a.x,gy+rh*1.5+14,'L7',{size:13,weight:700,fill:C.green,baseline:'middle'});
+    const cells=[
+      [0,0,C.blue,'Load Balancer','TCP/UDP'],
+      [1,0,'#dfe3e9','— (Traffic Manager is DNS/global)','',true],
+      [0,1,C.amber,'Traffic Manager','DNS-based, domain-level'],
+      [1,1,C.green,'Front Door','ADN · WAF · cache · fast failover'],
+    ];
+    /* place: row index = layer (0=L4 top), col = reach */
+    const grid=[[null,null],[null,null]];
+    /* manual placement */
+    function cell(row,col,color,title,sub,dim){const x=gx+col*cw+8,y=gy+row*rh+8,w=cw-16,hh=rh-16;
+      box(x,y,w,hh,{stroke:dim?'#dfe3e9':color,sw:dim?1.2:1.8,fill:dim?'#fafbfc':'#fff'});
+      T(x+w/2,y+hh/2-6,title,{anchor:'middle',size:13,weight:600,fill:dim?C.faint:color});
+      if(sub)Twrap(x+w/2,y+hh/2+16,sub,Math.floor(w/6.5),{anchor:'middle',size:10.5,fill:C.soft,lh:13});}
+    cell(0,0,C.blue,'Load Balancer','TCP/UDP');
+    cell(0,1,'#dfe3e9','(none — L4 is regional)','',true);
+    cell(1,0,C.green,'Application Gateway','web + WAF');
+    cell(1,1,C.green,'Front Door','ADN · WAF · fast failover');
+    T(a.cx,a.b-18,'Traffic Manager = DNS-based, global, domain-level (slower failover, sits across all of these)',{anchor:'middle',size:11,fill:C.amber,weight:600});
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

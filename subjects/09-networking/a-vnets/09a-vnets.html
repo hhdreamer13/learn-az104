@@ -1,0 +1,276 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Virtual Networks — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Networking (1 of 4)</div>
+  <h1>Virtual networks</h1>
+  <div class="lede">The foundation everything else in networking sits on. A <b>VNet</b> is your private, isolated network in Azure with its own address space; you carve it into <b>subnets</b> and give resources <b>private and public IPs</b>. Security (NSGs), connectivity (peering, routes), DNS, and load balancing all build on this.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.font||'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+const MONO='ui-monospace, monospace';
+
+const facets=[
+/* 0 — what a VNet is */
+{
+  tab:'The VNet',
+  title:'Your private, isolated network in Azure',
+  gist:`A <b>virtual network (VNet)</b> is a logical isolation of the Azure cloud — your own private network with an <b>address space</b> defined as one or more <b>CIDR blocks</b> (e.g. <code>10.0.0.0/16</code>). Resources inside it communicate privately and securely; you control DNS and segmentation. A VNet lives in <b>one region and one subscription</b>. To join VNets together or reach on-premises, the address spaces <b>must not overlap</b> (you link them with peering or a VPN/ExpressRoute gateway).`,
+  facts:[['VNet','private, isolated network'],['Address space','CIDR block(s), e.g. 10.0.0.0/16'],['Scope','one region, one subscription'],['Resources inside','communicate privately'],['To link VNets/on-prem','no overlapping ranges','red'],['You control','DNS + subnet segmentation']],
+  trap:['Two VNets you want to peer both use 10.0.0.0/16 — will it work?','<b>No — overlapping address spaces can\'t connect.</b> Peering (and VPN/ExpressRoute) require <b>non-overlapping</b> CIDR ranges. Plan addressing up front so VNets you might join never overlap.'],
+  exam:['"Resources must communicate privately within one region, isolated from others."','A <b>virtual network</b> — define its address space, place resources in it; they talk privately. It\'s scoped to a single region and subscription.'],
+  scn:[
+    ['Host app + DB privately so only they can talk to each other.','One VNet','place both in it; private communication by default'],
+    ['Plan to peer dev and prod VNets later.','Non-overlapping address spaces','choose distinct CIDR ranges from the start'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'A VNet with its own address space, holding resources',{anchor:'middle',size:15,weight:600});
+    const vx=a.x+a.w*0.10, vw=a.w*0.80, vy=a.y+a.h*0.18, vh=a.h*0.6;
+    box(vx,vy,vw,vh,{stroke:C.purple,sw:2});
+    T(vx+16,vy+26,'Virtual network',{size:14,weight:600,fill:C.purple});
+    T(vx+16,vy+44,'address space  10.0.0.0/16  ·  one region · one subscription',{size:11,fill:C.soft,font:MONO});
+    const res=['VM','VM','Database','Load balancer'];
+    const rw=(vw-32-3*14)/4, ry=vy+62, rh=vh-80;
+    res.forEach((r,i)=>{const x=vx+16+i*(rw+14);box(x,ry,rw,rh,{stroke:C.blue,sw:1.5});T(x+rw/2,ry+rh/2,r,{anchor:'middle',size:12.5,weight:600,fill:C.blue});});
+    T(a.cx,a.b-4,'resources inside communicate privately · link VNets only with non-overlapping ranges',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 1 — subnets + reserved addresses */
+{
+  tab:'Subnets',
+  title:'Subnets segment the VNet — and Azure reserves 5 per subnet',
+  gist:`You divide a VNet's address space into <b>subnets</b> (in CIDR notation) to organise and secure resources. Subnet ranges must be <b>within the VNet space</b>, <b>unique</b>, and <b>non-overlapping</b>. The exam fact: in <b>every subnet Azure reserves 5 IP addresses</b> — the <b>first four</b> and the <b>last</b>. For <code>10.0.0.0/24</code>: <code>.0</code> = network address, <code>.1</code> = default gateway, <code>.2</code>/<code>.3</code> = Azure DNS mapping, and <code>.255</code> = broadcast. So a /24 gives 251 usable addresses, not 256.`,
+  facts:[['Subnet','a CIDR range within the VNet'],['Ranges','unique, non-overlapping','red'],['Reserved per subnet','5 (first 4 + last)','red'],['.0','network address'],['.1','default gateway'],['/24 usable','251 (not 256)']],
+  trap:['A /24 subnet has 256 addresses — are they all usable for your resources?','<b>No — Azure reserves 5 per subnet</b> (first four + last). A /24 leaves <b>251 usable</b>. Always subtract 5 when sizing a subnet for the number of resources it can hold.'],
+  exam:['"How many usable host addresses in a 10.0.1.0/24 subnet?"','<b>251.</b> 256 total minus the <b>5 reserved by Azure</b> (network, gateway, two DNS, broadcast).'],
+  scn:[
+    ['Separate web, app, and DB tiers within one VNet.','Subnets','one subnet per tier, each a non-overlapping range'],
+    ['Need 300 IPs in a subnet.','Use /23 (not /24)','a /24 only gives 251 usable after the 5 reserved'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Every subnet loses 5 addresses to Azure',{anchor:'middle',size:15,weight:600});
+    /* subnet bar with reserved cells */
+    const sx=a.x+a.w*0.06, sw=a.w*0.88, sy=a.y+a.h*0.26, n=12, cw=sw/n, ch=64;
+    T(sx,sy-14,'subnet 10.0.0.0/24',{size:12.5,weight:600,fill:C.ink,font:MONO});
+    const labels={0:['.0','network'],1:['.1','gateway'],2:['.2','DNS'],3:['.3','DNS'],11:['.255','broadcast']};
+    for(let i=0;i<n;i++){const x=sx+i*cw;const reserved=labels[i];
+      box(x,sy,cw,ch,{stroke:reserved?C.red:C.green,fill:reserved?'#fdf6f6':'#f3faf6',sw:1.4});
+      if(reserved){T(x+cw/2,sy+ch/2-4,reserved[0],{anchor:'middle',size:11,weight:600,fill:C.red,font:MONO});T(x+cw/2,sy+ch/2+14,reserved[1],{anchor:'middle',size:8.5,fill:C.red});}
+      else T(x+cw/2,sy+ch/2+4,'usable',{anchor:'middle',size:9.5,fill:C.green});
+    }
+    T(sx,sy+ch+26,'5 reserved (first four + last)',{size:12,fill:C.red,weight:600});
+    T(a.r-a.w*0.06,sy+ch+26,'→ /24 = 251 usable, not 256',{anchor:'end',size:12,fill:C.green,weight:600});
+  }
+},
+/* 2 — private vs public IP */
+{
+  tab:'Private vs public IP',
+  title:'Private IP for inside, public IP for the internet',
+  gist:`Resources get IPs of two kinds. A <b>private IP</b> (from the subnet's range) is for communication <b>within the VNet and to on-premises</b> — VM NICs, internal load balancers, and app gateways have one. A <b>public IP</b> lets a resource reach (and be reached from) the <b>internet</b> — used by VMs, public load balancers, app gateways. A resource can have both. Public IPs come in a <b>SKU (Basic/Standard)</b> and a <b>tier</b>, and the rule is: a public IP's <b>SKU must match the load balancer's SKU</b>. (Basic public IPs are retired for new use — Standard is the default now.)`,
+  facts:[['Private IP','within VNet / to on-prem'],['…from','the subnet range'],['Public IP','to/from the internet'],['…SKU','Standard (Basic retired)'],['Public IP SKU','must match the LB SKU','red'],['A resource','can have both']],
+  trap:['You attach a Basic public IP to a Standard load balancer — does it work?','<b>No — the public IP SKU must match the load balancer SKU.</b> A Standard LB needs a Standard public IP (and vice versa). Mismatched SKUs is a classic configuration failure.'],
+  exam:['"VM must reach the internet AND be reachable from a private app tier."','Give it a <b>public IP</b> (internet) and a <b>private IP</b> (in-VNet). A resource can have both — public for internet, private for internal/on-prem traffic.'],
+  scn:[
+    ['App tier should talk to the DB tier but never face the internet.','Private IP only','internal communication, no public exposure'],
+    ['A web VM must be reachable from the internet.','Add a public IP','internet-facing connectivity'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Private = inside the VNet · Public = the internet',{anchor:'middle',size:15,weight:600});
+    /* internet on right, vnet on left, VM with both */
+    const vnet=node(a.x,a.y+a.h*0.18,a.w*0.46,a.h*0.62,C.purple,'',null,{tsize:14});
+    T(a.x+16,a.y+a.h*0.18+24,'Virtual network',{size:13,weight:600,fill:C.purple});
+    const vm=node(a.x+a.w*0.06,a.y+a.h*0.38,a.w*0.30,80,C.blue,'VM',null,{tsize:14});
+    Twrap(vm.cx,vm.cy+16,'private IP (from subnet)',Math.floor(vm.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const net=node(a.r-a.w*0.30,a.y+a.h*0.38,a.w*0.30,80,C.green,'Internet',null,{tsize:14});
+    arrow(vm.r+6,vm.cy,net.x-6,net.cy,{stroke:C.green});
+    T((vm.r+net.x)/2,vm.cy-12,'public IP',{anchor:'middle',size:11.5,fill:C.green,weight:600});
+    T(a.cx,a.b-4,'public IP SKU (Basic/Standard) must match the load balancer SKU',{anchor:'middle',size:11.5,fill:C.red,weight:600});
+  }
+},
+/* 3 — static vs dynamic */
+{
+  tab:'Static vs dynamic',
+  title:'Dynamic by default — go static when the IP must not change',
+  gist:`IPs can be assigned <b>dynamically</b> or <b>statically</b>. For <b>private IPs</b>, dynamic is the default: Azure hands out the next available address in range (and a dynamic IP can change, e.g. after deallocation). <b>Standard public IPs are static only</b> (Basic public IPs, which allowed dynamic, were retired). Use static when something depends on the address not changing: <b>DNS A-records</b>, <b>IP-based firewall rules</b>, <b>TLS certificates tied to an IP</b>, or role servers like <b>domain controllers and DNS servers</b>.`,
+  facts:[['Private IP','dynamic by default','red'],['…can change','e.g. on deallocation','red'],['Standard public IP','static only','green'],['Use static for','DNS records, firewall rules'],['…also','TLS-to-IP, DC / DNS servers'],['Private static','from the subnet range']],
+  trap:['A VM\'s IP keeps changing and breaking a firewall rule — why, and the fix?','The IP is <b>dynamic</b> (the default) and changed after a restart/deallocation. Set it to <b>static</b> so it stays fixed — required when firewall rules, DNS records, or certs depend on a constant address.'],
+  exam:['"A domain controller VM must always keep the same IP."','Assign it a <b>static</b> private IP — role servers like DCs and DNS servers need a constant address; dynamic could change and break clients.'],
+  scn:[
+    ['Default VM where the exact IP doesn\'t matter.','Dynamic','simplest; Azure assigns the next free address'],
+    ['DNS server whose address is referenced everywhere.','Static','must never change'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Default is dynamic — pin to static when the address must hold',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+28,'Dynamic',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+50,'the default',{anchor:'middle',size:12,fill:C.soft});
+    ['next free address in range','can change (e.g. on deallocation)','fine when the IP doesn\'t matter'].forEach((t,i)=>Twrap(x0+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Static',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+50,'fixed until deleted',{anchor:'middle',size:12,fill:C.soft});
+    ['DNS A-records, firewall rules','TLS certs tied to an IP','domain controllers / DNS servers'].forEach((t,i)=>Twrap(x1+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

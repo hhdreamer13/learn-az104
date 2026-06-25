@@ -1,0 +1,318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Monitoring Azure VMs — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Monitor &amp; maintain</div>
+  <h1>Monitoring Azure VMs</h1>
+  <div class="lede">Azure Monitor collects health, performance, and event data from a VM. The dividing line that shapes everything: the <b>host</b> (the VM as Azure sees it from outside) is monitored automatically, while the <b>guest</b> (the OS and apps inside) needs an agent and a collection rule before any data appears.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+
+const facets=[
+/* 0 — HOST vs GUEST (the master dividing line) */
+{
+  tab:'Host vs guest',
+  title:'A VM has two monitoring zones: host and guest',
+  gist:`Azure sees a VM at two levels. The <b>host</b> is the VM as the Azure platform runs it — CPU, disk, network, whether it's running. The platform collects host metrics <b>automatically</b>, with nothing to install. The <b>guest</b> is everything inside the operating system — memory pressure, processes, application logs, Syslog/Event Log. Azure can't see inside the guest on its own; you must install the <b>Azure Monitor Agent</b> and tell it what to collect with a <b>Data Collection Rule</b>. This automatic-outside / configured-inside split is the key to every VM monitoring question.`,
+  facts:[['Host metrics','automatic, no agent','green'],['Host shows','CPU, disk, network, availability'],['Guest needs','agent + DCR','red'],['Guest data','OS memory, processes, logs'],['Agent','Azure Monitor Agent'],['Easy setup','VM insights']],
+  trap:['On a brand-new VM the host charts work, but "Guest OS metrics" are empty. Why?','Host metrics are collected by the platform automatically; <b>guest data needs the Azure Monitor Agent + a DCR</b>. No agent inside the VM means no inside-the-VM data. Nothing is broken — it just isn\'t configured yet.'],
+  exam:['A question says "memory and process data from inside the VM." Host or guest?','<b>Guest</b> — memory, processes, and OS logs live inside the operating system, so they need the agent + DCR. Host metrics never include guest memory.'],
+  scn:[
+    ['You need CPU and network charts for a VM, right after deployment.','Host metrics','already collected automatically — visible on the VM\'s Overview, no setup'],
+    ['You need to see free memory and running processes inside the VM.','Agent + DCR','install Azure Monitor Agent and a Data Collection Rule (VM insights does this for you)'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Outside the VM is automatic · inside needs an agent',{anchor:'middle',size:15,weight:600});
+    const vmX=a.x, vmW=Math.min(360,a.w*0.46), vmY=a.y+a.h*0.16, vmH=a.h*0.70;
+    box(vmX,vmY,vmW,vmH,{stroke:C.soft,sw:1.6});
+    T(vmX+16,vmY+26,'A Virtual Machine',{size:14,weight:600});
+    box(vmX+16,vmY+42,vmW-32,72,{stroke:C.green,fill:'#f3faf6'});
+    T(vmX+30,vmY+68,'HOST',{size:13,weight:700,fill:C.green});
+    T(vmX+30,vmY+88,'CPU · disk · network · availability',{size:12,fill:C.soft});
+    T(vmX+30,vmY+106,'collected automatically',{size:11.5,fill:C.green,weight:600});
+    box(vmX+16,vmY+126,vmW-32,vmH-146,{stroke:C.red,fill:'#fdf6f6'});
+    T(vmX+30,vmY+152,'GUEST (OS + apps)',{size:13,weight:700,fill:C.red});
+    T(vmX+30,vmY+172,'memory · processes · Syslog / Event Log',{size:12,fill:C.soft});
+    T(vmX+30,vmY+190,'needs agent + DCR → else nothing',{size:11.5,fill:C.red,weight:600});
+    const ax=vmX+vmW+a.w*0.10;
+    const ag=node(ax,vmY+a.h*0.30,a.r-ax,80,C.blue,'Azure Monitor Agent',null,{tsize:13.5});
+    Twrap(ag.cx,ag.cy+16,'installed inside the guest, driven by a DCR',Math.floor((a.r-ax)/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
+    arrow(vmX+vmW+6,vmY+vmH*0.62,ax-6,ag.cy,{stroke:C.blue,dash:'4 4'});
+    T((vmX+vmW+ax)/2,vmY+vmH*0.62-12,'reads the guest',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 1 — METRICS vs LOGS (the two stores) */
+{
+  tab:'Metrics vs Logs',
+  title:'Two stores for the data: Metrics and Logs',
+  gist:`Whatever you collect lands in one of two stores, and they behave very differently. <b>Metrics</b> are numbers sampled over time — CPU %, disk IOPS — collected automatically for the host, kept for <b>93 days</b>, fast to chart, with no query language. <b>Logs</b> are timestamped records (events, Syslog, traces) that you opt into; they're stored in a <b>Log Analytics workspace</b>, kept far longer, and queried with <b>KQL</b> (Kusto Query Language). Metrics tell you <i>that</i> something spiked; logs help you find out <i>why</i>.`,
+  facts:[['Metrics','numbers over time'],['Metrics retention','93 days','red'],['Metrics setup','automatic (host)','green'],['Logs','events + records'],['Logs home','Log Analytics workspace'],['Logs query','KQL']],
+  trap:['You want to run a query across log data — which store, and where?','The <b>Logs</b> store, in a <b>Log Analytics workspace</b>, using <b>KQL</b>. The Metrics store has no query language — "write a query" almost always means Logs.'],
+  exam:['"Correlate an event with a metric spike, kept for a year." Which store?','<b>Logs</b> (Log Analytics + KQL). Metrics top out at 93-day retention and can\'t be queried with KQL, so long retention + querying points to Logs.'],
+  scn:[
+    ['You just want a CPU chart for the last few hours.','Metrics','auto-collected for the host, plotted instantly in Metrics Explorer'],
+    ['You need to search Syslog warnings from last month and join them to events.','Logs','collected via a DCR into Log Analytics, then queried with KQL'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One source, two stores that behave very differently',{anchor:'middle',size:15,weight:600});
+    const colW=Math.min(300,a.w*0.40), gap=a.w*0.06, x1=a.cx-gap/2-colW, x2=a.cx+gap/2;
+    const ny=a.y+a.h*0.16, nh=a.h*0.66;
+    box(x1,ny,colW,nh,{stroke:C.green,sw:2});
+    T(x1+colW/2,ny+30,'Metrics',{anchor:'middle',size:16,weight:600,fill:C.green});
+    ['numbers, sampled over time','automatic for the host','93-day retention','no query language'].forEach((t,i)=>T(x1+colW/2,ny+62+i*26,t,{anchor:'middle',size:12.5,fill:i===2?C.red:C.soft,weight:i===2?600:400}));
+    box(x2,ny,colW,nh,{stroke:C.green,sw:2});
+    T(x2+colW/2,ny+30,'Logs',{anchor:'middle',size:16,weight:600,fill:C.green});
+    ['events + records','opt-in collection','→ Log Analytics workspace','queried with KQL'].forEach((t,i)=>T(x2+colW/2,ny+62+i*26,t,{anchor:'middle',size:12.5,fill:i>=2?C.ink:C.soft,weight:i>=2?600:400}));
+  }
+},
+/* 2 — VM INSIGHTS (the easy button) */
+{
+  tab:'VM insights',
+  title:'VM insights — the easy button for guest monitoring',
+  gist:`Setting up guest monitoring by hand means installing the agent, writing a DCR, and choosing a workspace. <b>VM insights</b> does all three in one step: it installs the <b>Azure Monitor Agent</b>, creates a <b>predefined DCR</b> of common performance counters, sends them to a <b>Log Analytics workspace</b>, and presents the data in ready-made <b>workbooks</b>. Optionally it adds a <b>Map</b> of processes and their dependencies on other machines. It's the fastest way to monitor the inside of one or many VMs.`,
+  facts:[['Installs','Azure Monitor Agent','green'],['Creates','a predefined DCR'],['Sends to','Log Analytics workspace'],['Presents','prebuilt workbooks'],['Optional','process + dependency Map'],['Scope','one VM or many']],
+  trap:['Is VM insights the only way to monitor a VM\'s guest?','<b>No — it\'s the easy path.</b> You can install the agent and author a DCR yourself. VM insights just bundles agent + DCR + workbooks so you don\'t have to.'],
+  exam:['"Quickly monitor guest performance across many VMs, with dashboards and a dependency map."','<b>VM insights</b> — it onboards the agent, makes the DCR, and gives workbooks + the Map. The manual alternative is agent + DCR by hand.'],
+  scn:[
+    ['You want guest performance + a dependency map across a fleet, fast.','VM insights','one click installs the agent, makes the DCR, and adds the Map and workbooks'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One click bundles three manual steps',{anchor:'middle',size:15,weight:600});
+    const ib=node(a.x,a.y+a.h*0.40,Math.min(200,a.w*0.24),96,C.purple,'VM insights',null,{strong:true,tsize:15});
+    const out=[[C.blue,'Azure Monitor Agent','installed in the guest'],[C.amber,'Predefined DCR','common perf counters'],[C.green,'Log Analytics + workbooks','data + prebuilt charts']];
+    const ox=ib.r+a.w*0.12, ow=a.r-ox, oh=Math.min(72,(a.h*0.7-2*16)/3);
+    out.forEach((o,i)=>{
+      const oy=a.y+a.h*0.12+i*(oh+16);
+      box(ox,oy,ow,oh,{stroke:o[0],sw:1.6});
+      T(ox+16,oy+oh/2-6,o[1],{size:13,weight:600,fill:o[0]});
+      T(ox+16,oy+oh/2+14,o[2],{size:11.5,fill:C.soft});
+      arrow(ib.r+6,ib.cy,ox-6,oy+oh/2,{stroke:o[0],dash:'4 4'});
+    });
+    T((ib.r+ox)/2,a.y+a.h*0.40-14,'sets up',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 3 — AGENT + DCR (the manual mechanism, and the KQL endpoint) */
+{
+  tab:'Agent & DCR',
+  title:'Agent + DCR — what actually collects guest data',
+  gist:`Under the easy button is the real mechanism. The <b>Azure Monitor Agent</b> runs inside the guest and does the collecting. A <b>Data Collection Rule (DCR)</b> tells it <i>what</i> to gather (which performance counters, which logs like Linux Syslog or Windows Event Log) and <i>where</i> to send it. One DCR can be associated with many VMs, and a VM can have several DCRs for different data. Performance counters can go to Metrics or Logs; event/log data goes to <b>Logs</b> (Log Analytics), where you read it with <b>KQL</b>.`,
+  facts:[['Agent','collects inside the guest'],['DCR defines','what to collect + where'],['DCR : VMs','one DCR → many VMs'],['VM : DCRs','a VM can have several'],['Perf counters →','Metrics or Logs'],['Logs read with','KQL','green']],
+  trap:['You installed the agent but still see no Syslog data. What\'s missing?','A <b>DCR</b>. The agent collects nothing on its own — the DCR is what says "collect Syslog, send to this workspace." Agent without a DCR = silence.'],
+  exam:['"Collect Linux Syslog from several VMs into one workspace and query it."','Create a <b>DCR</b> (source: Linux Syslog → a Log Analytics workspace), associate it with the VMs, then query <b>Syslog</b> with <b>KQL</b>.'],
+  scn:[
+    ['You must gather Windows Event Logs from 20 VMs into a single workspace.','One DCR, many VMs','define the Event Log source once and associate the DCR with all 20'],
+    ['After collection, you want only warning-level Syslog events.','KQL in Log Analytics','query Syslog and filter on SeverityLevel — logs are KQL-queryable'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Agent collects · DCR decides what & where · KQL reads it',{anchor:'middle',size:15,weight:600});
+    const y=a.y+a.h*0.42, nh=Math.min(96,a.h*0.30);
+    const w=Math.min(190,a.w*0.22), gap=a.w*0.055;
+    const total=4*w+3*gap, x0=a.cx-total/2;
+    const ag=node(x0,y-nh/2,w,nh,C.blue,'Agent',null,{tsize:14});
+    Twrap(ag.cx,ag.cy+15,'runs in the guest',Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:12});
+    const dcr=node(x0+w+gap,y-nh/2,w,nh,C.amber,'DCR',null,{strong:true,tsize:14});
+    Twrap(dcr.cx,dcr.cy+15,'what to collect + where',Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:12});
+    const la=node(x0+2*(w+gap),y-nh/2,w,nh,C.green,'Log Analytics',null,{tsize:13});
+    Twrap(la.cx,la.cy+15,'the workspace store',Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:12});
+    const kql=node(x0+3*(w+gap),y-nh/2,w,nh,C.green,'KQL',null,{tsize:14});
+    Twrap(kql.cx,kql.cy+15,'query the logs',Math.floor(w/7),{anchor:'middle',size:11,fill:C.soft,lh:12});
+    arrow(ag.r+6,y,dcr.x-6,y,{stroke:C.soft});
+    arrow(dcr.r+6,y,la.x-6,y,{stroke:C.soft});
+    arrow(la.r+6,y,kql.x-6,y,{stroke:C.soft});
+    T(dcr.cx,y+nh/2+28,'one DCR can serve many VMs',{anchor:'middle',size:11.5,fill:C.faint});
+  }
+},
+/* 4 — host extras: alerts, activity log, boot diagnostics */
+{
+  tab:'Alerts & host tools',
+  title:'Acting on host data: alerts, activity log, boot diagnostics',
+  gist:`Three host-level features the exam likes. <b>Recommended alert rules</b> are a ready-made set (CPU, memory, disk, availability) you can switch on when creating a VM or later — the fast way to get alerting without building rules by hand. The <b>Activity log</b> records control-plane events on the VM (it was started, resized, modified) — who did what to the resource, not what's happening inside it. <b>Boot diagnostics</b> captures a console screenshot and serial log of the boot sequence, stored in a managed storage account, to troubleshoot a VM that won't start.`,
+  facts:[['Recommended alerts','prebuilt CPU/mem/disk/avail','green'],['Enable','at VM create or later'],['Activity log','control-plane events'],['…answers','who did what to the VM'],['Boot diagnostics','console screenshot + serial log'],['Boot diag stored in','managed storage account']],
+  trap:['A VM won\'t boot. Activity log or boot diagnostics?','<b>Boot diagnostics</b> — it shows the console screenshot and serial log of the boot. The Activity log only records control-plane actions (start/resize/modify), not what the OS is doing during boot.'],
+  exam:['"Fastest way to get standard CPU/availability alerts on a new VM."','Enable <b>recommended alert rules</b> at VM creation — they\'re a predefined set, no manual rule authoring needed.'],
+  scn:[
+    ['Audit who resized or restarted this VM and when.','Activity log','records control-plane operations on the resource'],
+    ['The VM is stuck at boot and unreachable.','Boot diagnostics','console screenshot + serial log reveal the boot failure'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'Three host-level tools, three different jobs',{anchor:'middle',size:15,weight:600});
+    const items=[
+      [C.green,'Recommended alerts','prebuilt rules: CPU · memory · disk · availability','enable at create or later'],
+      [C.blue,'Activity log','control-plane events on the VM','who started / resized / modified it'],
+      [C.amber,'Boot diagnostics','console screenshot + serial log','troubleshoot a VM that won\'t boot'],
+    ];
+    const w=Math.min(290,a.w*0.30), gap=a.w*0.04, total=3*w+2*gap, x0=a.cx-total/2;
+    const y=a.y+a.h*0.16, h=a.h*0.64;
+    items.forEach((it,i)=>{
+      const x=x0+i*(w+gap);
+      box(x,y,w,h,{stroke:it[0],sw:1.8});
+      T(x+w/2,y+30,it[1],{anchor:'middle',size:14,weight:600,fill:it[0]});
+      Twrap(x+w/2,y+h*0.42,it[2],Math.floor(w/7),{anchor:'middle',size:12,fill:C.ink,lh:15});
+      box(x+16,y+h-54,w-32,40,{stroke:'#e7e9ee',fill:'#fafbfc'});
+      Twrap(x+w/2,y+h-34,it[3],Math.floor(w/6.5),{anchor:'middle',size:11,fill:C.faint,lh:13});
+    });
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>

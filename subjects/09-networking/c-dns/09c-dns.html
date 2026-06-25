@@ -1,0 +1,278 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Azure DNS — AZ-104</title>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<style>
+:root{
+  --bg:#ffffff;--ink:#16181d;--soft:#5a6472;--faint:#98a1ad;--hair:#e7e9ee;
+  --green:#1f8a5b;--red:#c8453d;--amber:#b07d1a;--blue:#2f6fb0;--purple:#7a52b3;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI",Inter,Roboto,sans-serif;
+  --mono:"SF Mono",ui-monospace,Menlo,Consolas,monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{height:100%}
+body{background:var(--bg);color:var(--ink);font-family:var(--sans);font-size:15px;line-height:1.5;-webkit-font-smoothing:antialiased;display:flex;flex-direction:column;height:100vh;overflow:hidden}
+
+.head{padding:22px 40px 12px}
+.head .kicker{font-size:12px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:600}
+.head h1{font-size:29px;font-weight:650;letter-spacing:-.01em;margin-top:5px}
+.head .lede{font-size:14.5px;color:var(--soft);margin-top:6px;max-width:860px}
+
+.tabs{display:flex;gap:24px;padding:0 40px;border-bottom:1px solid var(--hair);overflow-x:auto}
+.tab{padding:11px 0;font-size:14.5px;color:var(--faint);cursor:pointer;border-bottom:2px solid transparent;margin-bottom:-1px;white-space:nowrap;transition:color .12s}
+.tab:hover{color:var(--soft)}
+.tab.on{color:var(--ink);font-weight:600;border-bottom-color:var(--ink)}
+
+.main{flex:1;display:grid;grid-template-columns:1fr 420px;min-height:0}
+.diagram{position:relative;min-height:0;overflow:hidden}
+.diagram svg{width:100%;height:100%;display:block}
+.side{border-left:1px solid var(--hair);overflow-y:auto;display:flex;flex-direction:column}
+
+.zone{padding:20px 28px}
+.zone+.zone{border-top:1px solid var(--hair)}
+.facet-title{font-size:19px;font-weight:650;letter-spacing:-.01em;line-height:1.25}
+.gist{font-size:14px;color:var(--soft);margin-top:9px;line-height:1.55}
+.gist b{color:var(--ink);font-weight:600}
+.gist code{font-family:var(--mono);font-size:12.5px;background:#f1f2f5;padding:1px 5px;border-radius:3px;color:var(--ink)}
+
+.scn{margin-top:14px}
+.scn .row{border:1px solid var(--hair);border-radius:8px;overflow:hidden;margin-bottom:9px}
+.scn .sym{background:#fdf6f6;padding:9px 12px;font-size:13.5px;color:var(--ink)}
+.scn .sym .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--red);margin-right:8px}
+.scn .ans{padding:9px 12px;font-size:13.5px;color:var(--soft);border-top:1px solid var(--hair)}
+.scn .ans .tool{font-weight:700;color:var(--green)}
+.scn .ans .tag{font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;color:var(--green);margin-right:8px}
+
+.facts{font-size:13.5px}
+.facts .r{display:flex;gap:14px;padding:6px 0;border-bottom:1px solid var(--hair)}
+.facts .r:last-child{border-bottom:none}
+.facts .k{flex:0 0 140px;color:var(--faint)}
+.facts .v{color:var(--ink)}
+.facts .v.green{color:var(--green);font-weight:600}
+.facts .v.red{color:var(--red);font-weight:600}
+
+.place{background:#f5f3fa;border:1px solid #e6e0f2;border-radius:8px;padding:12px 14px;font-size:13px;line-height:1.5}
+.place .lbl{font-size:10.5px;letter-spacing:.12em;text-transform:uppercase;font-weight:700;color:var(--purple);margin-bottom:6px}
+.place .here{color:var(--ink);font-weight:600}
+.place .else{color:var(--soft);margin-top:4px}
+.place b{color:var(--purple);font-weight:600}
+
+.zone.recall{background:#fafbfc;flex:1}
+.qa{font-size:13.5px}
+.qa+.qa{margin-top:13px;padding-top:13px;border-top:1px dashed var(--hair)}
+.qa .mark{display:inline-block;font-size:10px;letter-spacing:.1em;text-transform:uppercase;font-weight:700;padding:2px 7px;border-radius:4px;margin-bottom:6px}
+.qa.trap .mark{color:var(--red);background:#fbeceb}
+.qa.exam .mark{color:var(--amber);background:#f7f0df}
+.qa .q{color:var(--ink);font-weight:600;line-height:1.45}
+.qa .a{color:var(--soft);margin-top:8px;line-height:1.55;display:none}
+.qa .a b{color:var(--ink);font-weight:600}
+.qa.show .a{display:block}
+.qa .toggle{font-size:12.5px;color:var(--blue);cursor:pointer;margin-top:8px;display:inline-flex;align-items:center;gap:5px;user-select:none;font-weight:500}
+.qa .toggle::before{content:"›";font-size:16px;line-height:1}
+.qa.show .toggle{display:none}
+
+.section-label{font-size:10.5px;letter-spacing:.13em;text-transform:uppercase;color:var(--faint);font-weight:700;margin-bottom:11px}
+
+.foot{display:flex;align-items:center;justify-content:space-between;padding:10px 40px;border-top:1px solid var(--hair);color:var(--faint);font-size:13px}
+.foot .nav{display:flex;gap:8px}
+.foot button{font-family:var(--sans);font-size:14px;color:var(--soft);background:none;border:1px solid var(--hair);border-radius:6px;padding:6px 14px;cursor:pointer;transition:all .12s}
+.foot button:hover:not(:disabled){border-color:var(--soft);color:var(--ink)}
+.foot button:disabled{opacity:.4;cursor:default}
+</style>
+</head>
+<body>
+
+<div class="head">
+  <div class="kicker">AZ-104 · Networking (3 of 4)</div>
+  <h1>Azure DNS</h1>
+  <div class="lede">Azure DNS hosts your DNS domains on Microsoft's global name-server infrastructure — turning names like <code>www.contoso.com</code> into IP addresses. You manage zones and records with your Azure credentials. The exam leans on record types, the zone-apex limitation, and public vs private zones.</div>
+</div>
+
+<div class="tabs" id="tabs"></div>
+
+<div class="main">
+  <div class="diagram" id="diagram"><svg id="stage" preserveAspectRatio="xMidYMid meet"></svg></div>
+  <div class="side">
+    <div class="zone">
+      <div class="facet-title" id="ftitle"></div>
+      <div class="gist" id="gist"></div>
+      <div class="section-label" id="scnlabel" style="margin-top:18px">In practice — real examples</div>
+      <div class="scn" id="scn"></div>
+    </div>
+    <div class="zone" id="placezone" style="display:none"><div class="place" id="place"></div></div>
+    <div class="zone">
+      <div class="section-label">Facts that change answers</div>
+      <div class="facts" id="facts"></div>
+    </div>
+    <div class="zone recall">
+      <div class="section-label">Recall, then reveal</div>
+      <div id="qa"></div>
+    </div>
+  </div>
+</div>
+
+<div class="foot">
+  <div id="counter"></div>
+  <div class="nav"><button id="prev">← Prev</button><button id="next">Next →</button></div>
+</div>
+
+<script>
+const NS='http://www.w3.org/2000/svg';
+const $=id=>document.getElementById(id);
+const stage=$('stage');
+const PAD=34;let W=900,H=520;
+function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.round(r.width));H=Math.max(360,Math.round(r.height));stage.setAttribute('viewBox',`0 0 ${W} ${H}`);}
+function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
+function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
+function clear(){stage.innerHTML='';}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.font||'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
+function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
+function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
+function node(x,y,w,h,color,title,sub,o={}){box(x,y,w,h,{stroke:o.dim?'#dfe3e9':color,sw:o.strong?2.2:1.6,fill:o.fill||'#fff'});T(x+w/2,y+(sub?h/2-8:h/2+5),title,{anchor:'middle',size:o.tsize||14,weight:600,fill:o.dim?'#aab2bd':color});if(sub)Twrap(x+w/2,y+h/2+14,sub,o.subChars||Math.floor(w/7),{anchor:'middle',size:11.5,fill:o.dim?'#bcc3cd':'#5a6472',lh:13});return{x,y,w,h,cx:x+w/2,cy:y+h/2,r:x+w,b:y+h};}
+const C={green:'#1f8a5b',red:'#c8453d',amber:'#b07d1a',blue:'#2f6fb0',purple:'#7a52b3',ink:'#16181d',soft:'#5a6472',faint:'#98a1ad'};
+const MONO='ui-monospace, monospace';
+
+const facets=[
+/* 0 — what Azure DNS is */
+{
+  tab:'What it is',
+  title:'Hosts DNS zones — but doesn\'t register domains',
+  gist:`<b>Azure DNS</b> hosts your domain's DNS records on Microsoft's global name servers, managed with your Azure credentials (portal, CLI, PowerShell, REST). You create a <b>DNS zone</b> for your domain; Azure becomes the <b>start of authority (SOA)</b> for it. One firm limit: you <b>can't register a domain name</b> in Azure DNS — buy the name from a third-party registrar, then <b>delegate</b> it to Azure by pointing the registrar at Azure's name servers. (Public DNS zones support <b>DNSSEC</b> zone signing; private DNS zones don't.)`,
+  facts:[['Azure DNS','hosts DNS zones'],['On','Microsoft global name servers'],['Becomes','SOA for the domain'],['Cannot','register a domain','red'],['To use','register elsewhere, delegate to Azure'],['DNSSEC','public zones only']],
+  trap:['Can you buy and register a new domain name directly in Azure DNS?','<b>No.</b> Azure DNS <b>hosts and manages</b> a domain\'s records but can\'t <b>register</b> the name. Buy it from a third-party registrar, then delegate the domain to Azure\'s name servers.'],
+  exam:['"Host DNS for a domain you already own, managed alongside your Azure resources."','Create an <b>Azure DNS zone</b> and <b>delegate</b> the domain to Azure\'s name servers at your registrar. Azure then acts as SOA and you manage records in the portal/CLI.'],
+  scn:[
+    ['Manage contoso.com\'s records with your Azure login.','Azure DNS zone','host the zone; delegate from the registrar'],
+    ['You need to register a brand-new domain.','Third-party registrar','Azure DNS can\'t register — only host'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Register at a registrar → delegate → host the zone in Azure DNS',{anchor:'middle',size:15,weight:600});
+    const reg=node(a.x,a.y+a.h*0.38,a.w*0.28,86,C.amber,'Domain registrar',null,{tsize:13});
+    Twrap(reg.cx,reg.cy+16,'where you BUY the name',Math.floor(reg.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const dns=node(a.cx-a.w*0.14,a.y+a.h*0.38,a.w*0.28,86,C.blue,'Azure DNS zone',null,{strong:true,tsize:13.5});
+    Twrap(dns.cx,dns.cy+16,'hosts records · SOA',Math.floor(dns.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    const user=node(a.r-a.w*0.28,a.y+a.h*0.38,a.w*0.28,86,C.green,'You manage',null,{tsize:13.5});
+    Twrap(user.cx,user.cy+16,'portal · CLI · PowerShell',Math.floor(user.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(reg.r+6,reg.cy,dns.x-6,dns.cy,{stroke:C.soft});T((reg.r+dns.x)/2,reg.cy-12,'delegate',{anchor:'middle',size:11,fill:C.faint});
+    arrow(user.x-6,user.cy,dns.r+6,dns.cy,{stroke:C.green});
+    T(a.cx,a.b-6,'Azure DNS can host but NOT register a domain name',{anchor:'middle',size:11.5,fill:C.red,weight:600});
+  }
+},
+/* 1 — record types */
+{
+  tab:'Record types',
+  title:'A, CNAME, MX, TXT — and SOA/NS come free',
+  gist:`A zone holds <b>records</b>, each a type. The ones to know: <b>A</b> maps a name → an <b>IPv4</b> address (AAAA for IPv6); <b>CNAME</b> aliases one name → another name; <b>MX</b> points mail to a mail server; <b>TXT</b> holds text (used to <b>verify domain ownership</b> for Azure/M365). When you create a zone, the <b>SOA and NS records are created automatically</b>. A <b>record set</b> holds multiple values for one name (e.g. an A record with two IPs) — but <b>SOA and CNAME can't be record sets</b>.`,
+  facts:[['A','name → IPv4 (AAAA = IPv6)'],['CNAME','name → another name (alias)'],['MX','mail server'],['TXT','text; domain verification','green'],['SOA + NS','auto-created with the zone','green'],['No record sets','SOA, CNAME','red']],
+  trap:['Verify domain ownership for Microsoft 365 — which record type?','A <b>TXT</b> record. Azure and Microsoft 365 use TXT records to prove you own the domain. (A = IPv4, CNAME = alias, MX = mail.)'],
+  exam:['"Point the mail flow for a domain to a mail server." Record type?','An <b>MX</b> record. (A = host→IPv4; CNAME = name→name alias; TXT = verification/text.)'],
+  scn:[
+    ['Map www.contoso.com to a server\'s IP.','A record','name → IPv4 address'],
+    ['Make blog.contoso.com an alias of an external host name.','CNAME','name → another name'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'The common record types in a zone',{anchor:'middle',size:15,weight:600});
+    const recs=[['A','host → IPv4 address',C.blue],['CNAME','alias → another name',C.blue],['MX','mail → mail server',C.amber],['TXT','text → domain verification',C.green],['SOA','authority (auto-created)',C.faint],['NS','name servers (auto-created)',C.faint]];
+    const cols=2, gap=14, w=(a.w-gap)/2, rows=3, rh=(a.h*0.72-(rows-1)*gap)/rows;
+    const y0=a.y+a.h*0.16;
+    recs.forEach((r,i)=>{const c=i%cols,row=Math.floor(i/cols);const x=a.x+c*(w+gap),y=y0+row*(rh+gap);const auto=i>=4;
+      box(x,y,w,rh,{stroke:auto?'#dfe3e9':r[2],sw:auto?1.3:1.7,fill:auto?'#fafbfc':'#fff'});
+      T(x+18,y+rh/2+5,r[0],{size:15,weight:700,fill:auto?C.faint:r[2],font:MONO,baseline:'middle'});
+      T(x+w*0.30,y+rh/2+5,r[1],{size:12,fill:auto?C.faint:C.ink,baseline:'middle'});
+    });
+    T(a.cx,a.b-2,'record sets allow multiple values per name — but not for SOA or CNAME',{anchor:'middle',size:11,fill:C.faint});
+  }
+},
+/* 2 — zone apex + alias records */
+{
+  tab:'Zone apex & alias',
+  title:'CNAME can\'t sit at the apex — use an alias record',
+  gist:`The <b>zone apex</b> (the root domain, e.g. <code>contoso.com</code>, shown as <code>@</code>) is special: it already holds the auto-created NS and SOA, and <b>CNAME records aren't allowed there</b>. So you can't simply CNAME the apex to an Azure resource. The fix is an <b>alias record</b> — a special record (types <b>A, AAAA, CNAME</b>) that points the apex directly at an <b>Azure resource</b>. The target types are: a <b>Standard public IP</b> (this is how you reach a load balancer — via its public IP), a <b>Traffic Manager profile</b>, a <b>Front Door endpoint</b>, an <b>Azure CDN endpoint</b>, or another record set in the same zone. Alias records track the resource's lifecycle, so they <b>auto-update if its IP changes</b> and avoid <b>dangling DNS</b>.`,
+  facts:[['Zone apex','root domain (@)'],['CNAME at apex','not allowed','red'],['Alias record','points apex → Azure resource','green'],['Targets','Std public IP, Traffic Mgr, Front Door, CDN'],['Auto-updates','when target IP changes','green'],['Prevents','dangling DNS records']],
+  trap:['You try to CNAME contoso.com (the apex) to a load balancer. Why does it fail, and the fix?','<b>CNAME isn\'t allowed at the zone apex</b> (NS/SOA live there). Use an <b>alias record</b> instead — it points the apex straight at the Azure resource (LB, public IP, Traffic Manager…) and survives IP changes.'],
+  exam:['"Point the root domain to a load-balanced app / Traffic Manager."','An <b>alias record</b> at the apex (A or AAAA) → the load balancer\'s <b>public IP</b> (or the Traffic Manager profile). A CNAME can\'t be used at the apex, and alias records also prevent dangling DNS.'],
+  scn:[
+    ['Make contoso.com (apex) resolve to a public-IP load balancer.','Alias A record','apex → the Azure resource; auto-updates on IP change'],
+    ['A subdomain alias to an external name.','CNAME','allowed for non-apex names'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'The apex rejects CNAME — an alias record does the job',{anchor:'middle',size:15,weight:600});
+    /* apex node */
+    const apex=node(a.x,a.y+a.h*0.34,a.w*0.30,90,C.purple,'contoso.com (@)',null,{tsize:13.5});
+    Twrap(apex.cx,apex.cy+16,'zone apex · has NS + SOA',Math.floor(apex.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    /* CNAME blocked */
+    const cn=node(a.r-a.w*0.30,a.y+a.h*0.16,a.w*0.30,70,C.red,'CNAME',null,{tsize:13.5});
+    arrow(apex.r+6,apex.cy-20,cn.x-6,cn.cy,{stroke:C.red,dash:'5 4'});
+    T((apex.r+cn.x)/2,apex.cy-44,'✗ not allowed at apex',{anchor:'middle',size:11,fill:C.red,weight:600});
+    /* alias works */
+    const al=node(a.r-a.w*0.30,a.y+a.h*0.52,a.w*0.30,86,C.green,'Alias record',null,{strong:true,tsize:13.5});
+    Twrap(al.cx,al.cy+16,'→ LB / public IP / Traffic Mgr',Math.floor(al.w/6.5),{anchor:'middle',size:11,fill:C.soft,lh:13});
+    arrow(apex.r+6,apex.cy+20,al.x-6,al.cy,{stroke:C.green,sw:2});
+    T((apex.r+al.x)/2,apex.cy+44,'✓ alias → Azure resource',{anchor:'middle',size:11,fill:C.green,weight:600});
+  }
+},
+/* 3 — public vs private zones */
+{
+  tab:'Public vs private zones',
+  title:'Public zones for the internet, private for inside the VNet',
+  gist:`Two zone kinds. A <b>public DNS zone</b> resolves names for the <b>internet</b> — your externally reachable domain. A <b>private DNS zone</b> resolves names <b>inside and between virtual networks</b>, with your own custom domain, <b>without running DNS servers</b> — you link the VNets allowed to resolve it, and host names for VMs are maintained automatically. Private zones support <b>split-horizon DNS</b>: the <i>same</i> name can exist in both a public and a private zone and resolves to the right one depending on where the request comes from.`,
+  facts:[['Public zone','internet name resolution'],['Private zone','within/between VNets','green'],['Private','no DNS servers to run','green'],['Link','the VNets allowed to resolve'],['VM host names','auto-maintained'],['Split-horizon','same name, public + private']],
+  trap:['You need internal VMs to resolve custom names privately — run a DNS server VM?','<b>No need — use an Azure private DNS zone.</b> It gives VNet-internal name resolution with your custom domain, auto-maintains VM host names, and needs no DNS server infrastructure.'],
+  exam:['"Resolve custom names between VMs in a VNet, not exposed to the internet."','A <b>private DNS zone</b> linked to the VNet(s). (Public zones are for internet resolution; split-horizon lets the same name differ inside vs out.)'],
+  scn:[
+    ['Internal services should reach each other by custom name.','Private DNS zone','VNet-internal resolution, no DNS VM'],
+    ['Same hostname must resolve differently inside vs on the internet.','Split-horizon (public + private zones)','request location decides which answer'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+6,'Same service, two resolution scopes',{anchor:'middle',size:15,weight:600});
+    const w=Math.min(390,a.w*0.45), gap=a.w*0.04, x0=a.x, x1=a.r-w;
+    const y=a.y+a.h*0.16, h=a.h*0.66;
+    box(x0,y,w,h,{stroke:C.blue,sw:1.8});
+    T(x0+w/2,y+28,'Public DNS zone',{anchor:'middle',size:15,weight:600,fill:C.blue});
+    T(x0+w/2,y+50,'for the internet',{anchor:'middle',size:12,fill:C.soft});
+    ['externally reachable domain','www.contoso.com → public IP','anyone on the internet resolves it'].forEach((t,i)=>Twrap(x0+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    box(x1,y,w,h,{stroke:C.green,sw:2});
+    T(x1+w/2,y+28,'Private DNS zone',{anchor:'middle',size:15,weight:600,fill:C.green});
+    T(x1+w/2,y+50,'within / between VNets',{anchor:'middle',size:12,fill:C.soft});
+    ['custom internal names, no DNS VM','linked VNets resolve it','VM host names auto-maintained','split-horizon with public zone'].forEach((t,i)=>Twrap(x1+w/2,y+84+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+  }
+},
+];
+
+let cur=0;
+function renderTabs(){const t=$('tabs');t.innerHTML='';facets.forEach((f,i)=>{const d=document.createElement('div');d.className='tab'+(i===cur?' on':'');d.textContent=f.tab;d.onclick=()=>go(i);t.appendChild(d);});}
+function go(i){
+  cur=Math.max(0,Math.min(facets.length-1,i));
+  const f=facets[cur];
+  fit();clear();f.draw();
+  $('ftitle').textContent=f.title;
+  $('gist').innerHTML=f.gist;
+  const hasScn=(f.scn||[]).length>0;
+  $('scnlabel').style.display=hasScn?'':'none';
+  $('scn').innerHTML=(f.scn||[]).map(s=>`<div class="row"><div class="sym"><span class="tag">Example</span>${s[0]}</div><div class="ans"><span class="tag">Use</span><span class="tool">${s[1]}</span> — ${s[2]}</div></div>`).join('');
+  if(f.place){$('placezone').style.display='';$('place').innerHTML=`<div class="lbl">Where it lives</div><div class="here">${f.place.here}</div><div class="else">${f.place.other}</div>`;}
+  else $('placezone').style.display='none';
+  $('facts').innerHTML=f.facts.map(r=>`<div class="r"><div class="k">${r[0]}</div><div class="v ${r[2]||''}">${r[1]}</div></div>`).join('');
+  $('qa').innerHTML=
+    `<div class="qa trap"><div class="mark">Trap</div><div class="q">${f.trap[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.trap[1]}</div></div>`+
+    `<div class="qa exam"><div class="mark">Exam</div><div class="q">${f.exam[0]}</div><span class="toggle">Reveal answer</span><div class="a">${f.exam[1]}</div></div>`;
+  $('qa').querySelectorAll('.toggle').forEach(t=>t.onclick=()=>t.closest('.qa').classList.add('show'));
+  $('counter').textContent=`Facet ${cur+1} of ${facets.length}`;
+  renderTabs();
+  $('prev').disabled=cur===0;$('next').disabled=cur===facets.length-1;
+}
+$('prev').onclick=()=>go(cur-1);$('next').onclick=()=>go(cur+1);
+document.addEventListener('keydown',e=>{if(e.key==='ArrowRight')go(cur+1);if(e.key==='ArrowLeft')go(cur-1);});
+let rt;window.addEventListener('resize',()=>{clearTimeout(rt);rt=setTimeout(()=>go(cur),120);});
+window.addEventListener('load',()=>go(0));
+go(0);
+</script>
+</body>
+</html>
