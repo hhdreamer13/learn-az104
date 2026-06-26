@@ -258,24 +258,49 @@ const facets=[
     ['Register a server path to sync — but it\'s the C: system volume.','Not allowed','server endpoints can\'t be on the system volume; use another NTFS volume'],
   ],
   draw(){
+    /* recreated from MS Learn's file-sync diagram: three nested zones (Azure Cloud / Sync Group / On-premises) with a clean hierarchy tree */
     const a=area();
-    T(a.cx,a.y+6,'One cloud endpoint (the share), many server caches',{anchor:'middle',size:15,weight:600});
-    /* cloud endpoint top center */
-    const cw=Math.min(240,a.w*0.30);
-    const cloud=node(a.cx-cw/2,a.y+a.h*0.14,cw,80,C.green,'Cloud endpoint',null,{strong:true,tsize:14});
-    Twrap(cloud.cx,cloud.cy+16,'the Azure file share (1 per sync group)',Math.floor(cw/6.5),{anchor:'middle',size:11.5,fill:C.soft,lh:13});
-    /* sync group label */
-    T(a.cx,a.y+a.h*0.14+96,'↑ in a sync group · managed by the Storage Sync Service ↑',{anchor:'middle',size:10.5,fill:C.faint});
-    /* server endpoints */
-    const servers=['Server endpoint A','Server endpoint B','Server endpoint C'];
-    const sw=Math.min(200,a.w*0.26), sy=a.b-88, totalW=3*sw+2*a.w*0.03, sx0=a.cx-totalW/2;
-    servers.forEach((s,i)=>{const x=sx0+i*(sw+a.w*0.03);
-      box(x,sy,sw,72,{stroke:C.blue,sw:1.6});
-      T(x+sw/2,sy+28,s,{anchor:'middle',size:12.5,weight:600,fill:C.blue});
-      T(x+sw/2,sy+50,'NTFS path · cloud tiering',{anchor:'middle',size:10.5,fill:C.soft});
-      arrow(cloud.cx,cloud.b+6,x+sw/2,sy-6,{stroke:C.green,dash:'4 4'});
+    const colW=Math.min(220,a.w*0.30);                 // box width for each branch
+    const colL=a.cx-a.w*0.22, colR=a.cx+a.w*0.22;      // x-centres of the two server branches
+    const zonePad=12;
+
+    /* ---- zone bands (drawn first, behind everything) ---- */
+    const zCloudY=a.y+2,  zCloudH=a.h*0.20;             // Azure Cloud band (just the Storage Sync Service)
+    const zSyncY =a.y+a.h*0.22, zSyncH=a.h*0.50;        // Sync Group band (cloud endpoint + server endpoints)
+    const zOnpY  =a.y+a.h*0.74, zOnpH =a.h*0.24;        // On-premises band (the servers + agent)
+    const zL=a.x, zR=a.r, zW=a.w;
+    [['Azure Cloud',zCloudY,zCloudH,'#f4f6f9'],
+     ['Sync Group', zSyncY, zSyncH, '#f0f4f1'],
+     ['On-premises',zOnpY,  zOnpH,  '#f4f6f9']].forEach(([label,zy,zh,fill])=>{
+      box(zL,zy,zW,zh,{rx:10,fill,stroke:'#dfe3e9',sw:1.4});
+      T(zL+14,zy+22,label,{size:13,weight:700,fill:C.faint});
     });
-    T(a.cx,(cloud.b+sy)/2+18,'Sync Agent on each server · ≤ 100 server endpoints',{anchor:'middle',size:11,fill:C.faint});
+
+    /* ---- Storage Sync Service (top, Azure Cloud zone) ---- */
+    const sss=node(a.cx-colW/2, zCloudY+zCloudH-58, colW, 50, C.soft,'Storage Sync Service',
+                   '200 sync groups · 100 servers',{tsize:13.5,subChars:30});
+
+    /* ---- Cloud endpoint (top of Sync Group zone) ---- */
+    const ce=node(a.cx-colW/2, zSyncY+40, colW, 60, C.green,'Cloud endpoint',
+                  'Azure file share · 1 per sync group',{strong:true,tsize:13.5,subChars:26});
+    arrow(sss.cx,sss.b+2, ce.cx,ce.y-2,{stroke:C.faint});
+
+    /* ---- Server endpoints (bottom of Sync Group zone) ---- */
+    const seY=zSyncY+zSyncH-72;
+    const seL=node(colL-colW/2, seY, colW, 60, C.blue,'Server endpoint','Server 1 · NTFS path',{tsize:13.5,subChars:24});
+    const seR=node(colR-colW/2, seY, colW, 60, C.blue,'Server endpoint','Server 2 · NTFS path',{tsize:13.5,subChars:24});
+    /* tree split from cloud endpoint down to both server endpoints (plain horizontals, heads only on the drops) */
+    const midY=(ce.b+seY)/2;
+    el('line',{x1:ce.cx,y1:ce.b+2,x2:ce.cx,y2:midY,stroke:C.green,'stroke-width':1.5,'stroke-dasharray':'4 4'});   // stem down
+    el('line',{x1:seL.cx,y1:midY,x2:seR.cx,y2:midY,stroke:C.green,'stroke-width':1.5,'stroke-dasharray':'4 4'});   // horizontal bus
+    [seL,seR].forEach(se=>{ arrow(se.cx,midY, se.cx,se.y-2,{stroke:C.green,dash:'4 4'}); });                         // drop into each (arrowhead)
+
+    /* ---- Windows Servers + agent (On-premises zone) ---- */
+    const wsY=zOnpY+zOnpH-62;
+    const wsL=node(colL-colW/2, wsY, colW, 48, C.ink,'Windows Server 1','File Sync Agent',{tsize:13,subChars:22});
+    const wsR=node(colR-colW/2, wsY, colW, 48, C.ink,'Windows Server 2','File Sync Agent',{tsize:13,subChars:22});
+    arrow(seL.cx,seL.b+2, wsL.cx,wsL.y-2,{stroke:C.faint});
+    arrow(seR.cx,seR.b+2, wsR.cx,wsR.y-2,{stroke:C.faint});
   }
 },
 ];

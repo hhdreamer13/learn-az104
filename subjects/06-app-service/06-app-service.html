@@ -167,21 +167,21 @@ const facets=[
 {
   tab:'Pricing tiers',
   title:'Tiers: Shared compute, Dedicated, or Isolated',
-  gist:`The tier sets both features and isolation, in three categories. <b>Shared compute</b> — <b>Free</b> and <b>Shared</b> run your app on a VM shared with other customers' apps; no scale-out; dev/test only. <b>Dedicated compute</b> — <b>Basic / Standard / Premium (v2/v3)</b> run on dedicated VMs just for your plan; higher tier = more scale-out and features. <b>Isolated</b> — <b>Isolated / IsolatedV2</b> run dedicated VMs in a dedicated VNet (App Service Environment) with maximum scale-out (up to 100 instances). Higher tiers unlock features like slots, custom domains/TLS, autoscale, and backup.`,
-  facts:[['Free / Shared','shared VM, dev/test, no scale-out','red'],['Basic','dedicated VM, manual scale'],['Standard','autoscale, 5 slots, backup','green'],['Premium','more scale + slots'],['Isolated','dedicated VNet, up to 100 inst','green'],['Higher tier','unlocks slots/TLS/backup/autoscale']],
-  trap:['Free or Shared tier — can you scale the app out across instances?','<b>No.</b> Shared-compute tiers (Free/Shared) <b>can\'t scale out</b> — they\'re dev/test only, sharing a VM with other customers. Scale-out (and most features) need a <b>Dedicated</b> (Basic+) or <b>Isolated</b> tier.'],
+  gist:`The tier sets both features and isolation, in three categories. <b>Shared compute</b> — <b>Free</b> and <b>Shared</b> run your app on a VM shared with other customers' apps; no scale-out; dev/test only. <b>Dedicated compute</b> — <b>Basic / Standard / Premium (V2 / V3 / V4)</b> run on dedicated VMs just for your plan; higher tier = more scale-out and features. <b>Isolated</b> — <b>IsolatedV2</b> runs dedicated VMs in a dedicated VNet (App Service Environment) with maximum scale-out. Higher tiers unlock features like slots, custom domains/TLS, autoscale, and backup.`,
+  facts:[['Free / Shared','shared VM, dev/test, no scale-out','red'],['Basic','dedicated VM, manual scale'],['Standard','autoscale, 5 slots, backup','green'],['Premium','V2 / V3 / V4 — more scale + slots'],['IsolatedV2','dedicated VNet (ASE), max scale-out','green'],['Higher tier','unlocks slots/TLS/backup/autoscale']],
+  trap:['Why isn\'t the <b>IsolatedV2</b> tier in the normal "Create App Service plan" dropdown?','Because IsolatedV2 only exists <b>inside an App Service Environment (ASE)</b>. The regular create page shows only the multitenant tiers (Free/Basic/Premium V3/V4). You must create an <b>ASE first</b>, then create the plan into it — only then does IsolatedV2 appear. (Also note: Free/Shared <b>can\'t scale out</b> at all — scale-out needs Basic+ or IsolatedV2.)'],
   exam:['"Production web app needing autoscale, staging slots, and backups." Minimum tier?','<b>Standard</b> — it unlocks autoscale rules, deployment slots, and backup. Free/Shared/Basic lack one or more of these.'],
   scn:[
     ['Quick test app, pay nothing.','Free / Shared','shared compute, dev/test, no scale-out or slots'],
-    ['App must run in an isolated VNet at large scale.','Isolated (ASE)','dedicated VMs in a dedicated VNet, up to 100 instances'],
+    ['App must run in an isolated VNet at large scale.','IsolatedV2 (ASE)','dedicated VMs in a dedicated VNet, maximum scale-out'],
   ],
   draw(){
     const a=area();
     T(a.cx,a.y+6,'Three categories — isolation and features rise with the tier',{anchor:'middle',size:15,weight:600});
     const cats=[
       [C.red,'Shared compute','Free · Shared','shared VM with other customers · dev/test · no scale-out'],
-      [C.blue,'Dedicated compute','Basic · Standard · Premium','dedicated VMs for your plan · higher = more scale-out + features'],
-      [C.green,'Isolated','Isolated · IsolatedV2','dedicated VMs in a dedicated VNet (ASE) · up to 100 instances'],
+      [C.blue,'Dedicated compute','Basic · Standard · Premium V2/V3/V4','dedicated VMs for your plan · higher = more scale-out + features'],
+      [C.green,'Isolated','IsolatedV2','dedicated VMs in a dedicated VNet (ASE) · maximum scale-out'],
     ];
     const y0=a.y+a.h*0.16, gap=12, rh=(a.h*0.72-2*gap)/3;
     cats.forEach((c,i)=>{const y=y0+i*(rh+gap);
@@ -196,8 +196,8 @@ const facets=[
 {
   tab:'Scaling',
   title:'Scale up (bigger tier) vs scale out (more instances)',
-  gist:`App Service does <b>both</b> kinds of scaling — and the distinction maps to two different controls. <b>Scale up</b> = change the <b>pricing tier</b> of the plan (more CPU/memory/disk, and unlock features like slots and TLS) — you scale up by moving Free→Basic→Standard→Premium. <b>Scale out</b> = increase the <b>number of instances</b> running your app, up to your tier's max (manual, or <b>autoscale</b> on Standard+; Isolated goes to 100). No redeploy needed — scale changes apply in seconds to all apps in the plan.`,
-  facts:[['Scale up','change the pricing TIER'],['…gives','more CPU/mem + features','green'],['Scale out','more INSTANCES'],['…how','manual, or autoscale (Standard+)'],['Isolated scale-out','up to 100 instances'],['Either','no redeploy, seconds to apply','green']],
+  gist:`App Service does <b>both</b> kinds of scaling — and the distinction maps to two different controls. <b>Scale up</b> = change the <b>pricing tier</b> of the plan (more CPU/memory/disk, and unlock features like slots and TLS) — you scale up by moving Free→Basic→Standard→Premium. <b>Scale out</b> = increase the <b>number of instances</b> running your app, up to your tier's max (manual, or <b>autoscale</b> on Standard+; an IsolatedV2 plan goes to 100). No redeploy needed — scale changes apply in seconds to all apps in the plan.`,
+  facts:[['Scale up','change the pricing TIER'],['…gives','more CPU/mem + features','green'],['Scale out','more INSTANCES'],['…how','manual, or autoscale (Standard+)'],['IsolatedV2 scale-out','up to 100 instances/plan'],['Either','no redeploy, seconds to apply','green']],
   trap:['You need staging slots — scale up or scale out?','<b>Scale up</b> — slots are a <i>feature</i> unlocked by a higher <b>pricing tier</b> (Standard+), not by adding instances. Scale-out only changes how many instances run; it doesn\'t add features.'],
   exam:['"Handle a traffic surge automatically without changing code." Up or out?','<b>Scale out</b> with <b>autoscale</b> (Standard+) — add instances on rules/schedule. Scaling up (bigger tier) adds power/features but is a manual tier change.'],
   scn:[
@@ -216,7 +216,7 @@ const facets=[
     box(x1,y,w,h,{stroke:C.green,sw:2});
     T(x1+w/2,y+28,'Scale OUT',{anchor:'middle',size:15,weight:600,fill:C.green});
     T(x1+w/2,y+50,'more instances of the app',{anchor:'middle',size:12,fill:C.soft});
-    ['up to the tier max','manual, or autoscale (Standard+)','Isolated → up to 100 instances','no redeploy needed'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
+    ['up to the tier max','manual, or autoscale (Standard+)','IsolatedV2 → up to 100 instances','no redeploy needed'].forEach((t,i)=>Twrap(x1+w/2,y+82+i*26,t,Math.floor(w/6.5),{anchor:'middle',size:11.5,fill:C.ink,lh:13}));
   }
 },
 /* 3 — THE APP: deploy / CI-CD */
@@ -252,9 +252,9 @@ const facets=[
 {
   tab:'Deployment slots',
   title:'Slots — stage, swap, and roll back with no downtime',
-  gist:`A <b>deployment slot</b> is a live copy of the app with its own hostname (e.g. a <b>staging</b> slot alongside production). You deploy to staging, validate it, then <b>swap</b> it into production — the swap warms up instances first, so there's <b>zero downtime</b> and no dropped requests. If the new version misbehaves, <b>swap again</b> to return to the "last known good" production app. <b>Auto-swap</b> automates this for CI/CD. Slots require the <b>Standard, Premium, or Isolated</b> tier (Free/Shared/Basic have none).`,
-  facts:[['Slot','live app, own hostname'],['Use','stage → validate → swap'],['Swap','warms up first → zero downtime','green'],['Roll back','swap again = last known good','green'],['Auto-swap','automate on deploy'],['Requires','Standard / Premium / Isolated','red']],
-  trap:['You\'re on the Basic tier and want a staging slot. Available?','<b>No.</b> Deployment slots need <b>Standard, Premium, or Isolated</b>. Basic (and Free/Shared) have no slots — you\'d scale up first.'],
+  gist:`A <b>deployment slot</b> is a live copy of the app with its own hostname (e.g. a <b>staging</b> slot alongside production). You deploy to staging, validate it, then <b>swap</b> it into production — the swap warms up instances first, so there's <b>zero downtime</b> and no dropped requests. If the new version misbehaves, <b>swap again</b> to return to the "last known good" production app. <b>Auto-swap</b> automates this for CI/CD. Slots require the <b>Standard, Premium, or Isolated</b> tier (Free/Shared/Basic have none).<br><br>Not everything moves on a swap. <b>Swapped (follows the app):</b> language/framework version, app settings, connection strings, handler mappings, public certs, path mappings, WebJobs content. <b>Slot-specific (stays put):</b> custom domains, TLS/SSL bindings & non-public certs, <b>scale settings</b>, <b>managed identities</b>, <b>VNet integration</b>, IP restrictions, Always On, CORS, diagnostic settings. Note: <b>app settings & connection strings swap by default</b>, but ticking <b>"deployment slot setting"</b> makes one <b>sticky</b> (stays in its slot) — that's how you keep prod and staging pointed at different databases.`,
+  facts:[['Slot','live app, own hostname'],['Use','stage → validate → swap'],['Swap','warms up first → zero downtime','green'],['Roll back','swap again = last known good','green'],['Swapped','code, app settings, conn strings'],['Sticky to slot','domains, TLS, scale, identity, VNet','red'],['Make sticky','tick "deployment slot setting"'],['Requires','Standard / Premium / Isolated','red']],
+  trap:['After swapping staging→production, the app still points at the STAGING database. Why?','The connection string was marked as a <b>"deployment slot setting" (sticky)</b>, so it <b>stayed in its slot</b> instead of following the swap. App settings & connection strings swap by default; once marked slot-specific they don\'t. (Conversely, <b>custom domains, TLS bindings, scale settings, managed identity, and VNet integration are ALWAYS slot-specific</b> — they never swap.)'],
   exam:['"Release a new version with zero downtime and instant rollback."','Deploy to a <b>staging slot</b>, validate, then <b>swap</b> into production (warm-up = no downtime). If broken, <b>swap back</b> to the previous app. Needs Standard+.'],
   scn:[
     ['Test a new build under real config before going live.','Staging slot','validate in staging, then swap to production'],
@@ -305,11 +305,11 @@ const facets=[
 {
   tab:'Backup & monitor',
   title:'Back up the app, and watch it with App Insights',
-  gist:`Two operational features. <b>Backup and Restore</b> saves app <b>configuration, file content, and connected databases</b> (SQL/MySQL/PostgreSQL) to an <b>Azure storage account in the same subscription</b>, manually or on a schedule — available in <b>Basic and above</b> (Basic backs up the production slot only). For monitoring, <b>Application Insights</b> is the App Service-integrated APM: request rates, response times, failures, dependencies, and live metrics — the way you observe a web app's health.`,
-  place:{here:'Backup &amp; Application Insights are configured on the <b>App Service app</b>.',
+  gist:`Three operational features. <b>Backup and Restore</b> saves app <b>configuration, file content, and connected databases</b> (SQL/MySQL/PostgreSQL) to an <b>Azure storage account in the same subscription</b>, manually or on a schedule — available in <b>Basic and above</b> (Basic backs up the production slot only). For monitoring, <b>Application Insights</b> is the App Service-integrated APM: request rates, response times, failures, dependencies, and live metrics. <b>App Service Logs</b> are the lower-level diagnostic logs you toggle on the app, and the type you pick depends on the data you need: <b>Web Server Logging</b> = raw HTTP access log (method, URI, client IP/port, user agent, response code); <b>Application Logging</b> = messages your app code writes (traces/exceptions); <b>Detailed Error Messages</b> = the full HTML error page for 4xx/5xx; <b>Failed Request Tracing</b> = a per-request trace through the server pipeline.`,
+  place:{here:'Backup, logs &amp; Application Insights are configured on the <b>App Service app</b>.',
     other:'<b>Application Insights</b> is part of <b>Azure Monitor</b> (the monitoring domain) — same telemetry platform, surfaced here for web apps. If a question is about app request/latency/failure telemetry, it\'s App Insights.'},
-  facts:[['Backup saves','config + files + databases'],['Backup target','storage acct, same subscription'],['Backup tier','Basic+ (Basic = prod slot only)','red'],['Schedule','manual or scheduled'],['App Insights','request/latency/failure telemetry','green'],['App Insights','part of Azure Monitor']],
-  trap:['Where do App Service backups go, and any tier limit?','To an <b>Azure storage account in the same subscription</b>. Backup needs <b>Basic or higher</b> — and on Basic you can only back up the <b>production slot</b>. Free/Shared have no backup.'],
+  facts:[['Backup saves','config + files + databases'],['Backup tier','Basic+ (Basic = prod slot only)','red'],['Web Server Logging','raw HTTP requests: IP, URI, status'],['Application Logging','your app\'s traces / exceptions'],['App Insights','request/latency/failure APM','green'],['App Insights','part of Azure Monitor']],
+  trap:['Devs need the HTTP method, URI, client IP, and response code of incoming requests. Which log?','<b>Web Server Logging</b> — it\'s the raw HTTP <i>access</i> log (who hit what, from where, what status). <b>Application Logging</b> is a decoy: that captures only what your <b>app code</b> writes (traces/exceptions), not request metadata. "HTTP 500" tempts you toward Application logging, but they asked for <i>request data</i> → Web Server Logging.'],
   exam:['"Monitor request rates, failures, and dependencies for a web app."','<b>Application Insights</b> — the App Service-integrated APM (part of Azure Monitor). It tracks requests, response times, failures, and dependency calls.'],
   scn:[
     ['Schedule nightly backups of the app and its database.','Backup & Restore','to a same-subscription storage account; Basic+ tier'],

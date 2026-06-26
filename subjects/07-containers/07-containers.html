@@ -166,13 +166,13 @@ const facets=[
 {
   tab:'Container Instances (ACI)',
   title:'ACI — the simplest, fastest way to run a container',
-  gist:`<b>Azure Container Instances (ACI)</b> runs a container in seconds with <b>no VMs and no orchestrator</b>. The deploy unit is the <b>container group</b> — one or more containers sharing a host, local network, storage, and lifecycle (like a Kubernetes pod; multi-container groups are <b>Linux only</b>). You set exact CPU/memory and pay <b>per second</b>. It can deploy into a VNet and pin to an availability zone, but ACI has <b>no built-in autoscale</b> — it's a fixed group you size yourself. (ACI has <b>no GPU</b> — its GPU preview was retired; for GPU use Container Apps or AKS.)`,
+  gist:`<b>Azure Container Instances (ACI)</b> runs a container in seconds with <b>no VMs and no orchestrator</b>. The deploy unit is <b>always a container group</b> — even a single container runs <i>as</i> a one-container group (the container group is the top-level resource). A group is one or more containers sharing a host, local network, storage, and lifecycle (like a Kubernetes pod; <b>multi</b>-container groups are <b>Linux only</b>). So the real distinction isn't "ACI vs container group" — it's <b>single-container vs multi-container group</b>. You set exact CPU/memory and pay <b>per second</b>. It can deploy into a VNet and pin to an availability zone, but ACI has <b>no built-in autoscale</b> — it's a fixed group you size yourself. (ACI has <b>no GPU</b> — its GPU preview was retired; for GPU use Container Apps or AKS.)`,
   facts:[['ACI','serverless single container/group'],['Container group','containers sharing host/net/lifecycle'],['…like','a Kubernetes pod'],['Multi-container','Linux only','red'],['Billing','per second'],['Autoscale','none','red']],
   trap:['Can ACI automatically scale out as load grows?','<b>No — ACI has no built-in autoscale.</b> It\'s a fixed container group you size manually. For autoscaling containers use <b>Container Apps</b> (KEDA) or <b>AKS</b>. (ACI offers NGroups / virtual-nodes-on-AKS for more, but not simple autoscale.)'],
   exam:['"Run a short batch/build job in a container, fastest and simplest, pay per second."','<b>Azure Container Instances (ACI)</b> — quick single container group, per-second billing, no orchestrator. Not for autoscaling apps.'],
   scn:[
-    ['Run a one-off data-processing container for 10 minutes.','ACI','starts in seconds, billed per second, no infra'],
-    ['Bundle an app container with a logging sidecar.','ACI container group','multiple containers sharing one host (Linux)'],
+    ['Run a one-off data-processing container for 10 minutes.','ACI — single-container group','one container in the group · billed per second · no infra'],
+    ['Bundle an app container with a logging sidecar.','ACI — multi-container group','several containers in ONE group sharing a host (Linux only)'],
   ],
   draw(){
     const a=area();

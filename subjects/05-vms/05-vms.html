@@ -303,7 +303,7 @@ const facets=[
   exam:['"Web tier should add VMs automatically when CPU > 70% and remove them when it drops."','A <b>VM Scale Set</b> with an <b>autoscale rule</b> on CPU — scale out at the threshold, scale in when load falls. Schedule-based autoscale handles known peaks.'],
   scn:[
     ['Traffic is spiky and unpredictable; capacity must follow demand.','VMSS + autoscale (metric)','rules add/remove instances as CPU/load changes'],
-    ['Known nightly batch peak at 2am.','Autoscale (scheduled)','scale out on a schedule, then back in'],
+    ['Known nightly batch peak at 2am.','VMSS + autoscale (scheduled)','scale out on a schedule, then back in'],
   ],
   draw(){
     const a=area();

@@ -139,12 +139,12 @@ const facets=[
 {
   tab:'Containers & access',
   title:'Blobs live in containers — and who can read them',
-  gist:`A blob can't exist alone; it sits in a <b>container</b> (an account can hold unlimited containers, each unlimited blobs). Container names are lowercase letters/numbers/hyphens, 3–63 chars. The key setting is <b>public access level</b>: <b>Private</b> (default — owner only), <b>Blob</b> (anonymous read of blobs only), <b>Container</b> (anonymous read + list the whole container). Crucially, Blob/Container levels do <b>nothing</b> unless the account's <b>Allow Blob anonymous access</b> switch is on — and Microsoft recommends keeping it off.`,
-  facts:[['Container','holds blobs; required'],['Private','default — owner only','green'],['Blob','anon read of blobs'],['Container','anon read + list'],['Account switch','Allow anonymous access','red'],['…if off','all stays private']],
+  gist:`A blob can't exist alone; it sits in a <b>container</b> (an account can hold unlimited containers, each unlimited blobs). Container names are lowercase letters/numbers/hyphens, 3–63 chars. The key setting is <b>public access level</b> — whether someone with no sign-in and no SAS token (an <b>anonymous</b> reader) can read the data: <b>Private</b> (default — no anonymous access), <b>Blob</b> (anonymous reads of individual blobs), <b>Container</b> (anonymous reads + listing the whole container). But there are <b>two gates</b>: the container's access level only takes effect if the account's master switch, <b>Allow Blob anonymous access</b>, is turned on. If that account switch is off, every container stays private no matter its level — and Microsoft ships it off and recommends leaving it off.`,
+  facts:[['Container','holds blobs; required'],['Private','default — no anonymous access','green'],['Blob','anonymous read of blobs'],['Container','anonymous read + list'],['Account switch','Allow Blob anonymous access','red'],['…if off','every container stays private']],
   trap:['You set a container to "Blob" public access but anonymous reads still fail. Why?','The <b>account-level "Allow Blob anonymous access" switch is off</b>. Container access levels have <b>no effect</b> until that account switch is enabled. Two gates: account switch + container level.'],
   exam:['"Serve images publicly to browsers without SAS." How?','Enable the account anonymous-access switch, then set the container to <b>Blob</b> (read blobs) — or <b>Container</b> if listing is also needed. Otherwise keep Private and use SAS.'],
   scn:[
-    ['Host a public website\'s images, read-only, no auth.','Container access = Blob','anonymous read of blobs (account switch must be on)'],
+    ['Host a public website\'s images, read-only, no sign-in.','Container access = Blob','anonymous read of blobs (account switch must be on)'],
     ['Default safe posture for a new container.','Private','no anonymous access; share via SAS instead'],
   ],
   draw(){
@@ -154,14 +154,14 @@ const facets=[
     const acc=box(a.x,a.y+a.h*0.16,a.w,a.h*0.66,{stroke:C.purple,sw:1.8});
     T(a.x+16,a.y+a.h*0.16+24,'Storage account',{size:13,weight:600,fill:C.purple});
     const cw=(a.w-32-2*16)/3, cy=a.y+a.h*0.16+40, ch=a.h*0.66-56;
-    const levels=[[C.green,'Private','owner only (default)'],[C.amber,'Blob','anon read blobs'],[C.red,'Container','anon read + list']];
+    const levels=[[C.green,'Private','no anonymous access (default)'],[C.amber,'Blob','anonymous read blobs'],[C.red,'Container','anonymous read + list']];
     levels.forEach((l,i)=>{const x=a.x+16+i*(cw+16);
       box(x,cy,cw,ch,{stroke:l[0],sw:1.6});
       T(x+cw/2,cy+26,'Container',{anchor:'middle',size:12,fill:C.soft});
       T(x+cw/2,cy+ch/2-2,l[1],{anchor:'middle',size:15,weight:600,fill:l[0]});
       Twrap(x+cw/2,cy+ch/2+20,l[2],Math.floor(cw/7),{anchor:'middle',size:11,fill:C.soft,lh:13});
     });
-    T(a.cx,a.b-4,'Blob & Container levels need the account "Allow anonymous access" switch ON',{anchor:'middle',size:11,fill:C.red,weight:600});
+    T(a.cx,a.b-4,'Blob & Container levels need the account "Allow Blob anonymous access" switch ON',{anchor:'middle',size:11,fill:C.red,weight:600});
   }
 },
 /* 1 — blob types (block/append/page) */
