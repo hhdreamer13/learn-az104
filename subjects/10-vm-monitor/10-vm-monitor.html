@@ -127,7 +127,7 @@ function fit(){const r=$('diagram').getBoundingClientRect();W=Math.max(560,Math.
 function area(){return{x:PAD,y:PAD,w:W-2*PAD,h:H-2*PAD,cx:W/2,cy:H/2,r:W-PAD,b:H-PAD};}
 function el(n,a={}){const e=document.createElementNS(NS,n);for(const k in a)e.setAttribute(k,a[k]);stage.appendChild(e);return e;}
 function clear(){stage.innerHTML='';}
-function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
+function T(x,y,s,o={}){const t=el('text',{x,y,'text-anchor':o.anchor||'start','dominant-baseline':o.baseline||'auto',fill:o.fill||'#16181d','font-family':o.mono?'SF Mono,Menlo,Consolas,monospace':'-apple-system,Segoe UI,Inter,sans-serif','font-size':o.size||14,'font-weight':o.weight||400});t.textContent=s;return t;}
 function Twrap(x,y,s,maxChars,o={}){const words=s.split(' ');const lines=[];let ln='';for(const w of words){if((ln+' '+w).trim().length>maxChars){if(ln)lines.push(ln);ln=w;}else ln=(ln+' '+w).trim();}if(ln)lines.push(ln);const lh=o.lh||15;const total=(lines.length-1)*lh;lines.forEach((l,i)=>T(x,y-total/2+i*lh,l,o));return lines.length;}
 function box(x,y,w,h,o={}){return el('rect',{x,y,width:w,height:h,rx:o.rx!=null?o.rx:8,fill:o.fill||'#fff',stroke:o.stroke||'#d7dbe2','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none'});}
 function arrow(x1,y1,x2,y2,o={}){const id='ah'+Math.round(x1*3+y1*7+x2*11+y2*13);const defs=el('defs');const m=document.createElementNS(NS,'marker');m.setAttribute('id',id);m.setAttribute('viewBox','0 0 10 10');m.setAttribute('refX','8');m.setAttribute('refY','5');m.setAttribute('markerWidth','7');m.setAttribute('markerHeight','7');m.setAttribute('orient','auto-start-reverse');const p=document.createElementNS(NS,'path');p.setAttribute('d','M0 0 L10 5 L0 10 z');p.setAttribute('fill',o.stroke||'#98a1ad');m.appendChild(p);defs.appendChild(m);stage.appendChild(defs);el('line',{x1,y1,x2,y2,stroke:o.stroke||'#98a1ad','stroke-width':o.sw||1.5,'stroke-dasharray':o.dash||'none','marker-end':`url(#${id})`});}
@@ -193,6 +193,43 @@ const facets=[
     ['events + records','opt-in collection','→ Log Analytics workspace','queried with KQL'].forEach((t,i)=>T(x2+colW/2,ny+62+i*26,t,{anchor:'middle',size:12.5,fill:i>=2?C.ink:C.soft,weight:i>=2?600:400}));
   }
 },
+/* 1b — KQL BASICS (see a query in action) */
+{
+  tab:'KQL basics',
+  title:'KQL — the language you query logs with',
+  gist:`Logs in a Log Analytics workspace are queried with <b>KQL</b> (Kusto Query Language). A query <b>starts with a table name</b>, then pipes <code>|</code> the rows through operators left-to-right. The core few: <code>where</code> filters rows by a condition, <code>project</code> picks columns, <code>sort by</code> orders, <code>take</code> samples N rows, <code>summarize</code> aggregates (count, avg). Separately, <code>search</code> hunts for a text value across rows — and <b>scope it to a table</b>: <code>search in (EventLogs) "error"</code> looks only in EventLogs, while a bare <code>search "error"</code> scans <b>every</b> table (slower).`,
+  facts:[['Query starts with','a table name'],['Pipe','<code>|</code> chains operators'],['Filter rows','<code>where</code>'],['Pick columns','<code>project</code>'],['Find a value','<code>search in (Table) "x"</code>','green'],['<code>take</code> / <code>sort</code>','sample / order — don\'t filter','red']],
+  trap:['Find "error" in the EventLogs table — <code>search "error"</code> or <code>search in (EventLogs) "error"</code>?','<b><code>search in (EventLogs) "error"</code></b> — it scopes to that one table. A bare <code>search "error"</code> scans <b>all</b> tables (slower). <code>EventLogs | take 10</code> just samples 10 rows and <code>| sort by …</code> just orders — neither filters for the value.'],
+  exam:['"Show rows where CPU &gt; 90, newest first, only Computer + CounterValue."','<code>Perf | where CounterValue &gt; 90 | sort by TimeGenerated desc | project Computer, CounterValue</code> — table → filter → order → pick columns. Reading the pipe order is most of the question.'],
+  scn:[
+    ['Find every record containing "error" in the EventLogs table.','search in (EventLogs) "error"','scoped text search — one table, not all'],
+    ['Show only rows where the CPU counter exceeds 90.','Perf | where CounterValue > 90','<code>where</code> filters rows by a condition'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'A KQL query: table, then pipe rows through operators',{anchor:'middle',size:15,weight:600});
+    /* a sample query broken into piped stages, left to right as stacked bars */
+    const stages=[
+      [C.blue,'Perf','the table (always first)'],
+      [C.amber,'| where CounterValue > 90','filter rows by a condition'],
+      [C.purple,'| sort by TimeGenerated desc','order them'],
+      [C.green,'| project Computer, CounterValue','pick the columns to show'],
+    ];
+    const x=a.x+a.w*0.06, w=a.w*0.88, y0=a.y+a.h*0.16, gap=12;
+    const h=(a.h*0.58-(stages.length-1)*gap)/stages.length;
+    stages.forEach((s,i)=>{
+      const y=y0+i*(h+gap);
+      box(x,y,w,h,{stroke:s[0],sw:1.8,fill:'#fff'});
+      T(x+16,y+h/2-3,s[1],{size:13,weight:600,fill:s[0],baseline:'middle',mono:true});
+      T(x+16,y+h/2+14,s[2],{size:11,fill:C.soft,baseline:'middle'});
+    });
+    /* the search note band */
+    const by=y0+stages.length*(h+gap)+a.h*0.02, bh=a.b-by;
+    box(x,by,w,bh,{stroke:C.green,fill:'#f3faf6',sw:1.4});
+    T(x+16,by+bh/2-7,'search in (EventLogs) "error"',{size:13,weight:600,fill:C.green,baseline:'middle',mono:true});
+    T(x+16,by+bh/2+13,'scope search to ONE table — bare search "error" scans ALL tables',{size:11,fill:C.soft,baseline:'middle'});
+  }
+},
 /* 2 — VM INSIGHTS (the easy button) */
 {
   tab:'VM insights',
@@ -256,8 +293,8 @@ const facets=[
 {
   tab:'Alerts & host tools',
   title:'Acting on host data: alerts, activity log, boot diagnostics',
-  gist:`Three host-level features the exam likes. <b>Recommended alert rules</b> are a ready-made set (CPU, memory, disk, availability) you can switch on when creating a VM or later — the fast way to get alerting without building rules by hand. The <b>Activity log</b> records control-plane events on the VM (it was started, resized, modified) — who did what to the resource, not what's happening inside it. <b>Boot diagnostics</b> captures a console screenshot and serial log of the boot sequence, stored in a managed storage account, to troubleshoot a VM that won't start.`,
-  facts:[['Recommended alerts','prebuilt CPU/mem/disk/avail','green'],['Enable','at VM create or later'],['Activity log','control-plane events'],['…answers','who did what to the VM'],['Boot diagnostics','console screenshot + serial log'],['Boot diag stored in','managed storage account']],
+  gist:`Three host-level features the exam likes. <b>Recommended alert rules</b> are a ready-made set (CPU, memory, disk, availability) you can switch on when creating a VM or later — the fast way to get alerting without building rules by hand. The <b>Activity log</b> records <b>control-plane</b> events on the VM (it was started, resized, modified) — who did what to the resource, not what's happening inside it. (<b>Control plane</b> = managing the resource through Azure: create/resize/delete/move. <b>Data plane</b> = using what's <i>inside</i> it: signing in to the VM to run things, reading a blob, fetching a Key Vault secret — logged separately, not in the Activity log.) The Activity log is <b>automatic and lives at the resource level</b>, but is <b>short-lived</b> — to keep it longer or query it, add a <b>diagnostic setting</b> that sends it to a <b>Log Analytics workspace</b> (retention up to 2 years, queryable with KQL). <b>Boot diagnostics</b> captures a console screenshot and serial log of the boot sequence, stored in a managed storage account, to troubleshoot a VM that won't start.`,
+  facts:[['Recommended alerts','prebuilt CPU/mem/disk/avail','green'],['Enable','at VM create or later'],['Activity log','control-plane events'],['Control vs data plane','manage resource vs data inside','green'],['…answers','who did what to the VM'],['Activity log retention','automatic but short-lived','red'],['…keep / query it','diagnostic setting → Log Analytics','green'],['Boot diagnostics','console screenshot + serial log'],['Boot diag stored in','managed storage account']],
   trap:['A VM won\'t boot. Activity log or boot diagnostics?','<b>Boot diagnostics</b> — it shows the console screenshot and serial log of the boot. The Activity log only records control-plane actions (start/resize/modify), not what the OS is doing during boot.'],
   exam:['"Fastest way to get standard CPU/availability alerts on a new VM."','Enable <b>recommended alert rules</b> at VM creation — they\'re a predefined set, no manual rule authoring needed.'],
   scn:[
@@ -282,6 +319,41 @@ const facets=[
       box(x+16,y+h-54,w-32,40,{stroke:'#e7e9ee',fill:'#fafbfc'});
       Twrap(x+w/2,y+h-34,it[3],Math.floor(w/6.5),{anchor:'middle',size:11,fill:C.faint,lh:13});
     });
+  }
+},
+/* 6 — ALERT RULES & ACTION GROUPS */
+{
+  tab:'Alerts & action groups',
+  title:'Alert rules fire; action groups respond',
+  gist:`Alerting is two separate pieces. An <b>alert rule</b> watches one signal and defines the <b>condition</b> — e.g. "Availability metric drops" or "Regenerate Storage Account Keys activity". A signal can be a <b>metric</b>, an <b>activity-log</b> event, or a <b>log</b> query. When the condition is met, the rule fires and triggers one or more <b>action groups</b>. An <b>action group</b> is a reusable bundle of <b>who to notify</b> and <b>what to run</b> — and the same action group can be attached to many alert rules. So you build <b>one alert rule per signal/condition</b>, but only <b>one action group per unique set of recipients/actions</b> (reuse it wherever the recipients are the same).`,
+  facts:[['Alert rule','condition on one signal','green'],['Signal types','metric · activity log · log'],['Action group','who to notify + what to run','green'],['Reuse','one group → many alert rules','green'],['Notifications','email · SMS · push · voice'],['Actions','webhook · Function · Logic App · Runbook · ITSM']],
+  trap:['4 signals to alert on; two of them notify the exact same users. How many alert rules and action groups?','<b>4 alert rules</b> (one per signal/condition) but <b>3 action groups</b> — the two signals with identical recipients share <b>one</b> action group. Count rules by signals; count action groups by <b>unique recipient sets</b>.'],
+  exam:['"Notify the same 3 users for two different alerts." How many action groups?','<b>One.</b> Action groups are defined by their unique set of recipients/actions and are reusable — create one and attach it to both alert rules. (A single rule can attach up to 5 action groups.)'],
+  scn:[
+    ['Alert on a storage Availability metric AND on a "Regenerate Keys" activity-log event.','2 alert rules','one rule per signal — metric and activity-log are separate signals'],
+    ['Three different alerts all need to text the same on-call person.','1 action group','same recipients → one reusable action group attached to all three rules'],
+  ],
+  draw(){
+    const a=area();
+    T(a.cx,a.y+4,'One rule per signal · one action group per unique recipient set',{anchor:'middle',size:15,weight:600});
+    /* left: alert rules (one per signal) */
+    const rx=a.x+a.w*0.04, rw=a.w*0.34, ry=a.y+a.h*0.16;
+    const rules=['Availability','Transactions','Create/Update acct','Regenerate keys'];
+    const rh=Math.min(46,(a.h*0.7-3*10)/4);
+    rules.forEach((r,i)=>{
+      const y=ry+i*(rh+10);
+      box(rx,y,rw,rh,{stroke:C.blue,sw:1.6});
+      T(rx+rw/2,y+rh/2-5,'Alert rule',{anchor:'middle',size:10.5,fill:C.faint,baseline:'middle'});
+      Twrap(rx+rw/2,y+rh/2+9,r,Math.floor(rw/6.5),{anchor:'middle',size:11.5,weight:600,fill:C.blue,lh:12});
+    });
+    /* right: action groups (3 — first & third share) */
+    const gx=a.r-a.w*0.34, gw=a.w*0.30;
+    const groups=[['AG-1','Users 1·2·3',[0,2]],['AG-2','Users 2·3',[1]],['AG-3','User 3',[3]]];
+    const gh=Math.min(54,(a.h*0.7-2*16)/3), gy=a.y+a.h*0.18;
+    const gpos=groups.map((g,i)=>{const y=gy+i*(gh+16);box(gx,y,gw,gh,{stroke:C.green,sw:1.8});T(gx+gw/2,y+gh/2-7,g[0],{anchor:'middle',size:12.5,weight:600,fill:C.green,baseline:'middle'});T(gx+gw/2,y+gh/2+10,g[1],{anchor:'middle',size:11,fill:C.soft,baseline:'middle'});return{y:y+gh/2,rules:g[2]};});
+    /* arrows rule -> action group */
+    groups.forEach((g,gi)=>g[2].forEach(ri=>{const fy=ry+ri*(rh+10)+rh/2;arrow(rx+rw+4,fy,gx-4,gpos[gi].y,{stroke:'#c9cdd4',sw:1.2});}));
+    T((rx+rw+gx)/2,a.b-6,'4 rules → 3 action groups (AG-1 reused by two rules)',{anchor:'middle',size:11,fill:C.faint});
   }
 },
 ];

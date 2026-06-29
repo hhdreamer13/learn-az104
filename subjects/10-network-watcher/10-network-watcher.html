@@ -314,7 +314,7 @@ const facets=[
 {
   tab:'Scope & limits',
   title:'What Network Watcher can and can\'t see',
-  gist:`Network Watcher works on <b>IaaS</b> resources — virtual machines, VNets, subnets, NSGs, routes, load balancers, and gateways. It does <b>not</b> diagnose <b>PaaS</b> services or web apps; for those you look at Azure Service Health or the service's own diagnostics. It becomes available automatically, one instance per region, the moment you create a virtual network in that region. You reach it from the Networking area of the portal.`,
+  gist:`Network Watcher works on <b>IaaS</b> resources — virtual machines, VNets, subnets, NSGs, routes, load balancers, and gateways. It does <b>not</b> diagnose <b>PaaS</b> services or web apps; for those you look at Azure Service Health or the service's own diagnostics. It becomes available automatically, <b>one instance per region</b>, the moment you create a virtual network in that region. You reach it from the Networking area of the portal.`,
   place:{here:'Lives in the <b>Networking</b> area; on the exam it\'s scored under the <b>Monitor</b> domain.',
     other:'So when a question is about <i>diagnosing or observing</i> IaaS network connectivity, the Monitor-domain answer is Network Watcher / Connection Monitor — even though you configure it under Networking.'},
   facts:[['Works on','IaaS only','green'],['Does NOT cover','PaaS / web apps','red'],['Availability','auto, per region'],['Trigger to enable','create a VNet'],['Configured in','Networking blade'],['Scored under','Monitor','green']],
